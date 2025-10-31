@@ -1,1084 +1,1043 @@
 
-<!doctype html>
-<html lang="en">
-  <head>
-    <title>FEX</title>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 
-    <!-- carousel CSS -->
-    <link rel="stylesheet" href="static/assets/css/owl.carousel.min.css">
-    <!--header icon CSS -->
-    <link rel="icon" href="static/assets/img/fabicon.png">
-    <!-- animations CSS -->
-    <link rel="stylesheet" href="static/assets/css/animate.min.css">
-    <!-- font-awsome CSS -->
-    <link rel="stylesheet" href="static/assets/css/font-awesome.min.css">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" href="static/assets/css/bootstrap.min.css">
-    <!-- mobile menu CSS -->
-    <link rel="stylesheet" href="static/assets/css/slicknav.min.css">
-    <!--css animation-->
-    <link rel="stylesheet" href="static/assets/css/animation.css">
-    <!--css animation-->
-    <link rel="stylesheet" href="static/assets/css/material-design-iconic-font.min.css">
-    <!-- style CSS -->
-    <link rel="stylesheet" href="static/assets/css/style.css">
-    <!-- responsive CSS -->
-    <link rel="stylesheet" href="static/assets/css/responsive.css">
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Nigeria's #1 platform for buying and selling cryptocurrencies and gift cards. Trade Bitcoin, Ethereum, Amazon, iTunes gift cards with instant payments.">
+    <meta name="keywords" content="buy bitcoin Nigeria, sell cryptocurrency, gift card exchange, Amazon gift card, iTunes gift card, crypto trading">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>FEX Trading Platform - Buy & Sell Cryptocurrencies and Gift Cards in Nigeria</title>
+    <link rel="shortcut icon" href="public/uploads/dashboard/new/1608355599_af2a589f1a6c1279e4ff.png">
+    <!-- style css -->
+    <link href="https://fonts.googleapis.com/css?family=Pacifico" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nanum+Myeongjo:400,700,800" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Catamaran:100,200,300,400,500,600,700,800,900" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css?family=Raleway:100,100i,200,200i,300,300i,400,400i,500,500i,600,600i,700,700i,800,800i,900,900i"
+        rel="stylesheet">
+
+    <link href="public/assets/website/css/bootstrap.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/bootsnav.css" rel="stylesheet">
+    <link href="public/assets/website/css/owl.carousel.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/owl.theme.default.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/bootstrap-select.min.css" rel="stylesheet">
+    <link href="public/assets/website/flag-icons/css/flag-icon.min.css" rel="stylesheet">
+    <link href="public/assets/website/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+    <link href="https://phpcryptomarket.bdtask.com/demo-v4.0/public/assets/plugins/toastr/toastr.css" rel="stylesheet">
+    <link href="public/assets/website/css/animate.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/linearicons.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/magnific-popup.css" rel="stylesheet">
+    <link href="public/assets/website/css/dataTables.bootstrap.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/responsive.bootstrap.min.css" rel="stylesheet">
+    <link href="public/assets/website/css/style.css?v=1.1" rel="stylesheet">
+    <!--Chart-->
+    <link href="public/assets/website/amcharts/export.css" rel="stylesheet">
+    <!-- jQuery -->
+    <script src="public/assets/website/js/jquery.min.js?v=new"></script>
+    <input type="hidden" name="base_url" id="base_url" value="http://nishuedemo.bdtask-demo.com">
+    <input type="hidden" name="seg1" id="seg1" value="">
+    <input type="hidden" name="seg2" id="seg2" value="">
+    <input type="hidden" name="language" id="language" value="english">
+    <input type="hidden" name="crypto_api" id="crypto_api"
+        value="a5954b421dc01b9547ef9972a87ffbbaa58cf2308696439c6d2a5556199d761a">
+    
+    <!-- Custom CSS for black navbar -->
     <style>
-        body {
-            background-color: black !important;
+        /* Black navbar background */
+        .navbar.navbar-default.navbar-transparent {
+            background-color: #000000 !important;
+            background: #000000 !important;
+            border-color: #000000 !important;
         }
-        .community-bg {
-            background-image: url('static/assets/img/community-bg.jpg');
+        
+        .navbar.navbar-default {
+            background-color: #000000 !important;
+            background: #000000 !important;
+            border-color: #000000 !important;
+        }
+        
+        /* White text for navigation links */
+        .navbar.navbar-default .navbar-nav > li > a {
+            color: #ffffff !important;
+        }
+        
+        .navbar.navbar-default .navbar-nav > li > a:hover,
+        .navbar.navbar-default .navbar-nav > li > a:focus {
+            color: #f39c12 !important;
+            background-color: transparent !important;
+        }
+        
+        /* Active menu item */
+        .navbar.navbar-default .navbar-nav > .active > a,
+        .navbar.navbar-default .navbar-nav > .active > a:hover,
+        .navbar.navbar-default .navbar-nav > .active > a:focus {
+            color: #f39c12 !important;
+            background-color: transparent !important;
+        }
+        
+        /* Dropdown menu styling */
+        .navbar.navbar-default .navbar-nav .dropdown-menu {
+            background-color: #000000 !important;
+            border: 1px solid #333333 !important;
+        }
+        
+        .navbar.navbar-default .navbar-nav .dropdown-menu > li > a {
+            color: #ffffff !important;
+        }
+        
+        .navbar.navbar-default .navbar-nav .dropdown-menu > li > a:hover,
+        .navbar.navbar-default .navbar-nav .dropdown-menu > li > a:focus {
+            color: #f39c12 !important;
+            background-color: #333333 !important;
+        }
+        
+        /* Mobile toggle button */
+        .navbar.navbar-default .navbar-toggle {
+            border-color: #ffffff !important;
+        }
+        
+        .navbar.navbar-default .navbar-toggle .icon-bar {
+            background-color: #ffffff !important;
+        }
+        
+        .navbar.navbar-default .navbar-toggle:hover,
+        .navbar.navbar-default .navbar-toggle:focus {
+            background-color: #333333 !important;
+        }
+        
+        /* Login/Register button styling */
+        .attr-nav .btn.nav-btn.btn-orange {
+            background-color: #f39c12 !important;
+            border-color: #f39c12 !important;
+            color: #ffffff !important;
+        }
+        
+        .attr-nav .btn.nav-btn.btn-orange:hover {
+            background-color: #e67e22 !important;
+            border-color: #e67e22 !important;
         }
     </style>
-  </head>
-  <body>
-    <!--header area start-->
-    <div class="header-area wow fadeInDown header-absolate" id="nav" data-0="position:fixed;" data-top-top="position:fixed;top:0;" data-edge-strategy="set">
+</head>
+
+<body>
+    <div id="loader-wrapper">
+        <div id="loader"></div>
+        <div class="loader-section section-left"></div>
+        <div class="loader-section section-right"></div>
+    </div>
+    <!-- /.End of loader wrapper-->
+    <nav class="navbar navbar-default navbar-fixed navbar-transparent bootsnav">
+        <!-- Start Top Search -->
+        <div class="top-search">
+            <div class="container">
+                <div class="input-group">
+                    <span class="input-group-addon"><i class="fa fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="Search">
+                    <span class="input-group-addon close-search"><i class="fa fa-times"></i></span>
+                </div>
+            </div>
+        </div>
+        <!-- End Top Search -->
         <div class="container">
-            <div class="row">
-                <div class="col-4 d-block d-lg-none">
-                    <div class="mobile-menu"></div>
-                </div>
-                <div class="col-4 col-lg-2">
-                    <div class="logo-area">
-                        <a href="/"><img src="static/assets/img/logo-top.png" alt=""></a>
-                    </div>
-                </div>
-                <div class="col-4 col-lg-8 d-none d-lg-block">
-                    <div class="main-menu text-center">
-                        <nav>
-                            <ul id="slick-nav">
-                                <li><a class="scroll" href="/">Home</a></li>
-                                <li><a class="scroll" href="#about">About</a></li>
-                                <li><a class="scroll" href="#roadmap">Roadmap</a></li>
-                                <li><a class="scroll" href="#team">Team</a></li>
-                                <li><a class="scroll" href="#apps">Telegram Bot</a></li>
-                                <li><a class="scroll" href="#faq">FAQ</a></li>
-                                <li><a class="scroll" href="#contact">Contact</a></li>
-                                
-                                
-                            </ul>
-                        </nav>
-                    </div>
-                </div>
-                <div class="col-4 col-lg-2 text-right">
+            <!-- Start Atribute Navigation -->
+            <div class="attr-nav">
+                <ul>
+                                                            <li><a href="register.php" class="btn nav-btn btn-orange">Login/Register</a></li>
+
                     
-                    <a href="login.html" class="logibtn gradient-btn">login</a>
+                </ul>
+            </div>
+            <!-- End Atribute Navigation -->
+            <!-- Start Header Navigation -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
+                    <i class="fa fa-bars"></i>
+                </button>
+                <!-- <a class="navbar-brand" href="#"><img src="public/uploads/1609072784_296695c381fe8874cc5f.png" class="logo" alt="FEX Trading Platform - Buy & Sell Crypto and Gift Cards"></a> -->
+            </div>
+            <!-- End Header Navigation -->
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <ul class="nav navbar-nav" data-in="" data-out="">
+                                                            <li
+                        class="">
+                        <a href="home.html">Home</a>
+                                            </li>
+
+                                                            <li
+                        class="">
+                        <a href="#rates">Live Rates</a>
+                                            </li>
+
+                                                            <li
+                        class="">
+                        <a href="user-dashboard.php">Buy Crypto</a>
+                                            </li>
+
+                                                            <li
+                        class="">
+                        <a href="user-dashboard.php">Sell Crypto</a>
+                                            </li>
+
+                                                            <li
+                        class="">
+                        <a href="user-dashboard.php">Gift Cards</a>
+                                            </li>
+
+                                                            <li
+                        class="">
+                        <a href="user-dashboard.php">Trade Now</a>
+                                            </li>
+
+                                                            <li
+                        class="dropdown">
+                        <a
+                            href="#" class="dropdown-toggle" data-toggle="dropdown">More</a>
+                        
+                        <ul class="dropdown-menu">
+                                                        <li class=""><a href="#about">About Us</a>
+                            </li>
+                                                        <li class=""><a href="#rates">Exchange Rates</a>
+                            </li>
+                                                        <li class=""><a href="#faq">F.A.Q</a>
+                            </li>
+                                                        <li class=""><a href="#support">Support</a>
+                            </li>
+                                                        <li class=""><a href="#contact">Contact</a>
+                            </li>
+                                                    </ul>
+                                            </li>
+
                     
+                </ul>
+            </div><!-- /.navbar-collapse -->
+        </div>
+    </nav><!-- /. End of Navigation -->
+<div class="animation-slide owl-carousel owl-theme" id="animation-slide">
+                        <!-- Slide 1-->
+            <div class="item slide-one" style="background-image: url(http://nishuedemo.bdtask-demo.com/public/uploads/slider/f60ea2fc495dcab6205e27221342a27c.jpg)">
+                <div class="slide-table">
+                    <div class="slide-tablecell">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="slide-text text-center">
+                                        <h2>Secure <span class="outrageous-orange">Cryptocurrency</span> <br>& Gift Card Trading</h2>
+                                        <p>Buy and sell cryptocurrencies instantly at competitive rates.<br> Trade your favorite gift cards with trusted buyers and sellers worldwide.</p>
+                                        <div class="slide-buttons">
+                                            <a href="register.php" class="slide-btn">Start Trading Now</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-
+            </div>
+                            <!-- Slide 2-->
+            <div class="item slide-two" style="background-image: url(http://nishuedemo.bdtask-demo.com/public/uploads/slider/0e4a7d6316e326b8618ad1edb0f7c312.jpg)">
+                <div class="slide-table">
+                    <div class="slide-tablecell">
+                        <div class="container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="slide-text">
+                                        <h2>Gift Card <span class="bright-turquoise">Marketplace</span><br>You Can Trust</h2>
+                                        <p>Trade Amazon, iTunes, Google Play, and other popular gift cards.<br> Get instant cash for your unused gift cards with our secure platform.</p>
+                                        <div class="slide-buttons">
+                                            <a href="register.php" class="slide-btn">Sell Your Cards</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            </div>
+    <!-- /.End of slider -->
+    <div class="ticker">
+        <div class="list-wrpaaer">
+            <ul id="marquee-horizontal">
+                                    <li class="list-item" id="BTC">
+                        <div class="list-item-currency">BTC</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="ETH">
+                        <div class="list-item-currency">ETH</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="LTC">
+                        <div class="list-item-currency">LTC</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="DASH">
+                        <div class="list-item-currency">DASH</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="XMR">
+                        <div class="list-item-currency">XMR</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="NXT">
+                        <div class="list-item-currency">NXT</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="ETC">
+                        <div class="list-item-currency">ETC</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="DOGE">
+                        <div class="list-item-currency">DOGE</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="ZEC">
+                        <div class="list-item-currency">ZEC</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                                    <li class="list-item" id="BTS">
+                        <div class="list-item-currency">BTS</div>
+                        <div class="list-item-currency upgrade">
+                            <span></span>
+                        </div>
+                    </li>
+                
+            </ul>
+        </div>
+    </div>
+    <!-- /.End of tricker -->
+        <div class="about_content">
+        <div class="container">
+            <div class="row about-text justify-content">
+                <div class="col-md-6">
+                    <div class="about-info">
+                        <h2>What is FEX Trading Platform?</h2>
+                        <div class="definition">FEX is Nigeria's premier platform for buying and selling cryptocurrencies and gift cards with instant payments and competitive rates</div>
+                         <p>We provide a secure, user-friendly marketplace where you can trade Bitcoin, Ethereum, and other popular cryptocurrencies. Our gift card trading service supports Amazon, iTunes, Google Play, Steam, and many other brands with instant verification and payment.</p>
+<p>With over 10,000 satisfied customers and 24/7 customer support, FEX Trading Platform is your trusted partner for all cryptocurrency and gift card transactions in Nigeria.</p>                        <a href="register.php" class="btn btn-default mr-20 mb-10">Join Us Today</a>
+                        <div class="play-button">
+                            <a href="https://www.youtube.com/watch?v=bWW5Kz2bEPg" class="btn-play popup-youtube">
+                                <div class="play-icon"><i class="fa fa-play"></i></div>
+                                <div class="play-text">
+                                    <div class="btn-title-inner">
+                                        <div class="btn-title"><span>WATCH VIDEO</span></div>
+                                        <div class="btn-subtitle"><span>About Bitcoin</span></div>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="text-right">
+                        <img src="public/uploads/b1c4c1a1466bc4302f4ff58b6386f889.jpg" class="img-responsive" alt="Tarek Sumch - Owner, Bdtask">
+                    </div>
+                    <div class="quote">
+                        "FEX Trading Platform has revolutionized how Nigerians trade cryptocurrencies and gift cards. Our commitment to security, transparency, and customer satisfaction makes us the preferred choice for digital asset trading."                        <div class="author-address">CEO - FEX Trading Platform </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
-    <!--header area end-->
-
-    <!--welcome area start-->
-    <div class="welcome-area wow fadeInUp" id="home">
-        <div id="particles-js"></div>
+    <!-- /.End of about content -->
+    <div class="calculate">
         <div class="container">
             <div class="row">
-                <div class="col-12 col-md-6 align-self-center">
-                    <div class="welcome-right">
-                        <div class="welcome-text">
-                             <h1>Your Trusted Platform for
-                            Cryptocurrency & Gift Card
-                            Trading</h1>
-                            <h4>FEX is a secure and reliable platform specializing in cryptocurrency trading and gift card exchange services. Buy and sell popular cryptocurrencies like Bitcoin, Ethereum, USDT, and more, or trade gift cards from major retailers with competitive rates and instant transactions.</h4>
-                        </div>
-                        <div class="welcome-btn">
-                            
-                            <a href="register.html" class="gradient-btn v2 mr-20">Register</a>
-                            <a href="login.html" class="gradient-btn v2">Log In</a>
-                            
-                        </div>
+                <div class="col-sm-8 col-sm-offset-2">
+                    <div class="section_title">
+                        <h3>Cryptocurrency <span>Rate Calculator</span></h3>
+                        <p>Check real-time exchange rates for all supported cryptocurrencies. Get instant quotes for your Bitcoin, Ethereum, and altcoin transactions.</p>                    </div>
+                </div>
+            </div>
+            <div class="row justify-content">
+                <div class="col-sm-4">
+                    <div class="bitcoin-sack">
+                        <img src="public/uploads/1bdb688b0774ccb380813b393b52119e.png" class="img-responsive center-block" alt="Quick Bitcoin Converter">
                     </div>
                 </div>
-                <div class="col-12 col-md-6">
-                    <div class="welcome-img">
-                        <img src="static/assets/img/welcome-img.png" alt="">
+                <div class="col-sm-8">
+                    <div class="exchange-content">
+                        <form class="form-inline exchange-form" >
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <select class="selectpicker convertfromcryptolist" id="convertfromcryptolist" data-width="80px" name="convertfromcryptolist">                                            
+                                                                                    <option value="BTC">BTC</option>
+                                                                                    <option value="ETH">ETH</option>
+                                                                                    <option value="LTC">LTC</option>
+                                                                                    <option value="DASH">DASH</option>
+                                                                                    <option value="XMR">XMR</option>
+                                                                                    <option value="NXT">NXT</option>
+                                                                                    <option value="ETC">ETC</option>
+                                                                                    <option value="DOGE">DOGE</option>
+                                                                                    <option value="ZEC">ZEC</option>
+                                                                                    <option value="BTS">BTS</option>
+                                                                                <option value="USD">USD</option>
+                                    </select>
+                                </div>
+                                <input type="number" value="0" step="any"  min="0"  onkeypress="return event.charCode != 45" class="form-control convertfromcrypto" id="convertfromcrypto" name="convertfromcrypto">
+                            </div>
+                            <div class="exchange-btn">
+                                <span class="lnr lnr-arrow-right"></span>
+                            </div>
+                            <div class="input-group">
+                                <div class="input-group-btn">
+                                    <select class="selectpicker converttocryptolist" id="converttocryptolist" data-width="80px" name="converttocryptolist">
+                                        <option value="USD" selected>USD</option>
+                                                                                    <option  value="BTC">BTC</option>
+                                                                                    <option  value="ETH">ETH</option>
+                                                                                    <option  value="LTC">LTC</option>
+                                                                                    <option  value="DASH">DASH</option>
+                                                                                    <option  value="XMR">XMR</option>
+                                                                                    <option  value="NXT">NXT</option>
+                                                                                    <option  value="ETC">ETC</option>
+                                                                                    <option  value="DOGE">DOGE</option>
+                                                                                    <option  value="ZEC">ZEC</option>
+                                                                                    <option  value="BTS">BTS</option>
+                                                                            </select>
+                                </div>
+                                <input type="number" class="form-control converttocrypto" id="converttocrypto" name="converttocrypto">
+                            </div>
+                        </form>
+                        <div class="exchange-info">
+                            <h4>How it works?</h4>
+<p>Our rate calculator provides real-time cryptocurrency prices from multiple exchanges. Simply select the cryptocurrency you want to convert, enter the amount, and get instant rate quotes. All rates include our competitive trading fees for transparent pricing.</p>                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <!--welcome area end-->
+    <!-- /.End of calculate -->
 
-    <!--about area start-->
-    <div class="about-area wow fadeInUp" id="about">
-        <div class="space-30"></div>
+     
+    <div class="features__content">
+        <div id="content__bg"></div>
         <div class="container">
             <div class="row">
-                <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>We are featured in</h5>
-                    </div>
-                    <div class="space-30"></div>
+                <div class="col-sm-8 col-sm-offset-2">
+                    <div class="section_title">
+                        <h3>Our Trading <span>Services</span></h3>
+                        <p>Comprehensive cryptocurrency and gift card trading services designed for Nigerian traders. Experience secure, fast, and profitable trading with our premium features.</p>                    </div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="logo-carousel owl-carousel text-center">
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-1.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-2.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-3.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-4.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-5.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-3.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-2.png" alt="">
-                            </div>
-                        </div>
-                        <div class="single-logo-wrapper">
-                            <div class="single-item">
-                                <img src="static/assets/img/c-logo-5.png" alt="">
-                            </div>
-                        </div>
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-bitcoin"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">Cryptocurrency Trading</a></h3>
+                        <p>Buy and sell Bitcoin, Ethereum, Litecoin, and other popular cryptocurrencies at competitive rates with instant transactions.</p>
                     </div>
                 </div>
             </div>
-            <div class="space-90"></div>
-            <div class="row">
-                <div class="col-12 col-md-6">
-                    <div class="about-mid-img">
-                        <img src="static/assets/img/about-left.png" alt="">
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-credit-card"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">Gift Card Exchange</a></h3>
+                        <p>Trade Amazon, iTunes, Google Play, Steam, and 50+ other gift card brands for instant cash payments.</p>
                     </div>
-                </div>
-                <div class="col-12 col-md-6 align-self-center">
-                    <div class="about-mid-text">
-                        <h1>About Us</h1>
-                        <div class="space-10"></div>
-                        <p>FEX is a leading cryptocurrency and gift card trading platform established in April 2019, headquartered in the United Kingdom (UK). We specialize in providing secure, fast, and reliable services for buying and selling cryptocurrencies and exchanging gift cards from popular retailers worldwide.</p>
-                        <p>Our platform offers competitive exchange rates for major cryptocurrencies including Bitcoin (BTC), Ethereum (ETH), USDT, Litecoin (LTC), and Ripple (XRP). We also facilitate the trading of gift cards from major brands like Amazon, iTunes, Google Play, Steam, and many others.</p>
-                        <p>With years of experience in the digital currency and gift card exchange market, we have built a reputation for trustworthiness, security, and customer satisfaction. Our advanced security measures protect all transactions, while our user-friendly interface makes trading simple for both beginners and experienced traders.</p>
-                        <p>We are committed to providing 24/7 customer support and ensuring that all transactions are processed quickly and securely. Whether you're looking to buy cryptocurrencies, sell your digital assets, or exchange gift cards for cash, FEX is your trusted partner.</p>
-                        <p>Our mission is to bridge the gap between traditional gift cards and digital currencies, making it easy for anyone to participate in the growing cryptocurrency economy while maximizing the value of unused gift cards.</p>
-                    </div>
-                    <div class="space-90"></div>
                 </div>
             </div>
-            <div class="row">
-                <div class="col-12 col-md-6">
-                    <div class="about-mid-img">
-                        <img src="static/assets/img/btc-pic.jpg" alt="">
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-secure-shield"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">Secure Transactions</a></h3>
+                        <p>Multi-layer security protection with escrow services and fraud prevention to ensure safe trading for all users.</p>
                     </div>
                 </div>
-                <div class="col-12 col-md-6 align-self-center">
-                    <div class="heading">
-                        <h5>Everything you need to know</h5>
+            </div>
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-money-1"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">Instant Payments</a></h3>
+                        <p>Receive payments instantly via bank transfer, mobile money, or cryptocurrency wallet once trades are completed.</p>
                     </div>
-                    <div class="about-mid-text">
-                        <h1>Your One-Stop Shop for
-                        Cryptocurrency & Gift Card Exchange</h1>
-                        <div class="space-10"></div>
-                        <p>FEX is the premier platform for cryptocurrency trading and gift card exchange services. We understand that the digital economy requires reliable, secure, and efficient trading solutions. With our extensive experience and commitment to excellence, we have become the trusted choice for thousands of users worldwide.</p>
-                        <p>Our platform offers two main services: <b>CRYPTOCURRENCY TRADING</b> - Buy and sell popular digital currencies with competitive rates and instant processing, and <b>GIFT CARD EXCHANGE</b> - Convert your unused gift cards from major retailers into cash or cryptocurrency with attractive exchange rates and quick turnaround times.</p>
-                        <p>FEX supports trading of major cryptocurrencies including <b>Bitcoin</b> (BTC), <b>Ethereum</b> (ETH), <b>Tether</b> (USDT), <b>Litecoin</b> (LTC), <b>Ripple</b> (XRP), and accepts gift cards from popular brands like Amazon, iTunes, Google Play, Steam, Walmart, and many others. All transactions are processed with minimal fees and maximum security.</p>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-analytics"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">Live Rate Updates</a></h3>
+                        <p>Real-time rate updates from multiple sources ensuring you get the best possible prices for your trades.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-people"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">24/7 Support</a></h3>
+                        <p>Round-the-clock customer support via WhatsApp, Telegram, and email to assist with all your trading needs.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-money-2"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">Mobile Trading</a></h3>
+                        <p>Trade on-the-go with our mobile-optimized platform. Access all features from any device, anywhere.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="feature__box">
+                    <i class="flaticon-bitcoin-1"></i>
+                    <div class="feature__content">
+                        <h3><a href="#">KYC Verification</a></a></h3>
+                        <p>Quick and easy identity verification process to ensure compliance and provide higher trading limits.</p>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="space-90"></div>
     </div>
-    <!--about area end-->
-
-    <!--single about area start-->
-    <div class="single-about-area wow fadeInUp">
+    <!-- End of features content -->
+    <div class="crypto-strat">
         <div class="container">
             <div class="row">
-                <div class="col-lg-4">
-                    <a href="#" class="single-about">
-                        <div class="single-about-img">
-                            <img src="static/assets/img/about-icon-1.png" alt="">
-                        </div>
-                        <div class="single-about-text">
-                            <h4>Global Access</h4>
-                            <p>FEX serves customers from around the world with no geographical restrictions. Trade cryptocurrencies and exchange gift cards from anywhere, anytime.</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-4">
-                    <a href="#" class="single-about">
-                        <div class="single-about-img">
-                            <img src="static/assets/img/about-icon-2.png" alt="">
-                        </div>
-                        <div class="single-about-text">
-                            <h4>Secure Trading</h4>
-                            <p>Your security is our priority. We use advanced encryption, multi-layer authentication, and secure wallet systems to protect all cryptocurrency and gift card transactions. All trades are monitored 24/7 for maximum safety.</p>
-                        </div>
-                    </a>
-                </div>
-                <div class="col-lg-4">
-                    <a href="#" class="single-about">
-                        <div class="single-about-img">
-                            <img src="static/assets/img/about-icon-3.png" alt="">
-                        </div>
-                        <div class="single-about-text">
-                            <h4>Best Rates</h4>
-                            <p>We offer competitive exchange rates for both cryptocurrency trading and gift card exchanges, ensuring you get maximum value for your transactions with transparent pricing and no hidden fees.</p>
-                        </div>
-                    </a>
+                <div class="col-sm-8 col-sm-offset-2">
+                    <div class="section_title">
+                        <h3>How to Get  <span>Started</span></h3>
+                        <p>Start trading cryptocurrencies and gift cards in just 3 simple steps. Join thousands of satisfied customers who trust FEX for their digital asset transactions.</p>                            
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="space-70"></div>
-    </div>
-    <!--single about area end-->
-
-    <!--single about area start-->
-    <div class="single-about-area wow fadeInUp">
-        <div class="container">
-            <div class="row">
-                    <div class="col-12 text-center">
-                    <div class="heading">
-                        <h1>Our Trading Services</h1>
-                    </div>
-                </div>
-                </div>
-                <div class="space-50"></div>
-            <div class="row">
-                <div class="col-lg-6">
-                    <a href="#" class="single-about">
-                        <div class="single-about-text">
-                            <h4>Cryptocurrency Trading</h4>
-                            <p>Buy and sell Bitcoin, Ethereum, USDT, Litecoin, Ripple and other popular cryptocurrencies with competitive rates and instant processing.</p>
+            <div class="start-steps">
+                <div class="start-step">
+                    <i class="step-icon flaticon-wallet"></i>
+                    <div class="start-step-info">
+                        <div class="step-name">
+                            <span>Create Account</span>
                         </div>
-                    </a>
-                </div>
-                <div class="col-lg-6">
-                    <a href="#" class="single-about">
-                        <div class="single-about-text">
-                            <h4>Gift Card Exchange</h4>
-                            <p>Exchange gift cards from Amazon, iTunes, Google Play, Steam, and 50+ other retailers for cash or cryptocurrency with attractive rates.</p>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12 col-md-12 align-self-center">
-                    <div class="space-30"></div>
-                    <center><a href="register.html" class="gradient-btn v2 about-btn"> <i class="fa fa-send-o"></i> Start Trading</a></center>
-                </div>
-            </div>
-        </div>
-        <div class="space-70"></div>
-    </div>
-    <!--single about area end-->
-
-    <!--ico area start-->
-    <div class="wow fadeInUp faq-area">
-        <div class="container">
-                <div class="row">
-                    <div class="col-12 text-center">
-                    <div class="heading">
-                        <h1>Why Choose FEX for Your Cryptocurrency and Gift Card Trading Needs</h1>
-                    </div>
-                </div>
-                </div>
-                <div class="space-50"></div>
-        </div>
-        <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade show active" id="one1">
-                        <div class="container-fluid">
-                            <div class="faq-carousel owl-carousel">
-                                <div class="single-faq">
-                                    <h4>Build Wealth</h4>
-                                    <div class="space-20"></div>
-                                    <p>FEX has Fixed income on investments which is an important hedge against more volatile components of a traditional portfolio, outperforming other mass-market fixed income returns.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>Total Control</h4>
-                                    <div class="space-20"></div>
-                                    <p>Set your choice amount of investment and watch all your investments grow daily on your dashboard.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>Fast & Easy</h4>
-                                    <div class="space-20"></div>
-                                    <p>Register and start your investment in a minute by following the process of transferring your choice of coin to the company's wallet address featuring updating an evidence of payment.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>Safe & Secured</h4>
-                                    <div class="space-20"></div>
-                                    <p>Start up your investment with confidence that your investments are safe and secured by institutional-grade investments transparently administered by our proprietary.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>Affordable</h4>
-                                    <div class="space-20"></div>
-                                    <p>The company operates on two package plans; The STARTER plan (short-term) and the PREMIUM plan (long-term). Each of these package plan has its own specified minimum amount on every available coin with no hidden fees.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>Mission Focused</h4>
-                                    <div class="space-20"></div>
-                                    <p>FEX is a trading and investment company committed in providing everyone access to their investments and financing that build profits with the lowest possible fees.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>Professional Connectivity</h4>
-                                    <div class="space-20"></div>
-                                    <p>FEX company has professional traders and institutional firms that trade their investor's coin for the benefit of both the company and their customers thereby offering them some amount of percentage from the profit yield monthly, the following solutions, supported by round the clock assistance and industry renowned expertise.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                            </div>
+                        <div class="step-text">
+                            <span>Sign up with your email and complete quick verification to access our trading platform</span>
                         </div>
                     </div>
                 </div>
-    </div>
-    <!--ico area end-->
-
-
-
-    <!--distibution-bg start-->
-    <div class="distibution-bg">
-        <!---distibution area start-->
-        <div class="distibution wow fadeInUp" id="token">
-            <div class="container">
-                <div class="space-90"></div>
-                <div class="row">
-                    <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>Payment Distribution</h5>
-                        <div class="space-10"></div>
-                        <h1>amongst investors</h1>
-                    </div>
-                    <div class="space-60"></div>
-                </div>
-                </div>
-                <div class="row">
-
-                    <div class="col-6 text-right">
-                        <div class="distibution-svg distibution-svg-1">
-                            <img src="static/assets/img/token-top.png" alt="">
+                <div class="start-step">
+                    <i class="step-icon flaticon-credit-card"></i>
+                    <div class="start-step-info">
+                        <div class="step-name">
+                            <span>Upload Your Assets</span>
                         </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="distibution-d item-1">
-                            <ul>
-                                <li class="distibution-list-1"><span>15% </span>Loans</li>
-                                <li class="distibution-list-2"><span>50% </span>Premium Investments</li>
-                                <li class="distibution-list-3"><span>25% </span>Starter Investments</li>
-                                <li class="distibution-list-4"><span>10% </span>Referral Earnings </li>
-                            </ul>
+                        <div class="step-text">
+                            <span>Upload gift card images or provide cryptocurrency wallet details for the assets you want to trade</span>
                         </div>
                     </div>
                 </div>
-                <div class="space-90"></div>
-                <div class="row">
-                    <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>Our</h5>
-                        <div class="space-10"></div>
-                        <h1>Investments Breakdown</h1>
-                    </div>
-                    <div class="space-90"></div>
-                </div>
-                </div>
-                <div class="row">
-                    <div class="col-2 text-right">
-                        <div class="distibution-d distibution-d-2">
-                            <ul>
-                                <li class="distibution-list-5"><span>40% </span>Blockchain</li>
-                                <li class="distibution-list-6"><span>30% </span>Arbitrage Trading</li>
-                                <li class="distibution-list-7"><span>20% </span>Stock Trading</li>
-                                <li class="distibution-list-8"><span>10% </span>Mining</li>
-                            </ul>
+                <div class="start-step">
+                    <!--<span class="start-step-number">3</span>-->
+                    <i class="step-icon flaticon-money-1"></i>
+                    <div class="start-step-info">
+                        <div class="step-name">
+                            <span>Get Paid Instantly</span>
                         </div>
-                    </div>
-                    <div class="col-10">
-                        <div class="distibution-svg distibution-svg-2">
-                            <img src="static/assets/img/token-bottom.png" alt="">
+                        <div class="step-text">
+                            <span>Receive instant payment to your bank account or mobile wallet once your trade is verified</span>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="space-90"></div>
-        </div>
-        <!---distibution area end-->
-    </div>
-    <!--distibution-bg end-->
-
-    <!--roadmap area start-->
-    <div class="roadmap-area section-padding wow fadeInUp" id="roadmap">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>history Timeline</h5>
-                        <div class="space-10"></div>
-                        <h1>Development Roadmap</h1>
-                    </div>
-                    <div class="space-60 d-none d-sm-block"></div>
-                </div>
-            </div>
-
-        </div>
-        <div class="container">
-            <div class="roadmap-carousel owl-carousel">
-                <div class="roadmap-item">
-                    <div class="single-roadmap text-center road-left">
-                        <div class="single-roadmap-img">
-                            <img src="static/assets/img/roadmap-1.png" alt="">
-                        </div>
-                        <div class="space-30"></div>
-                        <div class="roadmap-text">
-                            <p>01.03.2018</p>
-                            <div class="space-10"></div>
-                            <h5>Concept and whitepaper</h5>
-                            <p>The recording starts with the patter of a summer squall. Later, a drifting tone like that of an investment company.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="roadmap-item align-self-center">
-                    <div class="single-roadmap road-right">
-                        <div class="row">
-                            <div class="col-5 align-self-center">
-                                <div class="single-roadmap-img">
-                                    <img src="static/assets/img/roadmap-2.png" alt="">
-                                </div>
-                            </div>
-                            <div class="col-7">
-                                <div class="roadmap-text">
-                                    <p>21.06 .2018</p>
-                                    <h5>Recruitment of Our team</h5>
-                                    <p>The search for the best in the trading scenery begins as we took the time to seek out the best in the community.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="roadmap-item">
-                    <div class="single-roadmap text-center road-left">
-                        <div class="single-roadmap-img">
-                            <img src="static/assets/img/roadmap-4.png" alt="">
-                        </div>
-                        <div class="space-30"></div>
-                        <div class="roadmap-text">
-                            <p>31.08.2018</p>
-                            <div class="space-10"></div>
-                            <h5>Core Development</h5>
-                            <p>Development and testing of trade strategy in real time to confirm trade efficiency for the duration of 6 months.</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="roadmap-item align-self-center">
-                    <div class="single-roadmap road-right">
-                        <div class="row">
-                            <div class="col-5 align-self-center">
-                                <div class="single-roadmap-img">
-                                    <img src="static/assets/img/roadmap-5.png" alt="">
-                                </div>
-
-                            </div>
-                            <div class="col-7">
-                                <div class="roadmap-text">
-                                    <p>31.01.2019</p>
-                                    <h5>Main Development</h5>
-                                    <p>Development of website and telegram investment bot to share opportunity with the general public</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="roadmap-item">
-                    <div class="single-roadmap text-center road-left">
-                        <div class="single-roadmap-img">
-                            <img src="static/assets/img/roadmap-4.png" alt="">
-                        </div>
-                        <div class="space-30"></div>
-                        <div class="roadmap-text">
-                            <p>01.04.2019</p>
-                            <div class="space-10"></div>
-                            <h5>Soft Launch</h5>
-                            <p>Conpany registration in the UK SEC, followed by a one week soft launch to test system in real-time with inhouse investments</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="roadmap-item align-self-center">
-                    <div class="single-roadmap road-right">
-                        <div class="row">
-                            <div class="col-5 align-self-center">
-                                <div class="single-roadmap-img">
-                                    <img src="static/assets/img/roadmap-5.png" alt="">
-                                </div>
-
-                            </div>
-                            <div class="col-7">
-                                <div class="roadmap-text">
-                                    <p>21.04.2019</p>
-                                    <h5>Official Launch</h5>
-                                    <p>On this day the final release of the project was made to the general public.</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            <a href="register.php" class="btn btn-default">Get Started</a>
         </div>
     </div>
-    <!--roadmap area end-->
-
-    <!--team-bg-->
-    <div class="team-bg">
-        <!--team area start-->
-        <div class="team-area wow fadeInUp section-padding" id="team">
+    <!-- /.End of How to Get  Start -->
+    
+        <div class="testimonial-wrapper">
             <div class="container">
                 <div class="row">
-                    <div class="col-12 text-center">
-                        <div class="heading">
-                            <h5>core team</h5>
-                            <div class="space-10"></div>
-                            <h1>Meet the visionaries changing the way people access financial investments and build wealth.</h1>
-                        </div>
-                        <div class="space-60"></div>
+                    <div class="col-sm-8 col-sm-offset-2">
+                    <div class="section_title">
+                        <h3>What our customers say about <span>FEX Trading</span></h3>
+                         <p>Read genuine reviews from thousands of satisfied customers who have successfully traded cryptocurrencies and gift cards on our platform.</p>                        </div>
                     </div>
                 </div>
-                <div class="row text-center">
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-1.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Sean Graham</h3>
-                                <div class="space-10"></div>
-                                <h6>FOUNDER & CEO</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="owl-testimonial owl-carousel owl-theme">
+                                                            <div class="testimonial-panel">
+                                    <div class="tes-quoteInfo">
+                                        <img src="public/uploads/client/1614163242_d77ccf3107038036eb08.jpg" class="quoteAvatar" alt="Pandora">
+                                        <div>
+                                            <div class="quoteAuthor"><span>Pandora</span></div>
+                                            <div class="quotePosition">
+                                                <span>Donec eget libero et lacus</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="testimonial--body">
+                                        "FEX Trading Platform made selling my Bitcoin so easy! The rates are competitive and I received payment within minutes. Highly recommended!"                                    </div>
+                                    <!-- /.testimonial-body end -->
+                                </div>
+                                                            <div class="testimonial-panel">
+                                    <div class="tes-quoteInfo">
+                                        <img src="public/uploads/client/1614163394_2d2e562b0c4ddeb18201.jpg" class="quoteAvatar" alt="John Leo">
+                                        <div>
+                                            <div class="quoteAuthor"><span>John Leo</span></div>
+                                            <div class="quotePosition">
+                                                <span>Lorem ipsum dolor sit amet.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="testimonial--body">
+                                        "I've been trading Amazon gift cards on FEX for months. Fast verification, instant payments, and excellent customer service. Best platform in Nigeria!"                                    </div>
+                                    <!-- /.testimonial-body end -->
+                                </div>
+                                                            <div class="testimonial-panel">
+                                    <div class="tes-quoteInfo">
+                                        <img src="public/uploads/client/1614163344_0e0bd0c56d0d5b48eda7.jpg" class="quoteAvatar" alt="Avalon">
+                                        <div>
+                                            <div class="quoteAuthor"><span>Avalon</span></div>
+                                            <div class="quotePosition">
+                                                <span>Lorem ipsum dolor sit amet.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="testimonial--body">
+                                        "The security features and customer support at FEX are outstanding. I feel safe trading my cryptocurrencies here. The mobile app is also very user-friendly."                                    </div>
+                                    <!-- /.testimonial-body end -->
+                                </div>
+                                                            <div class="testimonial-panel">
+                                    <div class="tes-quoteInfo">
+                                        <img src="public/uploads/testimonial/6ffe1bf3d45733f495e37e1c625844c2.jpg" class="quoteAvatar" alt="John Deo">
+                                        <div>
+                                            <div class="quoteAuthor"><span>John Deo</span></div>
+                                            <div class="quotePosition">
+                                                <span>Co-founder of Microsoft, American business management</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="testimonial--body">
+                                        "FEX has the best rates for iTunes gift cards in Nigeria. Quick processing, reliable payments, and 24/7 support. I recommend it to all my friends."                                    </div>
+                                    <!-- /.testimonial-body end -->
+                                </div>
+                                                    </div>
                     </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-2.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Julius Book</h3>
-                                <div class="space-10"></div>
-                                <h6>COO</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-3.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Jessica Blair</h3>
-                                <div class="space-10"></div>
-                                <h6>Director Of Operations</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-4.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Nancy Burns</h3>
-                                <div class="space-10"></div>
-                                <h6>Executive Board Member</h6>
-                            </div>
-                            <div class="space-10"></div>
+                    <div class="col-sm-12">
+                        <div class="client-logo">
+
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/01.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/02.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/03.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/04.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/05.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/06.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/07.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                            <div class="logo-item">
+                                    <a href="https://www.bdtask.com/" target="_blank"><img src="public/uploads/client/08.png" class="img-responsive" alt="Bdtask"></a>
+                                </div>
+                                                        <!-- /.End of client logo -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="team-area team wow fadeInDown">
+        <!-- /.End of testimonial content -->
+        <div class="blog_content">
             <div class="container">
                 <div class="row">
-                    <div class="col-12 text-center">
-                        <div class="heading">
-                            <h5>Advisory  team</h5>
-                            <div class="space-10"></div>
-                            <h1>Advisory Board</h1>
-                        </div>
-                        <div class="space-60"></div>
+                    <div class="col-sm-8 col-sm-offset-2">
+                        <div class="section_title">
+                            <h3>Trading <span>Tips & News</span></h3>
+                            <p>Stay updated with the latest cryptocurrency market trends, gift card trading tips, and platform updates to maximize your trading profits.</p>                        </div>
                     </div>
-                </div>
-                <div class="row text-center">
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-5.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Josh Morgan</h3>
-                                <div class="space-10"></div>
-                                <h6>Community Activator & Growth Hacker</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-6.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>William Delisle</h3>
-                                <div class="space-10"></div>
-                                <h6>ADVISOR</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-7.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Edward Schultz</h3>
-                                <div class="space-10"></div>
-                                <h6>Hedge Fund Manager</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6 col-lg-3">
-                        <div class="single-team">
-                            <div class="single-team-img">
-                                <img src="static/assets/img/superman-8.jpg" alt="">
-                            </div>
-                            <div class="space-30"></div>
-                            <div class="single-team-content">
-                                <h3>Alexander Cyr</h3>
-                                <div class="space-10"></div>
-                                <h6>Crypto Keynote Speaker</h6>
-                            </div>
-                            <div class="space-10"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="space-30"></div>
-        </div>
-        <!--team area end-->
-
-        <!--apps area start-->
-        <div class="apps-area wow fadeInUp section-padding" id="apps">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12 col-lg-5 offset-1 align-self-center">
-                        <div class="heading">
-                            <h5>TELEGRAM INVESTMENT BOT</h5>
-                            <div class="space-10"></div>
-                            <h1>Make investment from the telegram secure chat app</h1>
-                            <div class="space-20"></div>
-                            <p>Apart from making your investment via this website, investments can also be made using your favourite messaging app - telegram. These investments can be accessed safely through the telegram bot on the go without a login request.</p>
-                        </div>
-                        <div class="space-30"></div>
-                        <a href="https://t.me/millennium_coin_support" class="gradient-btn apps-btn apps-btn-2"> <i class="fa fa-send-o"></i> join us on telegram</a>
-                    </div>
-                    <div class="col-12 col-lg-5 offset-1">
-                        <div class="apps-img">
-                            <img src="static/assets/img/Mobile.png" alt="">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <!--apps area end-->
-
-        <!--faq area start-->
-        <div class="faq-area wow fadeInUp" id="faq">
-            <div class="container">
-                <div class="row">
-                    <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>faq</h5>
-                        <div class="space-10"></div>
-                        <h1>Frequently Asked Questions </h1>
-                    </div>
-                    <div class="space-60"></div>
-                </div>
                 </div>
                 <div class="row">
-                    <div class="col-12 text-center">
-                        <div class="faq-list">
-                            <ul class="nav nav-pills" id="pills-tab">
-                                <li><a class="active" data-toggle="pill" href="#one">General Questions</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="space-50"></div>
-            </div>
-                <div class="tab-content" id="pills-tabContent">
-                    <div class="tab-pane fade show active" id="one">
-                        <div class="container-fluid">
-                            <div class="faq-carousel owl-carousel">
-                                <div class="single-faq">
-                                    <h4>WHY CHOOSE FEX?</h4>
-                                    <div class="space-20"></div>
-                                    <p>FEX is a trusted platform specializing in cryptocurrency trading and gift card exchange services. We offer competitive rates, secure transactions, 24/7 customer support, and a user-friendly interface that makes trading simple for everyone.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>WHAT SERVICES DO YOU OFFER?</h4>
-                                    <div class="space-20"></div>
-                                    <p>We offer two main services: Cryptocurrency trading (buy/sell Bitcoin, Ethereum, USDT, Litecoin, Ripple) and Gift Card Exchange (convert gift cards from Amazon, iTunes, Google Play, Steam, and 50+ other retailers into cash or cryptocurrency).</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>IS MY MONEY SAFE?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Yes, all transactions are 100% secure. We use advanced encryption technology, multi-layer security protocols, and secure wallet systems to protect your funds. All trades are monitored 24/7 and processed through verified channels.</p>
-                                    <div class="space-20"></div>
-                                </div>
-                                <div class="single-faq">
-                                    <h4>WHAT ARE YOUR TRADING LIMITS?</h4>
-                                    <div class="space-20"></div>
-                                    <p>We accommodate both small and large transactions. Minimum trading amounts vary by cryptocurrency and gift card type. Contact our support team for specific limits and current exchange rates for your preferred trading option.</p>
-                                    <div class="space-20"></div>
+                    <div class="owl-blog owl-carousel owl-theme">
+
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/e8c9b79ff91acd804c8a8611affe6ade.jpg" class="img-responsive" alt="Bitcoin Cash Price Trend Including Tether">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/trading/bitcoin-cash-price-trend-including-tether">Bitcoin Cash Price Trend Including Tether</a></h3>
+                                        <time datetime="2018-04-09 10:43:42" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="two">
-                        <div class="container-fluid">
-                            <div class="faq-carousel owl-carousel">
-                                <div class="single-faq">
-                                    <h4>Why I should invest in ICO ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day.</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>The Risks of Investing in ICO ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day.</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>How to Trade Cryptocurrencies ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>How to Trade Cryptocurrencies ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day</p>
-                                    <div class="space-20"></div>
-
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/ef423f8d1be6f3f6a00c7c59cabbfcaa.jpg" class="img-responsive" alt="Bitfinex Introduces Trading for 12 Altcoins">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/trading/bitfinex-introduces-trading-for-12-altcoins">Bitfinex Introduces Trading for 12 Altcoins</a></h3>
+                                        <time datetime="2018-04-09 10:34:42" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="three">
-                        <div class="container-fluid">
-                            <div class="faq-carousel owl-carousel">
-                                <div class="single-faq">
-                                    <h4>Why I should invest in ICO ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day.</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>The Risks of Investing in ICO ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day.</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>How to Trade Cryptocurrencies ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>How to Trade Cryptocurrencies ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day</p>
-                                    <div class="space-20"></div>
-
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/6ed8f39e635fdf5efe114fb891d53ccc.jpg" class="img-responsive" alt="Ripple Price Technical Analysis – XRP/USD">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/trading/ripple-price-technical-analysis-xrpusd">Ripple Price Technical Analysis – XRP/USD</a></h3>
+                                        <time datetime="2018-04-09 10:44:42" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                    <div class="tab-pane fade" id="four">
-                        <div class="container-fluid">
-                            <div class="faq-carousel owl-carousel">
-                                <div class="single-faq">
-                                    <h4>Why I should invest in ICO ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day.</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>The Risks of Investing in ICO ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day.</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>How to Trade Cryptocurrencies ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day</p>
-                                    <div class="space-20"></div>
-
-                                </div>
-                                <div class="single-faq">
-                                    <h4>How to Trade Cryptocurrencies ?</h4>
-                                    <div class="space-20"></div>
-                                    <p>Swimming hundreds of feet beneath the ocean’s surface in many parts of the world are prolific architects called giant larvaceans. These zooplankton are not particularly giant themselves (they resemble tadpoles and are about the size of a pinkie finger), but every day</p>
-                                    <div class="space-20"></div>
-
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/3646c01da54507fd2b0ad3b2ec1a168d.png" class="img-responsive" alt="How Blockchain Is Making It Easier to Get">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/blockchain/how-blockchain-is-making-it-easier-to-get">How Blockchain Is Making It Easier to Get</a></h3>
+                                        <time datetime="2018-04-09 10:35:24" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            <div class="space-30"></div>
-        </div>
-        <!--faq area end-->
-    </div>
-    <!--team bg area end-->
-
-    <!--Documentation area start-->
-    <div class="section-padding documentation-area wow fadeInUp" id="contact">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>Support</h5>
-                        <div class="space-10"></div>
-                        <h1>Reach out to our support team in your preferred language</h1>
-                    </div>
-                    <div class="space-60"></div>
-                </div>
-            </div>
-            <div class="row text-center">
-                <div class="col-6 col-lg">
-                    <div class="single-document">
-                        <div class="document-flag">
-                            <a href="https://t.me/millennium_coin_support"><img src="static/assets/img/flag-1.png" alt=""></a>
-                        </div>
-                        <button class="single-document-text">
-                            <span>English</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-document">
-                        <div class="document-flag">
-                            <img src="static/assets/img/flag-2.png" alt="">
-                        </div>
-                        <button class="single-document-text">
-                            <span>Spanish</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-document">
-                        <div class="document-flag">
-                            <img src="static/assets/img/flag-3.png" alt="">
-                        </div>
-                        <button class="single-document-text">
-                            <span>Russian</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-document">
-                        <div class="document-flag">
-                            <img src="static/assets/img/flag-4.png" alt="">
-                        </div>
-                        <button class="single-document-text">
-                            <span>Arabic</span>
-                        </button>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-document">
-                        <div class="document-flag">
-                            <img src="static/assets/img/flag-5.png" alt="">
-                        </div>
-                        <button class="single-document-text">
-                            <span>Portuguese</span>
-                        </button>
-                    </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/32a158bf5a2f5b11e63bcca8b6578039.png" class="img-responsive" alt="How Can Blockchains Remove the ‘Pay to Trade’ Barrier in the Market?">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/blockchain/how-can-blockchains-remove-the-pay-to-trade-barrier-in-the-market">How Can Blockchains Remove the ‘Pay to Trade’ Barrier in the Market?</a></h3>
+                                        <time datetime="2018-04-09 09:59:55" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/59be39a3a7647f8219b84452e247acf3.jpg" class="img-responsive" alt="CANADIAN MINING GIANT HYPERBLOCK ACQUIRES CRYPTOGLOBAL FOR $106 MILLION">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/mining/canadian-mining-giant-hyperblock-acquires-cryptoglobal-for-106-million">CANADIAN MINING GIANT HYPERBLOCK ACQUIRES CRYPTOGLOBAL FOR $106 MILLION</a></h3>
+                                        <time datetime="2018-04-09 09:59:13" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/e7ea25eb9caf196ceac62c9b1d777014.jpg" class="img-responsive" alt="ASIC Resistance Increasingly Hot Topic in Crypto as Monero Forks">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/mining/asic-resistance-increasingly-hot-topic-in-crypto-as-monero-forks">ASIC Resistance Increasingly Hot Topic in Crypto as Monero Forks</a></h3>
+                                        <time datetime="2018-04-09 09:57:45" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/37c1c2dcd93cde3cbc82a699d2a5c383.jpg" class="img-responsive" alt="Why Invest in Dash?">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/dash/why-invest-in-dash">Why Invest in Dash?</a></h3>
+                                        <time datetime="2018-04-09 09:56:48" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/ceba334f82b6964ae8e115f9047fa56e.jpg" class="img-responsive" alt="NEO, EOS, Litecoin, IOTA and Stellar: Technical Analysis April 9, 2018">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/ltc/neo-eos-litecoin-iota-and-stellar-technical-analysis-april-9-2018">NEO, EOS, Litecoin, IOTA and Stellar: Technical Analysis April 9, 2018</a></h3>
+                                        <time datetime="2018-04-09 09:53:30" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/5a27e17eeccaf8f933a01c47ef161ab6.jpg" class="img-responsive" alt="South Africa Puts Onus on Taxpayers to Declare All Cryptocurrency Income">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/ltc/south-africa-puts-onus-on-taxpayers-to-declare-all-cryptocurrency-income">South Africa Puts Onus on Taxpayers to Declare All Cryptocurrency Income</a></h3>
+                                        <time datetime="2018-04-09 09:53:10" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/22c6957a6c707bf5d1a8435b665a0cf3.jpg" class="img-responsive" alt="Ethereum Price Technical Analysis – ETH/USD Eyes More Gains">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/eth/ethereum-price-technical-analysis-ethusd-eyes-more-gains">Ethereum Price Technical Analysis – ETH/USD Eyes More Gains</a></h3>
+                                        <time datetime="2018-04-09 09:50:44" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/4e9a8a65e73a4267e85cf6cbd3a6ccfe.jpg" class="img-responsive" alt="Bitcoin in Brief Monday: Twitter Wields the Banhammer">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/btc/bitcoin-in-brief-monday-twitter-wields-the-banhammer">Bitcoin in Brief Monday: Twitter Wields the Banhammer</a></h3>
+                                        <time datetime="2018-04-09 09:46:23" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                                    <div class="item">
+                                <div class="post_grid">
+                                    <div class="grid_img">
+                                        <img src="public/uploads/news/42cf81dba6b110fbed82b4414279d8ef.jpg" class="img-responsive" alt="True Flip enters the slot market with Chain’s Code">
+                                    </div>
+                                    <div class="grid_body">
+                                        <h3 class="post_heading"><a href="https://nishuedemo.bdtask-demo.com/news/btc/true-flip-enters-the-slot-market-with-chains-code">True Flip enters the slot market with Chain’s Code</a></h3>
+                                        <time datetime="2018-04-09 09:46:48" class="time">
+                                            9th, April 2018    
+                                        </time>
+                                        <p>Lorem ipsum dolor sit amet, quo omittam moderatius in, te cum mutat malorum. Autem ullum cu sed. Id per enim d</p>
+                                    </div>
+                                </div>
+                            </div>
+                                            </div>
                 </div>
             </div>
         </div>
-    </div>
-    <!--Documentation area end-->
+        <!-- /.End of blog content -->
 
-    <!--community area start-->
-    <div class="community-bg community-area wow fadeInUp section-padding" id="contact1">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <div class="heading">
-                        <h5>GReat Community</h5>
-                        <div class="space-10"></div>
-                        <h1>Our Community </h1>
-                    </div>
-                <div class="space-60"></div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-6 col-lg">
-                    <div class="single-community big-social">
-                        <a class="google-plus" href="mailto:millenniumcoin.com@gmail.com"><i class="fa fa-google-plus"></i></a>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-community mid-social">
-                        <a class="linkedin" href="http://linkedin.com/in/millennium-coin-5a60101a5"><i class="fa fa-linkedin"></i></a>
-                    </div>
-                    <div class="single-community">
-                        <a class="twitter" href="https://t.me/millennium_coin_support"><i class="fa fa-telegram"></i></a>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-community mid-social">
-                        <a class="twitter" href="https://twitter.com/Millenniumcoin2"><i class="fa fa-twitter"></i></a>
-                    </div>
-                </div>
-                <div class="col-6 col-lg">
-                    <div class="single-community big-social">
-                        <a class="youtube" href="#"><i class="fa fa-instagram"></i></a>
-                    </div>
-                </div>
-
-            </div>
-        </div>
-    </div>
-    <!--community area end-->
-
-    <!--footer area start-->
-    <div class="footera-area section-padding wow fadeInDown">
-        <div class="container">
-            <div class="row">
-                <div class="col-12 col-sm-6 col-lg-6">
-                    <div class="single-footer">
-                        <div class="logo-area footer">
-                            <a href="#"><img src="static/assets/img/logo-top.png" alt=""></a>
-                        </div>
-                        <div class="space-20"></div>
-                        <p>FEX is a trusted and reliable platform specializing in cryptocurrency trading and gift card exchange services. Our secure online platform enables users to buy and sell cryptocurrencies, exchange gift cards for cash or digital currencies, all with competitive rates and instant processing.</p>
-                        <div class="space-10"></div>
-                        <p>Copyright &copy;<script>document.write(new Date().getFullYear());</script> All rights reserved</p>
-                    </div>
-                </div>
-                <div class="col-12 col-sm-6 col-lg-3">
-                    <div class="single-footer">
-                        <ul>
-                            <li><a href="#about">About</a></li>
-                            <li><a href="#roadmap">Roadmap</a></li>
-                            <li><a href="#contact">Contact</a></li>
+        <footer class="footer">
+            <div class="footer-breadcrumbs">
+                <div class="container">
+                    <div class="breadcrumbs-row">
+                        <ul class="f_breadcrumbs">
+                            <li><a href="https://nishuedemo.bdtask-demo.com"><span>Home</span></a></li>
+                            <li><a href="#"><span></span></a></li>
                         </ul>
-                    </div>
-                </div>
-                <div class="col-6 col-lg-3">
-                    <div class="single-footer">
-                        <ul>
-                            <li><a href="/account">Account</a></li>
-                            <li><a href="#team">Team</a></li>
-                            <li><a href="#faq">FAQ</a></li>
-                        </ul>
+                        <div class="scroll-top" id="back-to-top">
+                            <div class="scroll-top-text"><span>Scroll to Top</span></div>
+                            <div class="scroll-top-icon"><i class="fa fa-angle-up"></i></div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    <!--footer area end-->
+            <!-- /.End of breadcrumbs -->
+            <div class="action_btn_inner">
+                <a href="register.php" class="action_btn">
+                    <span class="action_title">Register</span>
+                    <span class="lnr lnr-chevron-right action_icon"></span>
+                    <span class="action_sub_title">Join Nigeria's #1 crypto and gift card trading platform</span>
+                </a>
+                <a href="login.php" class="action_btn">
+                    <span class="action_title">Sign In</span>
+                    <span class="lnr lnr-chevron-right action_icon"></span>
+                    <span class="action_sub_title">Access your trading dashboard and start earning</span>
+                </a>
+            </div>
+            <!-- /.End of action button -->
+            <div class="main_footer">
+                <div class="container">
+                    <div class="row">
+                        <div class="col-sm-4 col-md-4">
+                            <div class="widget-contact">
+                                <ul class="list-icon">
+                                    <li><i class="fa fa-map-marker"></i> Road # Sample Road / Town # Sample Town / City # Sample City / Country # Sample Country</li>
+                                    <li><i class="fa fa-phone"></i> +8801234567000 </li>
+                                    <li><i class="fa fa-envelope"></i> <a href="/cdn-cgi/l/email-protection#6900070f06290d0c0406470a0604"><span class="__cf_email__" data-cfemail="90f9fef6ffd0f4f5fdffbef3fffd">[email&#160;protected]</span></a>
+                                    </li>
+                                    <li>
+                                        <br><i class="fa fa-clock-o"></i>Monday - Friday: 08:00 - 22:00
+Saturday, Sunday: Closed                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="col-sm-5 col-md-4 col-md-offset-1">
+                            <div class="row">
+                                <div class="col-xs-6 col-sm-6 col-md-6">
+                                    <div class="footer-box">
+                                        <h3 class="footer-title">Our Company</h3>
+                                        <ul class="footer-list">
+                                                            <li><a href="https://nishuedemo.bdtask-demo.com/about">About</a></li>
+                                                            <li><a href="https://nishuedemo.bdtask-demo.com/faq">F.A.Q</a></li>
+                                                            <li><a href="https://nishuedemo.bdtask-demo.com/service">Service</a></li>
+                                                            <li><a href="https://nishuedemo.bdtask-demo.com/contact">Contact</a></li>
+                                                                </ul>
+                                    </div>
+                                </div>
+                                <div class="col-xs-6 col-sm-6 col-md-6">
+                                    <div class="footer-box">
+                                        <h3 class="footer-title">Services</h3>
+                                        <ul class="footer-list">
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/data-protection">Data Protection</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/security-protected">Security Protected</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/support-247">Support 24/7</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/payment-methods">Payment Methods</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/registered-company">Registered Company</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/secured-company">Secured Company</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/live-exchange-rates">Live Exchange Rates</a></li>
+                                            
+                                                    <li><a href="https://nishuedemo.bdtask-demo.com/service/ecuritydashanddashprivacy-centric">Security and Privacy-Centric</a></li>
+                                                                                    </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-md-3">
+                            <div class="newsletter-box">
+                                <h3 class="footer-title">Email Newslatter</h3>
+                                <p>Subscribe to our newsletter!</p>
+                                <form action="https://nishuedemo.bdtask-demo.com/" id="subscribeForm" class="newsletter-form" name="subscribeForm" method="post" accept-charset="utf-8">
+<input type="hidden" name="csrf_test_name" value="54f2a925790a751005081a199d353a5f" />                                <form class='newsletter-form' action='#' method='post'>
+                                    <input name="subscribe_email" placeholder="Email Address" type="email">
+                                    <button type="submit"><i class="fa fa-paper-plane" aria-hidden="true"></i></button>
+                                    <div class="envelope">
+                                        <i class="fa fa-envelope" aria-hidden="true"></i>
+                                    </div>
+                                </form>                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.End of main footer -->
+            <div class="sub_footer">
+                <div class="container">
+                    <div class="logos-wrapper">
+                        <div class="logos-row">
+                            <div class="social-content">
+                                <div class="social-row">
+                                    <div class="social_icon">
+                                                                                <a href="https://www.facebook.com" class=""><i class="fa fa-facebook"></i></a>
+                                                                                <a href="https://twitter.com" class=""><i class="fa fa-twitter"></i></a>
+                                                                                <a href="https://google-plus.com" class=""><i class="fa fa-google-plus"></i></a>
+                                                                                <a href="https://www.youtube.com" class=""><i class="fa fa-youtube-play"></i></a>
+                                                                                <a href="https://instagram.com" class=""><i class="fa fa-instagram"></i></a>
+                                                                            </div>
+                                    <div class="f-language">
+                                    <form action="https://nishuedemo.bdtask-demo.com/" id="langForm" class="lang-form" name="langForm" method="post" accept-charset="utf-8">
+<input type="hidden" name="csrf_test_name" value="54f2a925790a751005081a199d353a5f" />                                        <select name="lang" class="selectpicker lang-change" id="lang-changeF" data-width="fit">
+                                            <option value="english" data-content='<span class="flag-icon flag-icon-us"></span> English' Selected>English</option>
+                                            <option value="french"  data-content='<span class="flag-icon flag-icon-fr"></span> Français' > Français</option>
+                                        </select>
+                                        </form>                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="copyright">
+                            <span>2024 © Copyright FEX Trading Platform - Buy & Sell Crypto and Gift Cards</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- /.End of sub footer -->
+        </footer>
+        <!-- /.End of footer -->
 
-    <style>
-div#conveythis-wrapper{
-	position: fixed !important;
-	left: 0px !important;
-	bottom: 0px !important;
-}
-div#conveythis-wrapper-main{
-	position: fixed !important;
-	left: 0px !important;
-	bottom: 0px !important;
-}
-</style>
-<!-- ConveyThis button: -->
-<div id="conveythis-wrapper-main"><a href="https://www.conveythis.com" class="conveythis-no-translate notranslate" title="ConveyThis" >ConveyThis</a></div>
-<script src="//s2.conveythis.com/javascriptClassic/1/conveythis.js"></script>
-<script src="//s2.conveythis.com/javascriptClassic/1/translate.js"></script>
-<script type="text/javascript">
-document.addEventListener("DOMContentLoaded", function(e) {
-conveythis.init({source_language_id: 703, languages: [{"id":"703","active":true},{"id":"815","active":false},{"id":"795","active":false},{"id":"794","active":false},{"id":"793","active":false},{"id":"792","active":false},{"id":"791","active":false},{"id":"813","active":false},{"id":"790","active":false},{"id":"789","active":false},{"id":"788","active":false},{"id":"812","active":false},{"id":"787","active":false},{"id":"786","active":false},{"id":"785","active":false},{"id":"784","active":false},{"id":"783","active":false},{"id":"782","active":false},{"id":"781","active":false},{"id":"780","active":false},{"id":"779","active":false},{"id":"778","active":false},{"id":"777","active":false},{"id":"776","active":false},{"id":"797","active":false},{"id":"775","active":false},{"id":"774","active":false},{"id":"811","active":false},{"id":"810","active":false},{"id":"809","active":false},{"id":"773","active":false},{"id":"772","active":false},{"id":"808","active":false},{"id":"771","active":false},{"id":"770","active":false},{"id":"769","active":false},{"id":"768","active":false},{"id":"767","active":false},{"id":"766","active":false},{"id":"765","active":false},{"id":"807","active":false},{"id":"764","active":false},{"id":"763","active":false},{"id":"762","active":false},{"id":"761","active":false},{"id":"760","active":false},{"id":"759","active":false},{"id":"758","active":false},{"id":"757","active":false},{"id":"756","active":false},{"id":"755","active":false},{"id":"754","active":false},{"id":"753","active":false},{"id":"752","active":false},{"id":"751","active":false},{"id":"750","active":false},{"id":"749","active":false},{"id":"748","active":false},{"id":"805","active":false},{"id":"747","active":false},{"id":"804","active":false},{"id":"746","active":false},{"id":"745","active":false},{"id":"744","active":false},{"id":"743","active":false},{"id":"742","active":false},{"id":"741","active":false},{"id":"740","active":false},{"id":"739","active":false},{"id":"738","active":false},{"id":"737","active":false},{"id":"802","active":false},{"id":"736","active":false},{"id":"735","active":false},{"id":"734","active":false},{"id":"801","active":false},{"id":"733","active":false},{"id":"732","active":false},{"id":"731","active":false},{"id":"730","active":false},{"id":"729","active":false},{"id":"728","active":false},{"id":"799","active":false},{"id":"727","active":false},{"id":"726","active":false},{"id":"725","active":false},{"id":"724","active":false},{"id":"723","active":false},{"id":"722","active":false},{"id":"721","active":false},{"id":"720","active":false},{"id":"798","active":false},{"id":"796","active":false},{"id":"719","active":false},{"id":"806","active":false},{"id":"718","active":false},{"id":"717","active":false},{"id":"716","active":false},{"id":"715","active":false},{"id":"714","active":false},{"id":"713","active":false},{"id":"712","active":false},{"id":"711","active":false},{"id":"710","active":false},{"id":"709","active":false},{"id":"708","active":false},{"id":"707","active":false},{"id":"706","active":false},{"id":"705","active":false},{"id":"704","active":false}]})
-});
-</script>
-<!-- End ConveyThis button code. -->
+        
 
-    <!-- jquery 2.2.4 js-->
-    <script src="static/assets/js/jquery-2.2.4.min.js"></script>
-    <!-- popper js-->
-    <script src="static/assets/js/popper.js"></script>
-    <!-- carousel js-->
-    <script src="static/assets/js/owl.carousel.min.js"></script>
-    <!-- wow js-->
-    <script src="static/assets/js/wow.min.js"></script>
-    <!-- bootstrap js-->
-    <script src="static/assets/js/bootstrap.min.js"></script>\
-    <!--skroller js-->
-    <script src="static/assets/js/skrollr.min.js"></script>
-    <!--mobile menu js-->
-    <script src="static/assets/js/jquery.slicknav.min.js"></script>
-    <!--particle s-->
-    <script src="static/assets/js/particles.min.js"></script>
-    <!-- main js-->
-    <script src="static/assets/js/main.js"></script>
-  </body>
+        <!-- jQuery -->
+        
+        <!-- Home and CoinMarket Page Script -->
+        <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="public/assets/website/js/bootstrap.min.js"></script>
+                <script src="public/assets/website/streamer/angular.min.js"></script>
+        <script src="public/assets/website/streamer/jquery.min.js"></script>
+        <script src="public/assets/website/streamer/socket.io.js"></script>
+        <script src="public/assets/website/streamer/ccc-streamer-utilities.js"></script>
+        <script src="public/assets/website/streamer/streammyjs.js"></script>
+            
+        <script src="public/assets/js/sparkline.min.js"></script>
+        <script src=""></script>
+        <script src="public/assets/website/js/bootsnav.min.js"></script>
+        <script src="public/assets/website/js/owl.carousel.min.js"></script>
+        <script src="public/assets/website/js/wow.min.js"></script>
+        <script src="public/assets/website/js/parallax-background.min.js"></script>
+        <script src="public/assets/website/js/jquery.dataTables.min.js"></script>
+        <script src="public/assets/website/js/dataTables.bootstrap.min.js"></script>
+        <script src="public/assets/website/js/dataTables.responsive.min.js"></script>
+        <script src="public/assets/website/js/responsive.bootstrap.min.js"></script>
+        <script src="public/assets/website/js/jquery.marquee.min.js"></script>
+                <script src="public/assets/website/js/particles.min.js"></script>
+                <script src="public/assets/website/js/jquery.magnific-popup.min.js"></script>
+        <script src="public/assets/website/js/bootstrap-select.min.js"></script>
+                <script src="public/assets/website/js/app.js"></script>
+                <script src="https://phpcryptomarket.bdtask.com/demo-v4.0/public/assets/plugins/toastr/toastr.min.js"></script>
+        <script src=""></script>
+        <script src="public/assets/website/js/classie.min.js"></script>
+        <script src="public/assets/website/js/custom.js?v=1.4"></script>
+
+        
+        
+        
+            </body>
 </html>
