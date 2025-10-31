@@ -201,6 +201,45 @@ class AdminAuth {
     }
     
     /**
+     * Get admin data by ID (wrapper method for dashboard compatibility)
+     */
+    public function getAdminData($adminId) {
+        try {
+            $sql = "SELECT id, username, email, role, status, created_at, last_login, 
+                           username as first_name, '' as last_name
+                    FROM admin_users WHERE id = :admin_id LIMIT 1";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':admin_id' => $adminId]);
+            $admin = $stmt->fetch();
+            
+            if ($admin) {
+                // Split username into first_name and last_name for display compatibility
+                $nameParts = explode(' ', $admin['username'], 2);
+                $admin['first_name'] = $nameParts[0];
+                $admin['last_name'] = isset($nameParts[1]) ? $nameParts[1] : '';
+                
+                return [
+                    'success' => true,
+                    'data' => $admin
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'Admin not found'
+                ];
+            }
+            
+        } catch (PDOException $e) {
+            logError('Get admin data error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Database error occurred'
+            ];
+        }
+    }
+    
+    /**
      * Check admin permission
      */
     public function hasPermission($requiredRole = 'admin') {

@@ -155,8 +155,13 @@ class UserDashboard {
     /**
      * Get crypto holdings
      */
-    public function getCryptoHoldings() {
+    public function getCryptoHoldings($userId = null) {
         try {
+            if ($userId) {
+                $this->userId = $userId;
+            }
+            
+            // Get detailed holdings for dashboard display
             $sql = "SELECT h.crypto_symbol, h.amount, r.name, r.buy_rate, r.sell_rate
                     FROM user_crypto_holdings h
                     LEFT JOIN cryptocurrency_rates r ON h.crypto_symbol = r.symbol
@@ -166,13 +171,32 @@ class UserDashboard {
             $stmt = $this->db->prepare($sql);
             $stmt->execute([':user_id' => $this->userId]);
             
-            $holdings = $stmt->fetchAll();
+            $detailedHoldings = $stmt->fetchAll();
             
-            // Format holdings
-            foreach ($holdings as &$holding) {
+            // Format detailed holdings
+            foreach ($detailedHoldings as &$holding) {
                 $holding['amount_formatted'] = formatCrypto($holding['amount'], $holding['crypto_symbol']);
                 $holding['value_usd'] = $holding['amount'] * $holding['sell_rate'];
                 $holding['value_formatted'] = formatCurrency($holding['value_usd']);
+            }
+            
+            // Also return simple array for backward compatibility
+            $holdings = [];
+            $sql = "SELECT crypto_symbol, amount FROM user_crypto_holdings WHERE user_id = :user_id";
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':user_id' => $this->userId]);
+            $results = $stmt->fetchAll();
+            
+            foreach ($results as $result) {
+                $holdings[$result['crypto_symbol']] = $result['amount'];
+            }
+            
+            // Ensure all major cryptos are represented
+            $majors = ['BTC', 'ETH', 'USDT', 'LTC'];
+            foreach ($majors as $symbol) {
+                if (!isset($holdings[$symbol])) {
+                    $holdings[$symbol] = 0;
+                }
             }
             
             return $holdings;
@@ -245,7 +269,18 @@ class UserDashboard {
     /**
      * Buy cryptocurrency
      */
-    public function buyCryptocurrency($cryptoSymbol, $amountUSD) {
+    public function buyCryptocurrency($cryptoSymbolOrUserId, $amountUSDOrSymbol, $amountUSD = null) {
+        // Handle both old and new method signatures
+        if ($amountUSD !== null) {
+            // New signature: buyCryptocurrency($userId, $symbol, $amount)
+            $this->userId = $cryptoSymbolOrUserId;
+            $cryptoSymbol = $amountUSDOrSymbol;
+            $amountUSD = $amountUSD;
+        } else {
+            // Old signature: buyCryptocurrency($symbol, $amount)
+            $cryptoSymbol = $cryptoSymbolOrUserId;
+            $amountUSD = $amountUSDOrSymbol;
+        }
         try {
             $this->db->beginTransaction();
             
@@ -337,7 +372,18 @@ class UserDashboard {
     /**
      * Sell cryptocurrency
      */
-    public function sellCryptocurrency($cryptoSymbol, $cryptoAmount) {
+    public function sellCryptocurrency($cryptoSymbolOrUserId, $cryptoAmountOrSymbol, $cryptoAmount = null) {
+        // Handle both old and new method signatures
+        if ($cryptoAmount !== null) {
+            // New signature: sellCryptocurrency($userId, $symbol, $amount)
+            $this->userId = $cryptoSymbolOrUserId;
+            $cryptoSymbol = $cryptoAmountOrSymbol;
+            $cryptoAmount = $cryptoAmount;
+        } else {
+            // Old signature: sellCryptocurrency($symbol, $amount)
+            $cryptoSymbol = $cryptoSymbolOrUserId;
+            $cryptoAmount = $cryptoAmountOrSymbol;
+        }
         try {
             $this->db->beginTransaction();
             
@@ -425,7 +471,22 @@ class UserDashboard {
     /**
      * Submit gift card for exchange
      */
-    public function submitGiftCard($brandCode, $cardValue, $cardCode, $cardImage = null) {
+    public function submitGiftCard($brandCodeOrUserId, $cardValueOrBrand, $cardCodeOrValue, $cardImageOrCode = null, $cardImage = null) {
+        // Handle both old and new method signatures
+        if ($cardImage !== null || (is_string($cardImageOrCode) && !is_numeric($cardImageOrCode))) {
+            // New signature: submitGiftCard($userId, $brand, $value, $code, $image)
+            $this->userId = $brandCodeOrUserId;
+            $brandCode = $cardValueOrBrand;
+            $cardValue = $cardCodeOrValue;
+            $cardCode = $cardImageOrCode;
+            $cardImage = $cardImage;
+        } else {
+            // Old signature: submitGiftCard($brand, $value, $code, $image)
+            $brandCode = $brandCodeOrUserId;
+            $cardValue = $cardValueOrBrand;
+            $cardCode = $cardCodeOrValue;
+            $cardImage = $cardImageOrCode;
+        }
         try {
             $this->db->beginTransaction();
             
@@ -612,6 +673,39 @@ class UserDashboard {
                 'pagination' => ['total' => 0, 'page' => 1, 'limit' => $limit, 'pages' => 0]
             ];
         }
+    }
+    
+    /**
+     * Get dashboard data (wrapper method for compatibility)
+     */
+    public function getDashboardData($userId) {
+        $this->userId = $userId;
+        $stats = $this->getTradingStats();
+        return [
+            'transaction_count' => $stats['completed_trades'] ?? 0,
+            'monthly_volume' => $stats['monthly_volume'] ?? 0
+        ];
+    }
+    
+    /**
+     * Get cryptocurrency rates (alias method)
+     */
+    public function getCryptocurrencyRates() {
+        return $this->getCryptoRates();
+    }
+    
+    /**
+     * Get gift card rates (alias method)
+     */
+    public function getGiftCardRates() {
+        return $this->getGiftCardBrands();
+    }
+    
+    /**
+     * Upload gift card image
+     */
+    public function uploadGiftCardImage($file) {
+        return saveUploadedFile($file, 'gift_cards');
     }
     
     /**

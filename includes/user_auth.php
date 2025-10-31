@@ -246,6 +246,40 @@ class UserAuth {
     }
     
     /**
+     * Get user data by ID (wrapper method for dashboard compatibility)
+     */
+    public function getUserData($userId) {
+        try {
+            $sql = "SELECT id, first_name, last_name, email, phone, country, balance, 
+                           status, email_verified, created_at, last_login 
+                    FROM users WHERE id = :user_id LIMIT 1";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute([':user_id' => $userId]);
+            $user = $stmt->fetch();
+            
+            if ($user) {
+                return [
+                    'success' => true,
+                    'data' => $user
+                ];
+            } else {
+                return [
+                    'success' => false,
+                    'message' => 'User not found'
+                ];
+            }
+            
+        } catch (PDOException $e) {
+            error_log("Get user data error: " . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Database error occurred'
+            ];
+        }
+    }
+    
+    /**
      * Change password
      */
     public function changePassword($userId, $currentPassword, $newPassword) {

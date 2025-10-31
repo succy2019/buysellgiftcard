@@ -102,6 +102,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = $result['message'];
                 }
                 break;
+                
+            case 'update_settings':
+                $settings = [
+                    'site_name' => $_POST['site_name'] ?? '',
+                    'trading_fee_percentage' => $_POST['trading_fee_percentage'] ?? '',
+                    'min_trade_amount' => $_POST['min_trade_amount'] ?? '',
+                    'max_trade_amount' => $_POST['max_trade_amount'] ?? '',
+                    'gift_card_processing_time' => $_POST['gift_card_processing_time'] ?? '',
+                    'maintenance_mode' => $_POST['maintenance_mode'] ?? '0'
+                ];
+                
+                $result = $dashboard->updateSystemSettings($settings);
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+                
+            case 'generate_report':
+                $reportType = $_POST['report_type'] ?? '';
+                $startDate = $_POST['start_date'] ?? '';
+                $endDate = $_POST['end_date'] ?? '';
+                
+                $result = $dashboard->generateReport($reportType, $startDate, $endDate);
+                if ($result['success']) {
+                    $success = 'Report generated successfully!';
+                    // You could add CSV download functionality here
+                } else {
+                    $error = $result['message'];
+                }
+                break;
         }
     }
 }
@@ -677,15 +709,97 @@ switch ($currentSection) {
                         </div>
                     </div>
 
-                    <!-- Other sections would be implemented similarly -->
+                    <!-- Transaction Management Section -->
                     <div id="admin-transactions-section" class="admin-section" style="display: <?php echo $currentSection === 'transactions' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Transaction Management</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Monitor and manage all platform transactions.</p>
                         </div>
+                        
+                        <!-- Transaction Filters -->
                         <div class="dashboard-card">
-                            <h3 style="color: #fff; margin-bottom: 20px;">Recent Transactions</h3>
-                            <p style="color: #cbe5ff;">Full transaction management interface coming soon...</p>
+                            <form method="GET" class="row">
+                                <input type="hidden" name="section" value="transactions">
+                                <div class="col-md-3">
+                                    <select name="type" class="form-control">
+                                        <option value="">All Types</option>
+                                        <option value="buy_crypto" <?php echo ($_GET['type'] ?? '') === 'buy_crypto' ? 'selected' : ''; ?>>Buy Crypto</option>
+                                        <option value="sell_crypto" <?php echo ($_GET['type'] ?? '') === 'sell_crypto' ? 'selected' : ''; ?>>Sell Crypto</option>
+                                        <option value="gift_card_exchange" <?php echo ($_GET['type'] ?? '') === 'gift_card_exchange' ? 'selected' : ''; ?>>Gift Card</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="status" class="form-control">
+                                        <option value="">All Status</option>
+                                        <option value="pending" <?php echo ($_GET['status'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
+                                        <option value="processing" <?php echo ($_GET['status'] ?? '') === 'processing' ? 'selected' : ''; ?>>Processing</option>
+                                        <option value="completed" <?php echo ($_GET['status'] ?? '') === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                                        <option value="failed" <?php echo ($_GET['status'] ?? '') === 'failed' ? 'selected' : ''; ?>>Failed</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="gradient-btn" style="width: 100%;">Filter</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">All Transactions</h3>
+                            <div class="admin-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>User</th>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Fee</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($pageData['transactions'])): ?>
+                                            <?php foreach ($pageData['transactions'] as $transaction): ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($transaction['transaction_id']); ?></td>
+                                                    <td><?php echo htmlspecialchars($transaction['user_name']); ?></td>
+                                                    <td><?php echo htmlspecialchars($transaction['type_formatted']); ?></td>
+                                                    <td><?php echo $transaction['amount_formatted']; ?></td>
+                                                    <td><?php echo $transaction['fee_formatted']; ?></td>
+                                                    <td><span class="status-<?php echo $transaction['status']; ?>"><?php echo ucfirst($transaction['status']); ?></span></td>
+                                                    <td><?php echo $transaction['date_formatted']; ?></td>
+                                                    <td>
+                                                        <a href="#" class="action-btn btn-view">View</a>
+                                                        <?php if ($transaction['status'] === 'pending'): ?>
+                                                            <a href="#" class="action-btn btn-approve">Approve</a>
+                                                            <a href="#" class="action-btn btn-reject">Cancel</a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr>
+                                                <td colspan="8" style="text-align: center; color: #cbe5ff;">No transactions found</td>
+                                            </tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            
+                            <!-- Pagination -->
+                            <?php if (!empty($pageData['pagination']) && $pageData['pagination']['pages'] > 1): ?>
+                                <nav>
+                                    <ul class="pagination">
+                                        <?php for ($i = 1; $i <= $pageData['pagination']['pages']; $i++): ?>
+                                            <li class="page-item <?php echo $i === $pageData['pagination']['page'] ? 'active' : ''; ?>">
+                                                <a class="page-link" href="?section=transactions&page=<?php echo $i; ?>&type=<?php echo urlencode($_GET['type'] ?? ''); ?>&status=<?php echo urlencode($_GET['status'] ?? ''); ?>"><?php echo $i; ?></a>
+                                            </li>
+                                        <?php endfor; ?>
+                                    </ul>
+                                </nav>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -753,8 +867,97 @@ switch ($currentSection) {
                             <h1 style="color: #fff; margin: 0;">Exchange Rates Management</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Update cryptocurrency and gift card exchange rates.</p>
                         </div>
+                        
+                        <!-- Cryptocurrency Rates -->
                         <div class="dashboard-card">
-                            <h3 style="color: #fff; margin-bottom: 20px;">Rate management interface coming soon...</h3>
+                            <h3 style="color: #fff; margin-bottom: 20px;">Cryptocurrency Rates</h3>
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_crypto_rates">
+                                <div class="admin-table">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Currency</th>
+                                                <th>Buy Rate ($)</th>
+                                                <th>Sell Rate ($)</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            // Get current crypto rates
+                                            $cryptoRates = $dashboard->getCryptocurrencyRates();
+                                            foreach ($cryptoRates as $rate):
+                                            ?>
+                                                <tr>
+                                                    <td><?php echo $rate['name']; ?> (<?php echo strtoupper($rate['symbol']); ?>)</td>
+                                                    <td>
+                                                        <input type="number" name="buy_rate_<?php echo $rate['symbol']; ?>" 
+                                                               class="form-control" value="<?php echo $rate['buy_rate']; ?>" 
+                                                               step="0.00000001" style="width: 150px;">
+                                                    </td>
+                                                    <td>
+                                                        <input type="number" name="sell_rate_<?php echo $rate['symbol']; ?>" 
+                                                               class="form-control" value="<?php echo $rate['sell_rate']; ?>" 
+                                                               step="0.00000001" style="width: 150px;">
+                                                    </td>
+                                                    <td>
+                                                        <span class="status-<?php echo $rate['is_active'] ? 'completed' : 'pending'; ?>">
+                                                            <?php echo $rate['is_active'] ? 'Active' : 'Inactive'; ?>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button type="submit" class="gradient-btn">Update Crypto Rates</button>
+                            </form>
+                        </div>
+
+                        <!-- Gift Card Rates -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Gift Card Rates</h3>
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_giftcard_rates">
+                                <div class="admin-table">
+                                    <table class="table">
+                                        <thead>
+                                            <tr>
+                                                <th>Brand</th>
+                                                <th>Exchange Rate (%)</th>
+                                                <th>Min Amount</th>
+                                                <th>Max Amount</th>
+                                                <th>Status</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <?php
+                                            // Get current gift card rates
+                                            $giftCardRates = $dashboard->getGiftCardRates();
+                                            foreach ($giftCardRates as $brand):
+                                            ?>
+                                                <tr>
+                                                    <td><?php echo htmlspecialchars($brand['brand_name']); ?></td>
+                                                    <td>
+                                                        <input type="number" name="rate_<?php echo $brand['brand_code']; ?>" 
+                                                               class="form-control" value="<?php echo $brand['exchange_rate']; ?>" 
+                                                               step="0.01" min="0" max="100" style="width: 100px;">
+                                                    </td>
+                                                    <td>$<?php echo number_format($brand['min_amount'], 0); ?></td>
+                                                    <td>$<?php echo number_format($brand['max_amount'], 0); ?></td>
+                                                    <td>
+                                                        <span class="status-<?php echo $brand['is_active'] ? 'completed' : 'pending'; ?>">
+                                                            <?php echo $brand['is_active'] ? 'Active' : 'Inactive'; ?>
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <button type="submit" class="gradient-btn">Update Gift Card Rates</button>
+                            </form>
                         </div>
                     </div>
 
@@ -763,8 +966,77 @@ switch ($currentSection) {
                             <h1 style="color: #fff; margin: 0;">Reports & Analytics</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Generate comprehensive platform reports.</p>
                         </div>
+                        
+                        <!-- Report Generation -->
                         <div class="dashboard-card">
-                            <h3 style="color: #fff; margin-bottom: 20px;">Reporting interface coming soon...</h3>
+                            <h3 style="color: #fff; margin-bottom: 20px;">Generate Reports</h3>
+                            <form method="POST">
+                                <input type="hidden" name="action" value="generate_report">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <select name="report_type" class="form-control" required>
+                                            <option value="">Select Report Type</option>
+                                            <option value="revenue">Revenue Report</option>
+                                            <option value="users">User Activity Report</option>
+                                            <option value="transactions">Transaction Summary</option>
+                                            <option value="gift_cards">Gift Card Analysis</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="date" name="start_date" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="date" name="end_date" class="form-control" required>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <button type="submit" class="gradient-btn" style="width: 100%;">Generate Report</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Summary Statistics -->
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="dashboard-card">
+                                    <h4 style="color: #fff;">Total Revenue</h4>
+                                    <div class="stat-value"><?php echo isset($stats['revenue']) ? $stats['revenue']['total_formatted'] : '$0'; ?></div>
+                                    <small style="color: #cbe5ff;">All time</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="dashboard-card">
+                                    <h4 style="color: #fff;">Total Users</h4>
+                                    <div class="stat-value"><?php echo $stats['users']['total_users'] ?? 0; ?></div>
+                                    <small style="color: #cbe5ff;">Registered</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="dashboard-card">
+                                    <h4 style="color: #fff;">Total Transactions</h4>
+                                    <div class="stat-value"><?php echo $stats['transactions']['total_transactions'] ?? 0; ?></div>
+                                    <small style="color: #cbe5ff;">All time</small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="dashboard-card">
+                                    <h4 style="color: #fff;">Gift Cards Processed</h4>
+                                    <div class="stat-value"><?php echo $stats['gift_cards']['approved_submissions'] ?? 0; ?></div>
+                                    <small style="color: #cbe5ff;">Approved</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity Chart Placeholder -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Platform Activity (Last 30 Days)</h3>
+                            <div style="height: 300px; display: flex; align-items: center; justify-content: center; color: #cbe5ff;">
+                                <div style="text-align: center;">
+                                    <i class="fa fa-bar-chart" style="font-size: 48px; margin-bottom: 20px;"></i>
+                                    <p>Advanced charts and analytics will be displayed here</p>
+                                    <p><small>Integrate with Chart.js or similar library for detailed analytics</small></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -773,8 +1045,102 @@ switch ($currentSection) {
                             <h1 style="color: #fff; margin: 0;">System Settings</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Configure platform settings and preferences.</p>
                         </div>
+                        
+                        <!-- General Settings -->
                         <div class="dashboard-card">
-                            <h3 style="color: #fff; margin-bottom: 20px;">Settings interface coming soon...</h3>
+                            <h3 style="color: #fff; margin-bottom: 20px;">General Settings</h3>
+                            <form method="POST">
+                                <input type="hidden" name="action" value="update_settings">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Site Name</label>
+                                            <input type="text" name="site_name" class="form-control" 
+                                                   value="<?php echo htmlspecialchars(getSystemSetting('site_name', 'FEX Trading Platform')); ?>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Trading Fee (%)</label>
+                                            <input type="number" name="trading_fee_percentage" class="form-control" 
+                                                   value="<?php echo getSystemSetting('trading_fee_percentage', '0.5'); ?>" 
+                                                   step="0.01" min="0" max="10">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Minimum Trade Amount ($)</label>
+                                            <input type="number" name="min_trade_amount" class="form-control" 
+                                                   value="<?php echo getSystemSetting('min_trade_amount', '10.00'); ?>" 
+                                                   step="0.01" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Maximum Trade Amount ($)</label>
+                                            <input type="number" name="max_trade_amount" class="form-control" 
+                                                   value="<?php echo getSystemSetting('max_trade_amount', '50000.00'); ?>" 
+                                                   step="0.01" min="100">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Gift Card Processing Time (hours)</label>
+                                            <input type="number" name="gift_card_processing_time" class="form-control" 
+                                                   value="<?php echo getSystemSetting('gift_card_processing_time', '24'); ?>" 
+                                                   min="1" max="168">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Maintenance Mode</label>
+                                            <select name="maintenance_mode" class="form-control">
+                                                <option value="0" <?php echo getSystemSetting('maintenance_mode', '0') == '0' ? 'selected' : ''; ?>>Disabled</option>
+                                                <option value="1" <?php echo getSystemSetting('maintenance_mode', '0') == '1' ? 'selected' : ''; ?>>Enabled</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="gradient-btn">Update Settings</button>
+                            </form>
+                        </div>
+
+                        <!-- System Information -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">System Information</h3>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p style="color: #cbe5ff;"><strong>PHP Version:</strong> <?php echo PHP_VERSION; ?></p>
+                                    <p style="color: #cbe5ff;"><strong>MySQL Version:</strong> 
+                                        <?php 
+                                        try {
+                                            $version = $this->db->query('SELECT VERSION()')->fetchColumn();
+                                            echo $version;
+                                        } catch (Exception $e) {
+                                            echo 'Unable to fetch';
+                                        }
+                                        ?>
+                                    </p>
+                                    <p style="color: #cbe5ff;"><strong>Server Time:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p style="color: #cbe5ff;"><strong>Disk Space:</strong> 
+                                        <?php 
+                                        $bytes = disk_free_space(".");
+                                        $si_prefix = array( 'B', 'KB', 'MB', 'GB', 'TB', 'EB', 'ZB', 'YB' );
+                                        $base = 1024;
+                                        $class = min((int)log($bytes , $base) , count($si_prefix) - 1);
+                                        echo sprintf('%1.2f' , $bytes / pow($base,$class)) . ' ' . $si_prefix[$class] . ' free';
+                                        ?>
+                                    </p>
+                                    <p style="color: #cbe5ff;"><strong>Memory Limit:</strong> <?php echo ini_get('memory_limit'); ?></p>
+                                    <p style="color: #cbe5ff;"><strong>Upload Max Size:</strong> <?php echo ini_get('upload_max_filesize'); ?></p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

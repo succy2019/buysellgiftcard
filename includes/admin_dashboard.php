@@ -707,6 +707,51 @@ class AdminDashboard {
     }
     
     /**
+     * Update system settings
+     */
+    public function updateSystemSettings($settings) {
+        try {
+            $this->db->beginTransaction();
+            
+            foreach ($settings as $key => $value) {
+                if (empty($key) || $value === '') {
+                    continue;
+                }
+                
+                $sql = "INSERT INTO system_settings (setting_key, setting_value, updated_by) 
+                        VALUES (:key, :value, :admin_id) 
+                        ON DUPLICATE KEY UPDATE 
+                        setting_value = :value, updated_by = :admin_id, updated_at = NOW()";
+                
+                $stmt = $this->db->prepare($sql);
+                $stmt->execute([
+                    ':key' => $key,
+                    ':value' => $value,
+                    ':admin_id' => $this->adminId
+                ]);
+            }
+            
+            $this->db->commit();
+            
+            // Log admin activity
+            $this->logAdminActivity('system_settings_update', 'Updated system settings');
+            
+            return [
+                'success' => true,
+                'message' => 'System settings updated successfully'
+            ];
+            
+        } catch (Exception $e) {
+            $this->db->rollBack();
+            logError('Update system settings error: ' . $e->getMessage());
+            return [
+                'success' => false,
+                'message' => 'Failed to update system settings'
+            ];
+        }
+    }
+    
+    /**
      * Generate platform reports
      */
     public function generateReport($type, $startDate, $endDate) {
@@ -741,6 +786,46 @@ class AdminDashboard {
                 'success' => false,
                 'message' => 'Failed to generate report'
             ];
+        }
+    }
+    
+    /**
+     * Get cryptocurrency rates
+     */
+    public function getCryptocurrencyRates() {
+        try {
+            $sql = "SELECT symbol, name, buy_rate, sell_rate, is_active, updated_at 
+                    FROM cryptocurrency_rates 
+                    ORDER BY name";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            
+            return $stmt->fetchAll();
+            
+        } catch (PDOException $e) {
+            logError('Get cryptocurrency rates error: ' . $e->getMessage());
+            return [];
+        }
+    }
+    
+    /**
+     * Get gift card rates
+     */
+    public function getGiftCardRates() {
+        try {
+            $sql = "SELECT brand_name, brand_code, exchange_rate, min_amount, max_amount, is_active, updated_at 
+                    FROM gift_card_brands 
+                    ORDER BY brand_name";
+            
+            $stmt = $this->db->prepare($sql);
+            $stmt->execute();
+            
+            return $stmt->fetchAll();
+            
+        } catch (PDOException $e) {
+            logError('Get gift card rates error: ' . $e->getMessage());
+            return [];
         }
     }
     
