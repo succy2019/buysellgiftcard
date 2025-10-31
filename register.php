@@ -23,16 +23,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $terms = isset($_POST['terms']);
     
     // Validation
-    if (empty($firstName) || empty($lastName) || empty($email) || empty($phone) || 
-        empty($password) || empty($confirmPassword) || empty($country)) {
-        $error = 'Please fill in all fields';
-    } elseif (!$terms) {
-        $error = 'Please accept the Terms of Service and Privacy Policy';
-    } elseif ($password !== $confirmPassword) {
-        $error = 'Passwords do not match';
+    $errors = [];
+    
+    if (empty($firstName)) $errors[] = 'First name is required';
+    if (empty($lastName)) $errors[] = 'Last name is required';
+    if (empty($email)) $errors[] = 'Email is required';
+    if (empty($phone)) $errors[] = 'Phone is required';
+    if (empty($password)) $errors[] = 'Password is required';
+    if (empty($confirmPassword)) $errors[] = 'Password confirmation is required';
+    if (empty($country)) $errors[] = 'Country is required';
+    
+    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        $errors[] = 'Invalid email format';
+    }
+    
+    if (!empty($password) && strlen($password) < 8) {
+        $errors[] = 'Password must be at least 8 characters long';
+    }
+    
+    if (!empty($password) && !empty($confirmPassword) && $password !== $confirmPassword) {
+        $errors[] = 'Passwords do not match';
+    }
+    
+    if (!$terms) {
+        $errors[] = 'Please accept the Terms of Service and Privacy Policy';
+    }
+    
+    if (!empty($errors)) {
+        $error = implode(', ', $errors);
     } else {
         $auth = new UserAuth();
-        $result = $auth->register($firstName, $lastName, $email, $phone, $password, $country);
+        $userData = [
+            'first_name' => $firstName,
+            'last_name' => $lastName,
+            'email' => $email,
+            'phone' => $phone,
+            'password' => $password,
+            'confirm_password' => $confirmPassword,
+            'country' => $country
+        ];
+        
+        $result = $auth->register($userData);
         
         if ($result['success']) {
             $success = 'Account created successfully! Please check your email to verify your account.';
@@ -110,6 +141,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #fff;
         }
         .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        .form-control select {
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+        }
+        .form-control option {
+            background: #062489;
+            color: #fff;
+        }
+        .form-control option:disabled {
             color: rgba(255, 255, 255, 0.7);
         }
         .register-header {
@@ -323,25 +365,83 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script>
         // Form validation
         document.getElementById('registerForm').addEventListener('submit', function(e) {
+            const firstName = document.querySelector('input[name="first_name"]').value.trim();
+            const lastName = document.querySelector('input[name="last_name"]').value.trim();
+            const email = document.querySelector('input[name="email"]').value.trim();
+            const phone = document.querySelector('input[name="phone"]').value.trim();
             const password = document.querySelector('input[name="password"]').value;
             const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
+            const country = document.querySelector('select[name="country"]').value;
             const terms = document.querySelector('input[name="terms"]').checked;
+            
+            // Check all required fields
+            if (!firstName) {
+                e.preventDefault();
+                alert('First name is required');
+                document.querySelector('input[name="first_name"]').focus();
+                return false;
+            }
+            
+            if (!lastName) {
+                e.preventDefault();
+                alert('Last name is required');
+                document.querySelector('input[name="last_name"]').focus();
+                return false;
+            }
+            
+            if (!email) {
+                e.preventDefault();
+                alert('Email is required');
+                document.querySelector('input[name="email"]').focus();
+                return false;
+            }
+            
+            if (!phone) {
+                e.preventDefault();
+                alert('Phone number is required');
+                document.querySelector('input[name="phone"]').focus();
+                return false;
+            }
+            
+            if (!password) {
+                e.preventDefault();
+                alert('Password is required');
+                document.querySelector('input[name="password"]').focus();
+                return false;
+            }
+            
+            if (!confirmPassword) {
+                e.preventDefault();
+                alert('Please confirm your password');
+                document.querySelector('input[name="confirm_password"]').focus();
+                return false;
+            }
+            
+            if (!country) {
+                e.preventDefault();
+                alert('Country is required');
+                document.querySelector('select[name="country"]').focus();
+                return false;
+            }
             
             if (password !== confirmPassword) {
                 e.preventDefault();
                 alert('Passwords do not match');
+                document.querySelector('input[name="confirm_password"]').focus();
                 return false;
             }
             
             if (password.length < 8) {
                 e.preventDefault();
                 alert('Password must be at least 8 characters long');
+                document.querySelector('input[name="password"]').focus();
                 return false;
             }
             
             if (!terms) {
                 e.preventDefault();
                 alert('Please accept the Terms of Service and Privacy Policy');
+                document.querySelector('input[name="terms"]').focus();
                 return false;
             }
         });
@@ -356,6 +456,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             } else {
                 this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             }
+        });
+        
+        // Add visual feedback for empty required fields
+        document.querySelectorAll('input[required], select[required]').forEach(function(field) {
+            field.addEventListener('blur', function() {
+                if (!this.value.trim()) {
+                    this.style.borderColor = '#dc3545';
+                } else {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }
+            });
+            
+            field.addEventListener('input', function() {
+                if (this.value.trim()) {
+                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }
+            });
         });
     </script>
 </body>
