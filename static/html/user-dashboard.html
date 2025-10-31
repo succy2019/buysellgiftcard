@@ -1,0 +1,613 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>User Dashboard - FEX</title>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <!-- carousel CSS -->
+    <link rel="stylesheet" href="static/assets/css/owl.carousel.min.css">
+    <!--header icon CSS -->
+    <link rel="icon" href="static/assets/img/fabicon.png">
+    <!-- animations CSS -->
+    <link rel="stylesheet" href="static/assets/css/animate.min.css">
+    <!-- font-awsome CSS -->
+    <link rel="stylesheet" href="static/assets/css/font-awesome.min.css">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="static/assets/css/bootstrap.min.css">
+    <!-- mobile menu CSS -->
+    <link rel="stylesheet" href="static/assets/css/slicknav.min.css">
+    <!--css animation-->
+    <link rel="stylesheet" href="static/assets/css/animation.css">
+    <!--css animation-->
+    <link rel="stylesheet" href="static/assets/css/material-design-iconic-font.min.css">
+    <!-- style CSS -->
+    <link rel="stylesheet" href="static/assets/css/style.css">
+    <!-- responsive CSS -->
+    <link rel="stylesheet" href="static/assets/css/responsive.css">
+    <style>
+        body {
+            background-color: black !important;
+        }
+        .dashboard-area {
+            min-height: 100vh;
+            background: #062489;
+            padding: 80px 0 50px;
+        }
+        .dashboard-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        .dashboard-header {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            margin-bottom: 30px;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            height: fit-content;
+        }
+        .sidebar-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .sidebar-menu li {
+            margin-bottom: 15px;
+        }
+        .sidebar-menu a {
+            color: #cbe5ff;
+            text-decoration: none;
+            padding: 15px 20px;
+            display: block;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        .sidebar-menu a:hover, .sidebar-menu a.active {
+            background: rgba(254, 153, 139, 0.2);
+            color: #fff;
+        }
+        .sidebar-menu i {
+            margin-right: 10px;
+            width: 20px;
+        }
+        .balance-card {
+            text-align: center;
+            padding: 30px;
+        }
+        .balance-amount {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #fe998b;
+            margin: 15px 0;
+        }
+        .balance-label {
+            color: #cbe5ff;
+            font-size: 1.1rem;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            padding: 25px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #fff;
+            margin-bottom: 5px;
+        }
+        .stat-label {
+            color: #cbe5ff;
+            font-size: 0.9rem;
+        }
+        .transaction-table {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .table {
+            color: #fff;
+            margin: 0;
+        }
+        .table th {
+            background: rgba(254, 153, 139, 0.2);
+            border: none;
+            color: #fff;
+            font-weight: 600;
+        }
+        .table td {
+            border-color: rgba(255, 255, 255, 0.1);
+            background: transparent;
+        }
+        .status-pending {
+            color: #ffc107;
+        }
+        .status-completed {
+            color: #28a745;
+        }
+        .status-failed {
+            color: #dc3545;
+        }
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .quick-action-btn {
+            padding: 15px;
+            text-align: center;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #cbe5ff;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+        .quick-action-btn:hover {
+            background: rgba(254, 153, 139, 0.2);
+            color: #fff;
+            text-decoration: none;
+        }
+        .quick-action-btn i {
+            display: block;
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            color: #fe998b;
+        }
+        .user-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .user-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #fe998b;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 1.5rem;
+            color: #fff;
+        }
+        .logout-btn {
+            color: #dc3545;
+            margin-top: 20px;
+        }
+        .logout-btn:hover {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+    <!--header area start-->
+    <div class="header-area wow fadeInDown header-absolate" id="nav">
+        <div class="container">
+            <div class="row">
+                <div class="col-4 d-block d-lg-none">
+                    <div class="mobile-menu"></div>
+                </div>
+                <div class="col-4 col-lg-2">
+                    <div class="logo-area">
+                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt=""></a>
+                    </div>
+                </div>
+                <div class="col-4 col-lg-8 d-none d-lg-block">
+                    <div class="main-menu text-center">
+                        <nav>
+                            <ul id="slick-nav">
+                                <li><a href="#" class="active">Dashboard</a></li>
+                                <li><a href="#" onclick="showSection('trading')">Trading</a></li>
+                                <li><a href="#" onclick="showSection('wallet')">Wallet</a></li>
+                                <li><a href="#" onclick="showSection('transactions')">Transactions</a></li>
+                                <li><a href="#" onclick="showSection('profile')">Profile</a></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+                <div class="col-4 col-lg-2 text-right">
+                    <a href="login.html" class="logibtn gradient-btn">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--header area end-->
+
+    <!--dashboard area start-->
+    <div class="dashboard-area wow fadeInUp">
+        <div class="container-fluid">
+            <div class="row">
+                <!-- Sidebar -->
+                <div class="col-lg-3">
+                    <div class="sidebar">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fa fa-user"></i>
+                            </div>
+                            <div>
+                                <h5 style="color: #fff; margin: 0;">John Doe</h5>
+                                <small style="color: #cbe5ff;">Premium Member</small>
+                            </div>
+                        </div>
+                        <ul class="sidebar-menu">
+                            <li><a href="#" class="active" onclick="showSection('dashboard')"><i class="fa fa-dashboard"></i>Dashboard</a></li>
+                            <li><a href="#" onclick="showSection('trading')"><i class="fa fa-exchange"></i>Trading</a></li>
+                            <li><a href="#" onclick="showSection('wallet')"><i class="fa fa-wallet"></i>Wallet</a></li>
+                            <li><a href="#" onclick="showSection('transactions')"><i class="fa fa-list"></i>Transactions</a></li>
+                            <li><a href="#" onclick="showSection('giftcards')"><i class="fa fa-gift"></i>Gift Cards</a></li>
+                            <li><a href="#" onclick="showSection('profile')"><i class="fa fa-user"></i>Profile</a></li>
+                            <li><a href="#" onclick="showSection('support')"><i class="fa fa-support"></i>Support</a></li>
+                            <li><a href="login.html" class="logout-btn"><i class="fa fa-sign-out"></i>Logout</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="col-lg-9">
+                    <!-- Dashboard Section -->
+                    <div id="dashboard-section" class="dashboard-section">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Welcome Back, John!</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Here's what's happening with your account today.</p>
+                        </div>
+
+                        <!-- Balance Card -->
+                        <div class="dashboard-card balance-card">
+                            <div class="balance-label">Total Balance</div>
+                            <div class="balance-amount">$12,456.78</div>
+                            <div class="quick-actions">
+                                <a href="#" class="quick-action-btn" onclick="showSection('trading')">
+                                    <i class="fa fa-plus"></i>
+                                    Buy Crypto
+                                </a>
+                                <a href="#" class="quick-action-btn" onclick="showSection('trading')">
+                                    <i class="fa fa-minus"></i>
+                                    Sell Crypto
+                                </a>
+                                <a href="#" class="quick-action-btn" onclick="showSection('giftcards')">
+                                    <i class="fa fa-gift"></i>
+                                    Gift Cards
+                                </a>
+                                <a href="#" class="quick-action-btn" onclick="showSection('wallet')">
+                                    <i class="fa fa-send"></i>
+                                    Transfer
+                                </a>
+                            </div>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <div class="stat-value">15</div>
+                                <div class="stat-label">Completed Trades</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">$8,234</div>
+                                <div class="stat-label">This Month Volume</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">3.2 BTC</div>
+                                <div class="stat-label">Bitcoin Holdings</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value">12.5 ETH</div>
+                                <div class="stat-label">Ethereum Holdings</div>
+                            </div>
+                        </div>
+
+                        <!-- Recent Transactions -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Recent Transactions</h3>
+                            <div class="transaction-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th>Type</th>
+                                            <th>Amount</th>
+                                            <th>Status</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>2025-10-31</td>
+                                            <td>Buy Bitcoin</td>
+                                            <td>$1,250.00</td>
+                                            <td><span class="status-completed">Completed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2025-10-30</td>
+                                            <td>Sell Ethereum</td>
+                                            <td>$850.50</td>
+                                            <td><span class="status-completed">Completed</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2025-10-29</td>
+                                            <td>Amazon Gift Card</td>
+                                            <td>$100.00</td>
+                                            <td><span class="status-pending">Pending</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td>2025-10-28</td>
+                                            <td>Buy USDT</td>
+                                            <td>$500.00</td>
+                                            <td><span class="status-completed">Completed</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Trading Section -->
+                    <div id="trading-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Cryptocurrency Trading</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Buy and sell cryptocurrencies with competitive rates.</p>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="dashboard-card">
+                                    <h3 style="color: #fff; margin-bottom: 20px;">Buy Cryptocurrency</h3>
+                                    <form>
+                                        <div class="form-group">
+                                            <select class="form-control" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                                <option>Select Cryptocurrency</option>
+                                                <option>Bitcoin (BTC)</option>
+                                                <option>Ethereum (ETH)</option>
+                                                <option>Tether (USDT)</option>
+                                                <option>Litecoin (LTC)</option>
+                                                <option>Ripple (XRP)</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="Amount (USD)" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                        </div>
+                                        <button type="submit" class="gradient-btn" style="width: 100%;">Buy Now</button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="dashboard-card">
+                                    <h3 style="color: #fff; margin-bottom: 20px;">Sell Cryptocurrency</h3>
+                                    <form>
+                                        <div class="form-group">
+                                            <select class="form-control" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                                <option>Select Cryptocurrency</option>
+                                                <option>Bitcoin (BTC) - 3.2 BTC</option>
+                                                <option>Ethereum (ETH) - 12.5 ETH</option>
+                                                <option>Tether (USDT) - 1,500 USDT</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="Amount to Sell" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                        </div>
+                                        <button type="submit" class="gradient-btn" style="width: 100%;">Sell Now</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Current Rates -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Current Exchange Rates</h3>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value">$67,845</div>
+                                        <div class="stat-label">Bitcoin (BTC)</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value">$2,456</div>
+                                        <div class="stat-label">Ethereum (ETH)</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value">$1.00</div>
+                                        <div class="stat-label">Tether (USDT)</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Gift Cards Section -->
+                    <div id="giftcards-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Gift Card Exchange</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Exchange your gift cards for cash or cryptocurrency.</p>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Sell Gift Card</h3>
+                            <form>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <select class="form-control" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                                <option>Select Gift Card Brand</option>
+                                                <option>Amazon</option>
+                                                <option>iTunes</option>
+                                                <option>Google Play</option>
+                                                <option>Steam</option>
+                                                <option>Walmart</option>
+                                                <option>Target</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <input type="number" class="form-control" placeholder="Card Value (USD)" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <input type="text" class="form-control" placeholder="Gift Card Code" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                </div>
+                                <div class="form-group">
+                                    <input type="file" class="form-control" accept="image/*" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: #fff;">
+                                    <small style="color: #cbe5ff;">Upload gift card image</small>
+                                </div>
+                                <button type="submit" class="gradient-btn" style="width: 100%;">Submit for Review</button>
+                            </form>
+                        </div>
+
+                        <!-- Gift Card Rates -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Current Gift Card Rates</h3>
+                            <div class="transaction-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Brand</th>
+                                            <th>Rate</th>
+                                            <th>Min Amount</th>
+                                            <th>Max Amount</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td>Amazon</td>
+                                            <td>85%</td>
+                                            <td>$25</td>
+                                            <td>$2,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>iTunes</td>
+                                            <td>82%</td>
+                                            <td>$15</td>
+                                            <td>$1,500</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Google Play</td>
+                                            <td>80%</td>
+                                            <td>$25</td>
+                                            <td>$1,000</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Steam</td>
+                                            <td>78%</td>
+                                            <td>$20</td>
+                                            <td>$500</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Other sections would go here -->
+                    <div id="wallet-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Wallet</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Manage your cryptocurrency holdings and transfers.</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Wallet section coming soon...</h3>
+                        </div>
+                    </div>
+
+                    <div id="transactions-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Transaction History</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">View all your trading activities.</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Transaction history section coming soon...</h3>
+                        </div>
+                    </div>
+
+                    <div id="profile-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Profile Settings</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Update your account information and preferences.</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Profile section coming soon...</h3>
+                        </div>
+                    </div>
+
+                    <div id="support-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Support</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Get help with your account and trading activities.</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Support section coming soon...</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--dashboard area end-->
+
+    <!-- jquery 2.2.4 js-->
+    <script src="static/assets/js/jquery-2.2.4.min.js"></script>
+    <!-- popper js-->
+    <script src="static/assets/js/popper.js"></script>
+    <!-- wow js-->
+    <script src="static/assets/js/wow.min.js"></script>
+    <!-- bootstrap js-->
+    <script src="static/assets/js/bootstrap.min.js"></script>
+    <!--mobile menu js-->
+    <script src="static/assets/js/jquery.slicknav.min.js"></script>
+    <!-- main js-->
+    <script src="static/assets/js/main.js"></script>
+    
+    <script>
+        function showSection(sectionName) {
+            // Hide all sections
+            const sections = document.querySelectorAll('.dashboard-section');
+            sections.forEach(section => {
+                section.style.display = 'none';
+            });
+            
+            // Show selected section
+            document.getElementById(sectionName + '-section').style.display = 'block';
+            
+            // Update active menu item
+            const menuItems = document.querySelectorAll('.sidebar-menu a');
+            menuItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Find and activate the clicked menu item
+            const activeItem = document.querySelector(`.sidebar-menu a[onclick="showSection('${sectionName}')"]`);
+            if (activeItem) {
+                activeItem.classList.add('active');
+            }
+        }
+    </script>
+</body>
+</html>
