@@ -1,16 +1,14 @@
 <?php
-session_start();
 require_once 'includes/user_auth.php';
 require_once 'includes/user_dashboard.php';
 
-// Check if user is logged in
-if (!isset($_SESSION['user_id'])) {
+$auth = new UserAuth();
+$dashboard = new UserDashboard();
+
+if (!$auth->isLoggedIn()) {
     header('Location: login.php');
     exit();
 }
-
-$auth = new UserAuth();
-$dashboard = new UserDashboard();
 
 // Get user data
 $userData = $auth->getUserData($_SESSION['user_id']);
@@ -21,72 +19,122 @@ if (!$userData['success']) {
 
 $user = $userData['data'];
 
-// Get dashboard data
-$dashboardData = $dashboard->getDashboardData($_SESSION['user_id']);
-$recentTransactions = $dashboard->getTransactionHistory($_SESSION['user_id'], 1, 5);
-$cryptoHoldings = $dashboard->getCryptoHoldings($_SESSION['user_id']);
-$currentRates = $dashboard->getCryptocurrencyRates();
-$giftCardRates = $dashboard->getGiftCardRates();
-
-// Handle logout
-if (isset($_GET['logout'])) {
-    $auth->logout();
-    header('Location: login.php');
-    exit();
-}
-
 $error = '';
 $success = '';
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
-        switch ($_POST['action']) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        $error = 'Your session security token expired. Please refresh the page and try again.';
+    } else {
+        $action = $_POST['action'] ?? '';
+
+        if ($action === 'logout') {
+            $auth->logout();
+            header('Location: login.php');
+            exit();
+        }
+
+        switch ($action) {
             case 'buy_crypto':
                 $symbol = $_POST['crypto_symbol'] ?? '';
                 $amount = (float)($_POST['amount'] ?? 0);
                 $result = $dashboard->buyCryptocurrency($_SESSION['user_id'], $symbol, $amount);
                 if ($result['success']) {
                     $success = $result['message'];
-                    // Refresh data
-                    $dashboardData = $dashboard->getDashboardData($_SESSION['user_id']);
-                    $cryptoHoldings = $dashboard->getCryptoHoldings($_SESSION['user_id']);
                 } else {
                     $error = $result['message'];
                 }
                 break;
-                
+
             case 'sell_crypto':
                 $symbol = $_POST['crypto_symbol'] ?? '';
                 $amount = (float)($_POST['amount'] ?? 0);
                 $result = $dashboard->sellCryptocurrency($_SESSION['user_id'], $symbol, $amount);
                 if ($result['success']) {
                     $success = $result['message'];
-                    // Refresh data
-                    $dashboardData = $dashboard->getDashboardData($_SESSION['user_id']);
-                    $cryptoHoldings = $dashboard->getCryptoHoldings($_SESSION['user_id']);
                 } else {
                     $error = $result['message'];
                 }
                 break;
-                
+
             case 'submit_gift_card':
                 $brand = $_POST['gift_card_brand'] ?? '';
                 $value = (float)($_POST['card_value'] ?? 0);
                 $code = $_POST['gift_card_code'] ?? '';
-                
-                // Handle file upload
-                $uploadResult = null;
-                if (isset($_FILES['gift_card_image']) && $_FILES['gift_card_image']['error'] === UPLOAD_ERR_OK) {
-                    $uploadResult = $dashboard->uploadGiftCardImage($_FILES['gift_card_image']);
-                }
-                
-                if ($uploadResult && $uploadResult['success']) {
-                    $result = $dashboard->submitGiftCard($_SESSION['user_id'], $brand, $value, $code, $uploadResult['file_path']);
+
+                $result = $dashboard->submitGiftCard(
+                    $_SESSION['user_id'],
+                    $brand,
+                    $value,
+                    $code,
+                    $_FILES['gift_card_image'] ?? null
+                );
+
+                if ($result['success']) {
+                    $success = $result['message'];
                 } else {
-                    $result = ['success' => false, 'message' => 'Please upload a valid gift card image'];
+                    $error = $result['message'];
                 }
-                
+                break;
+
+            case 'submit_transfer':
+                $result = $dashboard->createTransferRequest(
+                    $_SESSION['user_id'],
+                    [
+                        'direction' => $_POST['direction'] ?? 'deposit',
+                        'crypto_symbol' => $_POST['crypto_symbol'] ?? '',
+                        'company_account_id' => $_POST['company_account_id'] ?? 0,
+                        'crypto_amount' => $_POST['crypto_amount'] ?? 0,
+                        'tx_hash' => $_POST['tx_hash'] ?? '',
+                        'payout_currency' => $_POST['payout_currency'] ?? '',
+                        'payout_account_id' => $_POST['payout_account_id'] ?? 0,
+                        'amount' => $_POST['amount'] ?? 0,
+                        'user_notes' => $_POST['user_notes'] ?? '',
+                    ],
+                    $_FILES['transfer_proof'] ?? null
+                );
+
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'add_payout_account':
+                $result = $dashboard->addPayoutAccount($_SESSION['user_id'], $_POST);
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'delete_payout_account':
+                $result = $dashboard->deletePayoutAccount($_SESSION['user_id'], (int)($_POST['account_id'] ?? 0));
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'set_default_payout_account':
+                $result = $dashboard->setDefaultPayoutAccount($_SESSION['user_id'], (int)($_POST['account_id'] ?? 0));
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'change_password':
+                $result = $auth->changePassword(
+                    $_SESSION['user_id'],
+                    $_POST['current_password'] ?? '',
+                    $_POST['new_password'] ?? ''
+                );
                 if ($result['success']) {
                     $success = $result['message'];
                 } else {
@@ -96,11 +144,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
+
+// Get dashboard data (after any POST so figures are current)
+$userData = $auth->getUserData($_SESSION['user_id']);
+if ($userData['success']) {
+    $user = $userData['data'];
+}
+$dashboardData = $dashboard->getDashboardData($_SESSION['user_id']);
+$recentTransactions = $dashboard->getTransactionHistory(1, 5);
+$cryptoHoldings = $dashboard->getCryptoHoldings($_SESSION['user_id']);
+$currentRates = $dashboard->getCryptocurrencyRates();
+$giftCardRates = $dashboard->getGiftCardRates();
+$walletBalances = $dashboard->getWalletBalances($_SESSION['user_id']);
+$payoutAccounts = $dashboard->getPayoutAccounts($_SESSION['user_id']);
+$verifiedPayoutAccounts = $dashboard->getPayoutAccounts($_SESSION['user_id'], true);
+$companyAccounts = $dashboard->getCompanyAccounts(true);
+$transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
 ?>
 <!doctype html>
 <html lang="en">
 <head>
-    <title>User Dashboard - FEX</title>
+    <title>User Dashboard - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -332,6 +396,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6bcf7f;
         }
     </style>
+    <!-- PWA / install prompt -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#062489">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DFQ Exchange">
+    <link rel="apple-touch-icon" href="static/assets/img/apple-touch-icon.png">
+    <link rel="stylesheet" href="static/assets/css/pwa-install.css">
+    <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
 <body>
     <!--header area start-->
@@ -353,6 +427,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <li><a href="#" class="active">Dashboard</a></li>
                                 <li><a href="#" onclick="showSection('trading')">Trading</a></li>
                                 <li><a href="#" onclick="showSection('wallet')">Wallet</a></li>
+                                <li><a href="#" onclick="showSection('transfers')">Transfers</a></li>
                                 <li><a href="#" onclick="showSection('transactions')">Transactions</a></li>
                                 <li><a href="#" onclick="showSection('profile')">Profile</a></li>
                             </ul>
@@ -360,7 +435,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     </div>
                 </div>
                 <div class="col-4 col-lg-2 text-right">
-                    <a href="?logout=1" class="logibtn gradient-btn">Logout</a>
+                    <form method="POST" style="display:inline;">
+                        <?php echo csrfField(); ?>
+                        <input type="hidden" name="action" value="logout">
+                        <button type="submit" class="logibtn gradient-btn" style="border:0;">Logout</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -387,11 +466,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <li><a href="#" class="active" onclick="showSection('dashboard')"><i class="fa fa-dashboard"></i>Dashboard</a></li>
                             <li><a href="#" onclick="showSection('trading')"><i class="fa fa-exchange"></i>Trading</a></li>
                             <li><a href="#" onclick="showSection('wallet')"><i class="fa fa-wallet"></i>Wallet</a></li>
+                            <li><a href="#" onclick="showSection('transfers')"><i class="fa fa-send"></i>Transfers</a></li>
                             <li><a href="#" onclick="showSection('transactions')"><i class="fa fa-list"></i>Transactions</a></li>
                             <li><a href="#" onclick="showSection('giftcards')"><i class="fa fa-gift"></i>Gift Cards</a></li>
                             <li><a href="#" onclick="showSection('profile')"><i class="fa fa-user"></i>Profile</a></li>
                             <li><a href="#" onclick="showSection('support')"><i class="fa fa-support"></i>Support</a></li>
-                            <li><a href="?logout=1" class="logout-btn"><i class="fa fa-sign-out"></i>Logout</a></li>
+                            <li>
+                                <form method="POST" style="margin:0;">
+                                    <?php echo csrfField(); ?>
+                                    <input type="hidden" name="action" value="logout">
+                                    <button type="submit" class="logout-btn" style="background:none;border-top:0;border-left:0;border-right:0;width:100%;text-align:left;padding:15px 20px;cursor:pointer;">
+                                        <i class="fa fa-sign-out"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -417,22 +505,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="dashboard-card balance-card">
                             <div class="balance-label">Total Balance</div>
                             <div class="balance-amount">$<?php echo number_format($user['balance'], 2); ?></div>
+                            <div class="row" style="margin-top:20px;">
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo formatNaira($walletBalances['NGN']); ?></div>
+                                        <div class="stat-label">NGN Wallet</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo number_format($walletBalances['USDT'], 2); ?> USDT</div>
+                                        <div class="stat-label">USDT Wallet</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="stat-card">
+                                        <div class="stat-value"><?php echo number_format($walletBalances['USD'], 2); ?> USD</div>
+                                        <div class="stat-label">Trading Balance</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="quick-actions">
-                                <a href="#" class="quick-action-btn" onclick="showSection('trading')">
-                                    <i class="fa fa-plus"></i>
-                                    Buy Crypto
+                                <a href="#" class="quick-action-btn" onclick="showSection('transfers')">
+                                    <i class="fa fa-download"></i>
+                                    Deposit Crypto
+                                </a>
+                                <a href="#" class="quick-action-btn" onclick="showSection('transfers')">
+                                    <i class="fa fa-send"></i>
+                                    Withdraw
                                 </a>
                                 <a href="#" class="quick-action-btn" onclick="showSection('trading')">
-                                    <i class="fa fa-minus"></i>
-                                    Sell Crypto
+                                    <i class="fa fa-exchange"></i>
+                                    Trade
                                 </a>
                                 <a href="#" class="quick-action-btn" onclick="showSection('giftcards')">
                                     <i class="fa fa-gift"></i>
                                     Gift Cards
-                                </a>
-                                <a href="#" class="quick-action-btn" onclick="showSection('wallet')">
-                                    <i class="fa fa-send"></i>
-                                    Transfer
                                 </a>
                             </div>
                         </div>
@@ -508,6 +616,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <h3 style="color: #fff; margin-bottom: 20px;">Buy Cryptocurrency</h3>
                                     <form method="POST">
                                         <input type="hidden" name="action" value="buy_crypto">
+                                        <?php echo csrfField(); ?>
                                         <div class="form-group">
                                             <select name="crypto_symbol" class="form-control" required>
                                                 <option value="">Select Cryptocurrency</option>
@@ -530,6 +639,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     <h3 style="color: #fff; margin-bottom: 20px;">Sell Cryptocurrency</h3>
                                     <form method="POST">
                                         <input type="hidden" name="action" value="sell_crypto">
+                                        <?php echo csrfField(); ?>
                                         <div class="form-group">
                                             <select name="crypto_symbol" class="form-control" required>
                                                 <option value="">Select Cryptocurrency</option>
@@ -578,6 +688,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <h3 style="color: #fff; margin-bottom: 20px;">Sell Gift Card</h3>
                             <form method="POST" enctype="multipart/form-data">
                                 <input type="hidden" name="action" value="submit_gift_card">
+                                <?php echo csrfField(); ?>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
@@ -640,21 +751,236 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div id="wallet-section" class="dashboard-section" style="display: none;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Wallet</h1>
-                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Manage your cryptocurrency holdings and transfers.</p>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Manage your balances and cryptocurrency holdings.</p>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="dashboard-card">
+                                    <div class="balance-label">NGN Balance</div>
+                                    <div class="stat-value"><?php echo formatNaira($walletBalances['NGN']); ?></div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="dashboard-card">
+                                    <div class="balance-label">USDT Balance</div>
+                                    <div class="stat-value"><?php echo number_format($walletBalances['USDT'], 2); ?> USDT</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="dashboard-card">
+                                    <div class="balance-label">Trading Balance (USD)</div>
+                                    <div class="stat-value">$<?php echo number_format($walletBalances['USD'], 2); ?></div>
+                                </div>
+                            </div>
                         </div>
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Your Holdings</h3>
                             <div class="row">
+                                <?php $hasHoldings = false; ?>
                                 <?php foreach ($cryptoHoldings as $symbol => $amount): ?>
-                                    <?php if ($amount > 0): ?>
+                                    <?php if ($amount > 0): $hasHoldings = true; ?>
                                         <div class="col-md-4">
                                             <div class="stat-card">
-                                                <div class="stat-value"><?php echo number_format($amount, 4); ?></div>
+                                                <div class="stat-value"><?php echo number_format($amount, 8); ?></div>
                                                 <div class="stat-label"><?php echo strtoupper($symbol); ?></div>
                                             </div>
                                         </div>
                                     <?php endif; ?>
                                 <?php endforeach; ?>
+                                <?php if (!$hasHoldings): ?>
+                                    <div class="col-12"><p style="color:#cbe5ff;">You do not hold any cryptocurrency yet.</p></div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div class="dashboard-card" style="text-align:center;">
+                            <a href="#" class="gradient-btn" onclick="showSection('transfers')">Deposit or Withdraw</a>
+                        </div>
+                    </div>
+
+                    <!-- Transfers Section -->
+                    <div id="transfers-section" class="dashboard-section" style="display: none;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Deposits &amp; Withdrawals</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Send crypto to our company wallet or withdraw your balance in NGN or USDT.</p>
+                        </div>
+
+                        <!-- Company receiving accounts -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Company Receiving Accounts</h3>
+                            <?php if (!empty($companyAccounts)): ?>
+                                <div class="transaction-table">
+                                    <table class="table">
+                                        <thead><tr><th>Currency</th><th>Network</th><th>Wallet / Account</th><th>Instructions</th></tr></thead>
+                                        <tbody>
+                                            <?php foreach ($companyAccounts as $account): ?>
+                                                <?php if ($account['method'] !== 'crypto') continue; ?>
+                                                <tr>
+                                                    <td><?php echo h($account['currency']); ?></td>
+                                                    <td><?php echo h($account['network'] ?: '—'); ?></td>
+                                                    <td style="word-break:break-all;"><?php echo h($account['wallet_address']); ?>
+                                                        <?php if ($account['qr_url']): ?>
+                                                            <br><a href="<?php echo h($account['qr_url']); ?>" target="_blank" rel="noopener" style="color:#fe998b;">View QR</a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                    <td><?php echo h($account['instructions'] ?: '—'); ?></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php else: ?>
+                                <p style="color:#cbe5ff;">No receiving accounts are configured yet. Please contact support.</p>
+                            <?php endif; ?>
+                        </div>
+
+                        <div class="row">
+                            <!-- Deposit -->
+                            <div class="col-lg-7">
+                                <div class="dashboard-card">
+                                    <h3 style="color: #fff; margin-bottom: 20px;">Deposit Crypto</h3>
+                                    <form method="POST" enctype="multipart/form-data" id="deposit-form">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="action" value="submit_transfer">
+                                        <input type="hidden" name="direction" value="deposit">
+                                        <input type="hidden" name="crypto_symbol" id="deposit-crypto-symbol" value="">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Send to</label>
+                                            <select name="company_account_id" id="company-account-select" class="form-control" required
+                                                    onchange="document.getElementById('deposit-crypto-symbol').value = this.options[this.selectedIndex].dataset.symbol || '';">
+                                                <option value="">Select receiving wallet</option>
+                                                <?php foreach ($companyAccounts as $account): ?>
+                                                    <?php if ($account['method'] !== 'crypto') continue; ?>
+                                                    <option value="<?php echo (int)$account['id']; ?>" data-symbol="<?php echo h($account['currency']); ?>">
+                                                        <?php echo h($account['display']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label style="color:#cbe5ff;">Amount sent</label>
+                                                    <input type="number" name="crypto_amount" class="form-control" step="0.00000001" min="0" required>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label style="color:#cbe5ff;">Blockchain tx hash</label>
+                                                    <input type="text" name="tx_hash" class="form-control" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Proof of transfer</label>
+                                            <input type="file" name="transfer_proof" class="form-control" accept="image/*" required>
+                                            <small style="color:#cbe5ff;">Screenshot of the successful transfer (JPG, PNG, GIF, WEBP - max 5MB)</small>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label style="color:#cbe5ff;">Pay me in</label>
+                                                    <select name="payout_currency" class="form-control" id="deposit-payout-currency"
+                                                            onchange="filterPayoutAccounts('deposit');">
+                                                        <option value="NGN">Naira (NGN) — bank transfer</option>
+                                                        <option value="USDT">USDT — crypto wallet</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label style="color:#cbe5ff;">Verified payout account</label>
+                                                    <select name="payout_account_id" id="deposit-payout-account" class="form-control" required>
+                                                        <?php foreach ($verifiedPayoutAccounts as $account): ?>
+                                                            <option value="<?php echo (int)$account['id']; ?>" data-method="<?php echo h($account['method']); ?>">
+                                                                <?php echo h($account['display']); ?>
+                                                            </option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Notes (optional)</label>
+                                            <textarea name="user_notes" class="form-control" rows="2"></textarea>
+                                        </div>
+                                        <button type="submit" class="gradient-btn" style="width:100%;">Submit Deposit</button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Withdrawal -->
+                            <div class="col-lg-5">
+                                <div class="dashboard-card">
+                                    <h3 style="color: #fff; margin-bottom: 20px;">Withdraw</h3>
+                                    <form method="POST">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="action" value="submit_transfer">
+                                        <input type="hidden" name="direction" value="withdrawal">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Withdraw from</label>
+                                            <select name="payout_currency" class="form-control" id="withdraw-payout-currency"
+                                                    onchange="filterPayoutAccounts('withdraw');">
+                                                <option value="NGN">NGN balance</option>
+                                                <option value="USDT">USDT balance</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Amount</label>
+                                            <input type="number" name="amount" class="form-control" step="0.01" min="0" required>
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Pay into</label>
+                                            <select name="payout_account_id" id="withdraw-payout-account" class="form-control" required>
+                                                <?php foreach ($verifiedPayoutAccounts as $account): ?>
+                                                    <option value="<?php echo (int)$account['id']; ?>" data-method="<?php echo h($account['method']); ?>">
+                                                        <?php echo h($account['display']); ?>
+                                                    </option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Notes (optional)</label>
+                                            <textarea name="user_notes" class="form-control" rows="2"></textarea>
+                                        </div>
+                                        <button type="submit" class="gradient-btn" style="width:100%;">Request Withdrawal</button>
+                                    </form>
+                                    <p style="color:#cbe5ff;margin-top:15px;font-size:13px;">
+                                        Withdrawals are debited immediately and refunded if rejected. You need a verified payout account — add one under Profile.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Transfer history -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Transfer History</h3>
+                            <div class="transaction-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr><th>Reference</th><th>Type</th><th>Amount</th><th>Payout</th><th>Status</th><th>Date</th><th></th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($transferRequests)): ?>
+                                            <?php foreach ($transferRequests as $request): ?>
+                                                <tr>
+                                                    <td><?php echo h($request['reference']); ?></td>
+                                                    <td><?php echo $request['direction'] === 'deposit' ? 'Deposit' : 'Withdrawal'; ?></td>
+                                                    <td><?php echo $request['crypto_amount_formatted']; ?></td>
+                                                    <td><?php echo $request['payout_amount_formatted']; ?></td>
+                                                    <td><span class="status-<?php echo h($request['status']); ?>"><?php echo h($request['status_label']); ?></span></td>
+                                                    <td><?php echo h($request['date_formatted']); ?></td>
+                                                    <td>
+                                                        <?php if ($request['user_proof_url']): ?>
+                                                            <a href="<?php echo h($request['user_proof_url']); ?>" target="_blank" rel="noopener" style="color:#fe998b;">Proof</a>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="7" style="text-align:center;color:#cbe5ff;">No transfer requests yet</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -679,7 +1005,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                     </thead>
                                     <tbody>
                                         <?php 
-                                        $allTransactions = $dashboard->getTransactionHistory($_SESSION['user_id'], 1, 20);
+                                        $allTransactions = $dashboard->getTransactionHistory(1, 20);
                                         if (!empty($allTransactions['transactions'])): 
                                         ?>
                                             <?php foreach ($allTransactions['transactions'] as $transaction): ?>
@@ -727,6 +1053,161 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Payout accounts -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Payout Accounts</h3>
+                            <p style="color:#cbe5ff;">These are the bank accounts and USDT wallets we pay your withdrawals into. Accounts must be verified by the admin before use.</p>
+                            <?php if (!empty($payoutAccounts)): ?>
+                                <div class="transaction-table">
+                                    <table class="table">
+                                        <thead><tr><th>Account</th><th>Status</th><th>Default</th><th>Actions</th></tr></thead>
+                                        <tbody>
+                                            <?php foreach ($payoutAccounts as $account): ?>
+                                                <tr>
+                                                    <td><?php echo h($account['display']); ?></td>
+                                                    <td>
+                                                        <span class="status-<?php echo $account['status'] === 'verified' ? 'completed' : ($account['status'] === 'rejected' ? 'failed' : 'pending'); ?>">
+                                                            <?php echo h(ucfirst($account['status'])); ?>
+                                                        </span>
+                                                    </td>
+                                                    <td><?php echo $account['is_default'] ? 'Yes' : 'No'; ?></td>
+                                                    <td>
+                                                        <?php if (!$account['is_default']): ?>
+                                                            <form method="POST" style="display:inline;">
+                                                                <?php echo csrfField(); ?>
+                                                                <input type="hidden" name="action" value="set_default_payout_account">
+                                                                <input type="hidden" name="account_id" value="<?php echo (int)$account['id']; ?>">
+                                                                <button type="submit" class="quick-action-btn" style="padding:6px 12px;">Make default</button>
+                                                            </form>
+                                                        <?php endif; ?>
+                                                        <form method="POST" style="display:inline;" onsubmit="return confirm('Remove this payout account?');">
+                                                            <?php echo csrfField(); ?>
+                                                            <input type="hidden" name="action" value="delete_payout_account">
+                                                            <input type="hidden" name="account_id" value="<?php echo (int)$account['id']; ?>">
+                                                            <button type="submit" class="quick-action-btn" style="padding:6px 12px;color:#ff6b7a;">Remove</button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php else: ?>
+                                <p style="color:#cbe5ff;">You have not added any payout accounts yet.</p>
+                            <?php endif; ?>
+
+                            <hr style="border-color:rgba(255,255,255,0.1);">
+                            <h4 style="color:#fff;margin-bottom:15px;">Add Payout Account</h4>
+                            <form method="POST">
+                                <?php echo csrfField(); ?>
+                                <input type="hidden" name="action" value="add_payout_account">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Type</label>
+                                            <select name="method" class="form-control" id="payout-method"
+                                                    onchange="togglePayoutFields();">
+                                                <option value="bank">Bank account (NGN)</option>
+                                                <option value="crypto">USDT wallet</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Label (optional)</label>
+                                            <input type="text" name="label" class="form-control" placeholder="e.g. Main account">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">&nbsp;</label>
+                                            <div>
+                                                <label style="color:#cbe5ff;font-weight:normal;">
+                                                    <input type="checkbox" name="is_default" value="1"> Set as default
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="payout-bank-fields">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label style="color:#cbe5ff;">Bank name</label>
+                                                <input type="text" name="bank_name" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label style="color:#cbe5ff;">Account name</label>
+                                                <input type="text" name="account_name" class="form-control">
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label style="color:#cbe5ff;">Account number</label>
+                                                <input type="text" name="account_number" class="form-control" inputmode="numeric">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="payout-crypto-fields" style="display:none;">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label style="color:#cbe5ff;">USDT network</label>
+                                                <select name="network" class="form-control">
+                                                    <option value="TRC20">TRC20 (Tron)</option>
+                                                    <option value="ERC20">ERC20 (Ethereum)</option>
+                                                    <option value="BEP20">BEP20 (BNB Chain)</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-8">
+                                            <div class="form-group">
+                                                <label style="color:#cbe5ff;">Wallet address</label>
+                                                <input type="text" name="wallet_address" class="form-control">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <button type="submit" class="gradient-btn">Add Account</button>
+                            </form>
+                        </div>
+
+                        <!-- Change password -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Change Password</h3>
+                            <form method="POST">
+                                <?php echo csrfField(); ?>
+                                <input type="hidden" name="action" value="change_password">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Current password</label>
+                                            <input type="password" name="current_password" class="form-control" required autocomplete="current-password">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">New password</label>
+                                            <input type="password" name="new_password" class="form-control" required minlength="8" autocomplete="new-password">
+                                            <small style="color:#cbe5ff;">At least 8 characters with upper case, lower case and a number.</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">&nbsp;</label>
+                                            <button type="submit" class="gradient-btn" style="width:100%;">Update Password</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
                     </div>
 
                     <!-- Support Section -->
@@ -738,7 +1219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Contact Support</h3>
                             <p style="color: #cbe5ff;">For assistance, please contact our support team:</p>
-                            <p style="color: #cbe5ff;"><strong>Email:</strong> support@fex.com</p>
+                            <p style="color: #cbe5ff;"><strong>Email:</strong> support@dfqexchange.com.ng</p>
                             <p style="color: #cbe5ff;"><strong>Live Chat:</strong> Available 24/7</p>
                         </div>
                     </div>
@@ -784,6 +1265,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 activeItem.classList.add('active');
             }
         }
+
+        function togglePayoutFields() {
+            const method = document.getElementById('payout-method').value;
+            document.getElementById('payout-bank-fields').style.display = method === 'bank' ? 'block' : 'none';
+            document.getElementById('payout-crypto-fields').style.display = method === 'crypto' ? 'block' : 'none';
+        }
+
+        function filterPayoutAccounts(prefix) {
+            const currency = document.getElementById(prefix + '-payout-currency').value;
+            const method = currency === 'NGN' ? 'bank' : 'crypto';
+            const select = document.getElementById(prefix + '-payout-account');
+            let firstMatch = null;
+
+            Array.from(select.options).forEach(function(option) {
+                const matches = option.dataset.method === method;
+                option.hidden = !matches;
+                option.disabled = !matches;
+                if (matches && firstMatch === null) {
+                    firstMatch = option;
+                }
+            });
+
+            if (firstMatch) {
+                firstMatch.selected = true;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            filterPayoutAccounts('deposit');
+            filterPayoutAccounts('withdraw');
+            togglePayoutFields();
+        });
 
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {

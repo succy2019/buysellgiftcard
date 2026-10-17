@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once 'includes/user_auth.php';
 
 $error = '';
@@ -15,8 +14,10 @@ if (isset($_SESSION['user_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    
-    if (empty($email) || empty($password)) {
+
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        $error = 'Your session expired. Please refresh the page and try again.';
+    } elseif (empty($email) || empty($password)) {
         $error = 'Please fill in all fields';
     } else {
         $auth = new UserAuth();
@@ -34,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Login - FEX</title>
+    <title>Login - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -151,6 +152,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6bcf7f;
         }
     </style>
+    <!-- PWA / install prompt -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#062489">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DFQ Exchange">
+    <link rel="apple-touch-icon" href="static/assets/img/apple-touch-icon.png">
+    <link rel="stylesheet" href="static/assets/css/pwa-install.css">
+    <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
 <body>
     <!--header area start-->
@@ -194,7 +205,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="login-card">
                         <div class="login-header">
                             <h1>Welcome Back</h1>
-                            <p>Sign in to your FEX trading account</p>
+                            <p>Sign in to your DFQ Exchange trading account</p>
                         </div>
                         
                         <?php if (!empty($error)): ?>
@@ -206,6 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
                         
                         <form method="POST" id="loginForm">
+                            <?php echo csrfField(); ?>
                             <div class="form-group">
                                 <input type="email" name="email" class="form-control" placeholder="Email Address" 
                                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
@@ -214,7 +226,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <input type="password" name="password" class="form-control" placeholder="Password" required>
                             </div>
                             <div class="forgot-password">
-                                <a href="forgot-password.php" class="forgot-link">Forgot Password?</a>
+                                <a href="mailto:support@dfqexchange.com.ng?subject=Password%20reset%20request" class="forgot-link">Forgot Password?</a>
                             </div>
                             <button type="submit" class="gradient-btn login-btn">Sign In</button>
                         </form>
@@ -233,7 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <p style="margin: 0; color: #cbe5ff;">Copyright &copy;<script>document.write(new Date().getFullYear());</script> FEX. All rights reserved</p>
+                    <p style="margin: 0; color: #cbe5ff;">Copyright &copy;<script>document.write(new Date().getFullYear());</script> DFQ Exchange. All rights reserved</p>
                 </div>
             </div>
         </div>

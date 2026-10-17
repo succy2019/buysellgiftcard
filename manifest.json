@@ -1,0 +1,59 @@
+{
+    "name": "DFQ Exchange",
+    "short_name": "DFQ",
+    "description": "Buy and sell cryptocurrencies and gift cards in Nigeria. Trade Bitcoin, Ethereum, USDT and popular gift cards with instant payouts.",
+    "id": "./",
+    "start_url": "./index.html",
+    "scope": "./",
+    "display": "standalone",
+    "display_override": ["standalone", "minimal-ui"],
+    "orientation": "portrait-primary",
+    "background_color": "#062489",
+    "theme_color": "#062489",
+    "lang": "en",
+    "categories": ["finance", "business"],
+    "icons": [
+        {
+            "src": "static/assets/img/app-icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "static/assets/img/app-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any"
+        },
+        {
+            "src": "static/assets/img/app-icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "maskable"
+        }
+    ],
+    "shortcuts": [
+        {
+            "name": "Wallet",
+            "short_name": "Wallet",
+            "url": "./user-dashboard.php",
+            "icons": [
+                {
+                    "src": "static/assets/img/app-icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        },
+        {
+            "name": "Sign In",
+            "short_name": "Sign In",
+            "url": "./login.php",
+            "icons": [
+                {
+                    "src": "static/assets/img/app-icon-192.png",
+                    "sizes": "192x192"
+                }
+            ]
+        }
+    ]
+}

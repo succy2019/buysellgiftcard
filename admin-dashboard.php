@@ -1,16 +1,15 @@
 <?php
-session_start();
 require_once 'includes/admin_auth.php';
 require_once 'includes/admin_dashboard.php';
 
-// Check if admin is logged in
-if (!isset($_SESSION['admin_id'])) {
+$auth = new AdminAuth();
+$dashboard = new AdminDashboard();
+
+// Check if admin is logged in (validates the session server-side)
+if (!$auth->isLoggedIn()) {
     header('Location: admin-login.php');
     exit();
 }
-
-$auth = new AdminAuth();
-$dashboard = new AdminDashboard();
 
 // Get admin data
 $adminData = $auth->getAdminData($_SESSION['admin_id']);
@@ -28,20 +27,20 @@ $recentTransactions = $overviewData['data']['recent_transactions'] ?? [];
 $pendingReviews = $overviewData['data']['pending_reviews'] ?? [];
 $systemStatus = $overviewData['data']['system_status'] ?? [];
 
-// Handle logout
-if (isset($_GET['logout'])) {
-    $auth->logout();
-    header('Location: admin-login.php');
-    exit();
-}
-
 $error = '';
 $success = '';
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (isset($_POST['action'])) {
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? '')) {
+        $error = 'Your session expired. Please refresh the page and try again.';
+    } elseif (isset($_POST['action'])) {
         switch ($_POST['action']) {
+            case 'logout':
+                $auth->logout();
+                header('Location: admin-login.php');
+                exit();
+
             case 'update_user_status':
                 $userId = (int)($_POST['user_id'] ?? 0);
                 $status = $_POST['status'] ?? '';
@@ -52,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = $result['message'];
                 }
                 break;
-                
+
             case 'review_gift_card':
                 $submissionId = (int)($_POST['submission_id'] ?? 0);
                 $action = $_POST['review_action'] ?? '';
@@ -67,7 +66,81 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = $result['message'];
                 }
                 break;
-                
+
+            case 'update_transaction':
+                $result = $dashboard->updateTransactionStatus(
+                    (int)($_POST['transaction_id'] ?? 0),
+                    $_POST['transaction_action'] ?? ''
+                );
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'save_company_account':
+                $companyData = $_POST;
+                $companyData['qr_code'] = $_FILES['qr_code'] ?? null;
+                $result = $dashboard->saveCompanyAccount(
+                    $companyData,
+                    !empty($_POST['account_id']) ? (int)$_POST['account_id'] : null
+                );
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'toggle_company_account':
+                $result = $dashboard->toggleCompanyAccount((int)($_POST['account_id'] ?? 0));
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'review_payout_account':
+                $result = $dashboard->reviewPayoutAccount(
+                    (int)($_POST['account_id'] ?? 0),
+                    $_POST['review_action'] ?? '',
+                    $_POST['rejection_reason'] ?? ''
+                );
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'verify_transfer':
+                $result = $dashboard->verifyTransferRequest(
+                    (int)($_POST['transfer_id'] ?? 0),
+                    $_POST['review_action'] ?? '',
+                    $_POST['admin_notes'] ?? ''
+                );
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
+            case 'process_transfer':
+                $result = $dashboard->processTransferRequest(
+                    (int)($_POST['transfer_id'] ?? 0),
+                    $_POST,
+                    $_FILES['admin_proof'] ?? null
+                );
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
             case 'update_crypto_rates':
                 $rates = [];
                 foreach ($_POST as $key => $value) {
@@ -86,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = $result['message'];
                 }
                 break;
-                
+
             case 'update_giftcard_rates':
                 $rates = [];
                 foreach ($_POST as $key => $value) {
@@ -102,7 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = $result['message'];
                 }
                 break;
-                
+
             case 'update_settings':
                 $settings = [
                     'site_name' => $_POST['site_name'] ?? '',
@@ -110,9 +183,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'min_trade_amount' => $_POST['min_trade_amount'] ?? '',
                     'max_trade_amount' => $_POST['max_trade_amount'] ?? '',
                     'gift_card_processing_time' => $_POST['gift_card_processing_time'] ?? '',
-                    'maintenance_mode' => $_POST['maintenance_mode'] ?? '0'
+                    'maintenance_mode' => $_POST['maintenance_mode'] ?? '0',
+                    'usd_to_ngn_rate' => $_POST['usd_to_ngn_rate'] ?? '',
+                    'transfer_fee_percentage' => $_POST['transfer_fee_percentage'] ?? '',
+                    'min_transfer_usd' => $_POST['min_transfer_usd'] ?? '',
+                    'max_transfer_usd' => $_POST['max_transfer_usd'] ?? ''
                 ];
-                
+
                 $result = $dashboard->updateSystemSettings($settings);
                 if ($result['success']) {
                     $success = $result['message'];
@@ -120,12 +197,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $error = $result['message'];
                 }
                 break;
-                
+
             case 'generate_report':
                 $reportType = $_POST['report_type'] ?? '';
                 $startDate = $_POST['start_date'] ?? '';
                 $endDate = $_POST['end_date'] ?? '';
-                
+
                 $result = $dashboard->generateReport($reportType, $startDate, $endDate);
                 if ($result['success']) {
                     $success = 'Report generated successfully!';
@@ -149,25 +226,57 @@ switch ($currentSection) {
         $status = $_GET['status'] ?? '';
         $pageData = $dashboard->getUsers($page, 20, $search, $status);
         break;
-        
+
     case 'transactions':
         $page = (int)($_GET['page'] ?? 1);
         $type = $_GET['type'] ?? '';
         $status = $_GET['status'] ?? '';
         $pageData = $dashboard->getTransactions($page, 20, $type, $status);
         break;
-        
+
     case 'giftcards':
         $page = (int)($_GET['page'] ?? 1);
         $status = $_GET['status'] ?? '';
         $pageData = $dashboard->getGiftCardSubmissions($page, 20, $status);
+        if (!empty($_GET['view'])) {
+            $pageData['detail'] = $dashboard->getGiftCardSubmissionDetail((int)$_GET['view']);
+        }
+        break;
+
+    case 'transfers':
+        $page = (int)($_GET['page'] ?? 1);
+        $status = $_GET['status'] ?? '';
+        $direction = $_GET['direction'] ?? '';
+        $pageData = $dashboard->getTransferRequests($page, 20, $status, $direction);
+        $pageData['counts'] = $dashboard->getTransferStatusCounts();
+        if (!empty($_GET['view'])) {
+            $pageData['detail'] = $dashboard->getTransferRequest((int)$_GET['view']);
+        }
+        break;
+
+    case 'payouts':
+        $page = (int)($_GET['page'] ?? 1);
+        $status = $_GET['status'] ?? '';
+        $pageData = $dashboard->getPayoutAccounts($page, 20, $status);
+        break;
+
+    case 'company':
+        $pageData['accounts'] = $dashboard->getCompanyAccounts(true);
+        if (!empty($_GET['edit'])) {
+            foreach ($pageData['accounts'] as $account) {
+                if ((int)$account['id'] === (int)$_GET['edit']) {
+                    $pageData['editing'] = $account;
+                    break;
+                }
+            }
+        }
         break;
 }
 ?>
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Admin Dashboard - FEX</title>
+    <title>Admin Dashboard - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -449,13 +558,18 @@ switch ($currentSection) {
                                 <li><a href="#" onclick="showAdminSection('dashboard')">Dashboard</a></li>
                                 <li><a href="#" onclick="showAdminSection('users')">Users</a></li>
                                 <li><a href="#" onclick="showAdminSection('transactions')">Transactions</a></li>
+                                <li><a href="#" onclick="showAdminSection('transfers')">Transfers</a></li>
                                 <li><a href="#" onclick="showAdminSection('giftcards')">Gift Cards</a></li>
                             </ul>
                         </nav>
                     </div>
                 </div>
                 <div class="col-4 col-lg-2 text-right">
-                    <a href="?logout=1" class="logibtn gradient-btn">Logout</a>
+                    <form method="POST" style="display: inline;">
+                        <?php echo csrfField(); ?>
+                        <input type="hidden" name="action" value="logout">
+                        <button type="submit" class="logibtn gradient-btn">Logout</button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -482,11 +596,22 @@ switch ($currentSection) {
                             <li><a href="#" class="<?php echo $currentSection === 'dashboard' ? 'active' : ''; ?>" onclick="showAdminSection('dashboard')"><i class="fa fa-dashboard"></i>Dashboard</a></li>
                             <li><a href="#" class="<?php echo $currentSection === 'users' ? 'active' : ''; ?>" onclick="showAdminSection('users')"><i class="fa fa-users"></i>User Management</a></li>
                             <li><a href="#" class="<?php echo $currentSection === 'transactions' ? 'active' : ''; ?>" onclick="showAdminSection('transactions')"><i class="fa fa-exchange"></i>Transactions</a></li>
+                            <li><a href="#" class="<?php echo $currentSection === 'transfers' ? 'active' : ''; ?>" onclick="showAdminSection('transfers')"><i class="fa fa-paper-plane"></i>Transfers</a></li>
+                            <li><a href="#" class="<?php echo $currentSection === 'payouts' ? 'active' : ''; ?>" onclick="showAdminSection('payouts')"><i class="fa fa-credit-card"></i>Payout Accounts</a></li>
                             <li><a href="#" class="<?php echo $currentSection === 'giftcards' ? 'active' : ''; ?>" onclick="showAdminSection('giftcards')"><i class="fa fa-gift"></i>Gift Cards</a></li>
                             <li><a href="#" class="<?php echo $currentSection === 'rates' ? 'active' : ''; ?>" onclick="showAdminSection('rates')"><i class="fa fa-line-chart"></i>Exchange Rates</a></li>
+                            <li><a href="#" class="<?php echo $currentSection === 'company' ? 'active' : ''; ?>" onclick="showAdminSection('company')"><i class="fa fa-university"></i>Company Accounts</a></li>
                             <li><a href="#" class="<?php echo $currentSection === 'reports' ? 'active' : ''; ?>" onclick="showAdminSection('reports')"><i class="fa fa-bar-chart"></i>Reports</a></li>
                             <li><a href="#" class="<?php echo $currentSection === 'settings' ? 'active' : ''; ?>" onclick="showAdminSection('settings')"><i class="fa fa-cog"></i>Settings</a></li>
-                            <li><a href="?logout=1" class="logout-btn"><i class="fa fa-sign-out"></i>Logout</a></li>
+                            <li>
+                                <form method="POST">
+                                    <?php echo csrfField(); ?>
+                                    <input type="hidden" name="action" value="logout">
+                                    <button type="submit" class="logout-btn" style="background: none; border: 0; width: 100%; text-align: left; cursor: pointer;">
+                                        <i class="fa fa-sign-out"></i>Logout
+                                    </button>
+                                </form>
+                            </li>
                         </ul>
                     </div>
                 </div>
@@ -505,7 +630,7 @@ switch ($currentSection) {
                     <!-- Admin Dashboard Section -->
                     <div id="admin-dashboard-section" class="admin-section" style="display: <?php echo $currentSection === 'dashboard' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
-                            <h1 style="color: #fff; margin: 0;">FEX Admin Dashboard</h1>
+                            <h1 style="color: #fff; margin: 0;">DFQ Exchange Admin Dashboard</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Monitor and manage your cryptocurrency trading platform.</p>
                         </div>
 
@@ -594,12 +719,14 @@ switch ($currentSection) {
                                                 <div style="color: #fe998b; font-size: 0.8rem;"><?php echo htmlspecialchars($review['user_name']); ?></div>
                                                 <div style="margin-top: 8px;">
                                                     <form method="POST" style="display: inline;">
+                                                        <?php echo csrfField(); ?>
                                                         <input type="hidden" name="action" value="review_gift_card">
                                                         <input type="hidden" name="submission_id" value="<?php echo $review['id']; ?>">
                                                         <input type="hidden" name="review_action" value="approve">
                                                         <button type="submit" class="action-btn btn-approve" style="padding: 4px 8px; font-size: 0.7rem;">Approve</button>
                                                     </form>
                                                     <form method="POST" style="display: inline;">
+                                                        <?php echo csrfField(); ?>
                                                         <input type="hidden" name="action" value="review_gift_card">
                                                         <input type="hidden" name="submission_id" value="<?php echo $review['id']; ?>">
                                                         <input type="hidden" name="review_action" value="reject">
@@ -672,6 +799,7 @@ switch ($currentSection) {
                                                     <td><?php echo $user['join_date']; ?></td>
                                                     <td>
                                                         <form method="POST" style="display: inline;">
+                                                            <?php echo csrfField(); ?>
                                                             <input type="hidden" name="action" value="update_user_status">
                                                             <input type="hidden" name="user_id" value="<?php echo $user['id']; ?>">
                                                             <?php if ($user['status'] === 'active'): ?>
@@ -771,10 +899,23 @@ switch ($currentSection) {
                                                     <td><span class="status-<?php echo $transaction['status']; ?>"><?php echo ucfirst($transaction['status']); ?></span></td>
                                                     <td><?php echo $transaction['date_formatted']; ?></td>
                                                     <td>
-                                                        <a href="#" class="action-btn btn-view">View</a>
-                                                        <?php if ($transaction['status'] === 'pending'): ?>
-                                                            <a href="#" class="action-btn btn-approve">Approve</a>
-                                                            <a href="#" class="action-btn btn-reject">Cancel</a>
+                                                        <?php if (in_array($transaction['status'], ['pending', 'processing'], true)): ?>
+                                                            <form method="POST" style="display: inline;">
+                                                                <?php echo csrfField(); ?>
+                                                                <input type="hidden" name="action" value="update_transaction">
+                                                                <input type="hidden" name="transaction_id" value="<?php echo (int)$transaction['id']; ?>">
+                                                                <input type="hidden" name="transaction_action" value="approve">
+                                                                <button type="submit" class="action-btn btn-approve">Approve</button>
+                                                            </form>
+                                                            <form method="POST" style="display: inline;">
+                                                                <?php echo csrfField(); ?>
+                                                                <input type="hidden" name="action" value="update_transaction">
+                                                                <input type="hidden" name="transaction_id" value="<?php echo (int)$transaction['id']; ?>">
+                                                                <input type="hidden" name="transaction_action" value="cancel">
+                                                                <button type="submit" class="action-btn btn-reject">Cancel</button>
+                                                            </form>
+                                                        <?php else: ?>
+                                                            <span style="color: #cbe5ff;">—</span>
                                                         <?php endif; ?>
                                                     </td>
                                                 </tr>
@@ -808,6 +949,54 @@ switch ($currentSection) {
                             <h1 style="color: #fff; margin: 0;">Gift Card Management</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Review and manage gift card exchange requests.</p>
                         </div>
+
+                        <?php if (!empty($pageData['detail'])): $detail = $pageData['detail']; ?>
+                            <div class="dashboard-card">
+                                <h3 style="color: #fff; margin-bottom: 20px;">Submission <?php echo h($detail['submission_id']); ?></h3>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p style="color:#cbe5ff;"><strong>User:</strong> <?php echo h($detail['user_name']); ?> (<?php echo h($detail['user_email']); ?>)</p>
+                                        <p style="color:#cbe5ff;"><strong>Brand:</strong> <?php echo h($detail['brand_name']); ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Card value:</strong> <?php echo $detail['card_value_formatted']; ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Payout:</strong> <?php echo $detail['payout_amount_formatted']; ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Card code:</strong>
+                                            <code style="background:#111;color:#7CFC00;padding:4px 8px;border-radius:4px;word-break:break-all;"><?php echo h($detail['card_code_decrypted'] !== false ? $detail['card_code_decrypted'] : '[unable to decrypt]'); ?></code>
+                                        </p>
+                                        <p style="color:#cbe5ff;"><strong>Status:</strong> <?php echo h(ucfirst($detail['status'])); ?></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <?php if (!empty($detail['card_image_url'])): ?>
+                                            <a href="<?php echo h($detail['card_image_url']); ?>" target="_blank" rel="noopener">
+                                                <img src="<?php echo h($detail['card_image_url']); ?>" alt="Gift card" style="max-width:100%;border-radius:8px;">
+                                            </a>
+                                        <?php else: ?>
+                                            <p style="color:#fe998b;">No image was uploaded.</p>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php if ($detail['status'] === 'pending'): ?>
+                                    <div style="margin-top:20px;">
+                                        <form method="POST" style="display:inline;">
+                                            <?php echo csrfField(); ?>
+                                            <input type="hidden" name="action" value="review_gift_card">
+                                            <input type="hidden" name="submission_id" value="<?php echo (int)$detail['id']; ?>">
+                                            <input type="hidden" name="review_action" value="approve">
+                                            <button type="submit" class="action-btn btn-approve">Approve &amp; credit</button>
+                                        </form>
+                                        <form method="POST" style="display:inline;">
+                                            <?php echo csrfField(); ?>
+                                            <input type="hidden" name="action" value="review_gift_card">
+                                            <input type="hidden" name="submission_id" value="<?php echo (int)$detail['id']; ?>">
+                                            <input type="hidden" name="review_action" value="reject">
+                                            <input type="text" name="rejection_reason" class="form-control" placeholder="Reason" style="display:inline-block;width:240px;">
+                                            <button type="submit" class="action-btn btn-reject">Reject</button>
+                                        </form>
+                                    </div>
+                                <?php endif; ?>
+                                <p style="margin-top:15px;"><a href="?section=giftcards" style="color:#fe998b;">← Back to submissions</a></p>
+                            </div>
+                        <?php endif; ?>
+
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Pending Gift Card Reviews</h3>
                             <div class="admin-table">
@@ -827,20 +1016,22 @@ switch ($currentSection) {
                                         <?php if (!empty($pendingReviews)): ?>
                                             <?php foreach ($pendingReviews as $review): ?>
                                                 <tr>
-                                                    <td>#GC<?php echo $review['id']; ?></td>
-                                                    <td><?php echo htmlspecialchars($review['user_name']); ?></td>
-                                                    <td><?php echo htmlspecialchars($review['brand_name']); ?></td>
+                                                    <td><a href="?section=giftcards&view=<?php echo (int)$review['id']; ?>" style="color:#fe998b;">#GC<?php echo (int)$review['id']; ?></a></td>
+                                                    <td><?php echo h($review['user_name']); ?></td>
+                                                    <td><?php echo h($review['brand_name']); ?></td>
                                                     <td><?php echo $review['card_value_formatted']; ?></td>
                                                     <td><?php echo $review['payout_amount_formatted']; ?></td>
                                                     <td><?php echo $review['time_ago']; ?></td>
                                                     <td>
                                                         <form method="POST" style="display: inline;">
+                                                            <?php echo csrfField(); ?>
                                                             <input type="hidden" name="action" value="review_gift_card">
                                                             <input type="hidden" name="submission_id" value="<?php echo $review['id']; ?>">
                                                             <input type="hidden" name="review_action" value="approve">
                                                             <button type="submit" class="action-btn btn-approve">Approve</button>
                                                         </form>
                                                         <form method="POST" style="display: inline;">
+                                                            <?php echo csrfField(); ?>
                                                             <input type="hidden" name="action" value="review_gift_card">
                                                             <input type="hidden" name="submission_id" value="<?php echo $review['id']; ?>">
                                                             <input type="hidden" name="review_action" value="reject">
@@ -861,6 +1052,379 @@ switch ($currentSection) {
                         </div>
                     </div>
 
+                    <!-- Transfer Requests Section -->
+                    <div id="admin-transfers-section" class="admin-section" style="display: <?php echo $currentSection === 'transfers' ? 'block' : 'none'; ?>;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Crypto Transfer Requests</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Verify user deposits and payouts, then upload proof of payment.</p>
+                        </div>
+
+                        <?php if (!empty($pageData['detail'])): $t = $pageData['detail']; ?>
+                            <div class="dashboard-card">
+                                <h3 style="color:#fff;margin-bottom:20px;"><?php echo h($t['reference']); ?> — <?php echo h($t['direction_label']); ?></h3>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p style="color:#cbe5ff;"><strong>User:</strong> <?php echo h($t['user_name']); ?> (<?php echo h($t['user_email']); ?>)</p>
+                                        <p style="color:#cbe5ff;"><strong>Status:</strong> <?php echo h($t['status_label']); ?></p>
+                                        <p style="color:#cbe5ff;"><strong><?php echo $t['direction'] === 'deposit' ? 'Crypto sent' : 'Amount requested'; ?>:</strong> <?php echo $t['crypto_amount_formatted']; ?></p>
+                                        <p style="color:#cbe5ff;"><strong>USD value:</strong> <?php echo $t['amount_usd_formatted']; ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Fee:</strong> <?php echo $t['fee_formatted']; ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Payout:</strong> <?php echo $t['payout_amount_formatted']; ?> (<?php echo h($t['payout_currency']); ?>)</p>
+                                        <p style="color:#cbe5ff;"><strong>Rate used:</strong> <?php echo h($t['rate_used']); ?></p>
+                                        <p style="color:#cbe5ff;"><strong>User tx hash:</strong> <?php echo h($t['user_tx_hash']); ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Admin tx hash:</strong> <?php echo h($t['admin_tx_hash'] ?: '—'); ?></p>
+                                        <p style="color:#cbe5ff;"><strong>User notes:</strong> <?php echo h($t['user_notes'] ?: '—'); ?></p>
+                                        <p style="color:#cbe5ff;"><strong>Admin notes:</strong> <?php echo nl2br(h($t['admin_notes'] ?: '—')); ?></p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <?php if ($t['direction'] === 'deposit'): ?>
+                                            <p style="color:#cbe5ff;"><strong>Company account:</strong> <?php echo h($t['company_label']); ?></p>
+                                            <p style="color:#cbe5ff;"><strong>Company wallet:</strong> <?php echo h($t['company_wallet']); ?></p>
+                                        <?php endif; ?>
+                                        <p style="color:#cbe5ff;"><strong>Payout to:</strong>
+                                            <?php if ($t['payout_method'] === 'bank'): ?>
+                                                <?php echo h($t['bank_name'] . ' • ' . $t['account_number'] . ' (' . $t['account_name'] . ')'); ?>
+                                            <?php else: ?>
+                                                <?php echo h($t['payout_wallet']); ?> (<?php echo h($t['payout_network']); ?>)
+                                            <?php endif; ?>
+                                        </p>
+                                        <p style="color:#cbe5ff;"><strong>User proof:</strong>
+                                            <?php if ($t['user_proof_url']): ?>
+                                                <a href="<?php echo h($t['user_proof_url']); ?>" target="_blank" rel="noopener" style="color:#fe998b;">View proof</a>
+                                            <?php else: ?>—<?php endif; ?>
+                                        </p>
+                                        <p style="color:#cbe5ff;"><strong>Payout proof:</strong>
+                                            <?php if ($t['admin_proof_url']): ?>
+                                                <a href="<?php echo h($t['admin_proof_url']); ?>" target="_blank" rel="noopener" style="color:#fe998b;">View proof</a>
+                                            <?php else: ?>—<?php endif; ?>
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <?php if (in_array($t['status'], ['proof_submitted', 'under_review'], true)): ?>
+                                    <hr style="border-color:rgba(255,255,255,0.1);">
+                                    <h4 style="color:#fff;">Review</h4>
+                                    <form method="POST" class="row">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="action" value="verify_transfer">
+                                        <input type="hidden" name="transfer_id" value="<?php echo (int)$t['id']; ?>">
+                                        <div class="col-md-8">
+                                            <input type="text" name="admin_notes" class="form-control" placeholder="Notes / rejection reason">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" name="review_action" value="verify" class="gradient-btn" style="width:100%;">Verify</button>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" name="review_action" value="reject" class="action-btn btn-reject" style="width:100%;">Reject</button>
+                                        </div>
+                                    </form>
+                                <?php endif; ?>
+
+                                <?php if (in_array($t['status'], ['verified', 'processing'], true)): ?>
+                                    <hr style="border-color:rgba(255,255,255,0.1);">
+                                    <h4 style="color:#fff;">Process payout</h4>
+                                    <form method="POST" enctype="multipart/form-data" class="row">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="action" value="process_transfer">
+                                        <input type="hidden" name="transfer_id" value="<?php echo (int)$t['id']; ?>">
+                                        <div class="col-md-4">
+                                            <input type="text" name="admin_tx_hash" class="form-control" placeholder="Payout tx hash / bank reference" required>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="file" name="admin_proof" class="form-control" accept="image/*" required>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <input type="text" name="admin_notes" class="form-control" placeholder="Notes">
+                                        </div>
+                                        <div class="col-md-2">
+                                            <button type="submit" class="gradient-btn" style="width:100%;">Mark paid</button>
+                                        </div>
+                                    </form>
+                                <?php endif; ?>
+
+                                <p style="margin-top:15px;"><a href="?section=transfers" style="color:#fe998b;">← Back to transfers</a></p>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="dashboard-card">
+                            <form method="GET" class="row">
+                                <input type="hidden" name="section" value="transfers">
+                                <div class="col-md-3">
+                                    <select name="direction" class="form-control">
+                                        <option value="">All Directions</option>
+                                        <option value="deposit" <?php echo ($_GET['direction'] ?? '') === 'deposit' ? 'selected' : ''; ?>>Deposits</option>
+                                        <option value="withdrawal" <?php echo ($_GET['direction'] ?? '') === 'withdrawal' ? 'selected' : ''; ?>>Withdrawals</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="status" class="form-control">
+                                        <option value="">All Status</option>
+                                        <?php foreach (['proof_submitted', 'under_review', 'verified', 'processing', 'paid', 'rejected', 'cancelled'] as $st): ?>
+                                            <option value="<?php echo $st; ?>" <?php echo ($_GET['status'] ?? '') === $st ? 'selected' : ''; ?>>
+                                                <?php echo ucwords(str_replace('_', ' ', $st)); ?>
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <button type="submit" class="gradient-btn" style="width:100%;">Filter</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3 style="color:#fff;margin-bottom:20px;">Requests</h3>
+                            <div class="admin-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Ref</th>
+                                            <th>User</th>
+                                            <th>Type</th>
+                                            <th>Crypto</th>
+                                            <th>Payout</th>
+                                            <th>Status</th>
+                                            <th>Date</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($pageData['requests'])): ?>
+                                            <?php foreach ($pageData['requests'] as $request): ?>
+                                                <tr>
+                                                    <td><?php echo h($request['reference']); ?></td>
+                                                    <td><?php echo h($request['user_name']); ?></td>
+                                                    <td><?php echo h($request['direction_label']); ?></td>
+                                                    <td><?php echo $request['crypto_amount_formatted']; ?></td>
+                                                    <td><?php echo $request['payout_amount_formatted']; ?></td>
+                                                    <td><span class="status-<?php echo h($request['status']); ?>"><?php echo h($request['status_label']); ?></span></td>
+                                                    <td><?php echo $request['date_formatted']; ?></td>
+                                                    <td><a href="?section=transfers&view=<?php echo (int)$request['id']; ?>" class="action-btn btn-view">Open</a></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="8" style="text-align:center;color:#cbe5ff;">No transfer requests found</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <?php if (!empty($pageData['pagination']['pages']) && $pageData['pagination']['pages'] > 1): ?>
+                                <nav><ul class="pagination">
+                                    <?php for ($i = 1; $i <= $pageData['pagination']['pages']; $i++): ?>
+                                        <li class="page-item <?php echo $i === $pageData['pagination']['page'] ? 'active' : ''; ?>">
+                                            <a class="page-link" href="?section=transfers&page=<?php echo $i; ?>&status=<?php echo urlencode($_GET['status'] ?? ''); ?>&direction=<?php echo urlencode($_GET['direction'] ?? ''); ?>"><?php echo $i; ?></a>
+                                        </li>
+                                    <?php endfor; ?>
+                                </ul></nav>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+
+                    <!-- Payout Accounts Section -->
+                    <div id="admin-payouts-section" class="admin-section" style="display: <?php echo $currentSection === 'payouts' ? 'block' : 'none'; ?>;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">User Payout Accounts</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Verify the bank accounts and wallets users want to be paid into.</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <form method="GET" class="row" style="margin-bottom:15px;">
+                                <input type="hidden" name="section" value="payouts">
+                                <div class="col-md-4">
+                                    <select name="status" class="form-control">
+                                        <option value="">All Status</option>
+                                        <?php foreach (['pending', 'verified', 'rejected'] as $st): ?>
+                                            <option value="<?php echo $st; ?>" <?php echo ($_GET['status'] ?? '') === $st ? 'selected' : ''; ?>><?php echo ucfirst($st); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                                <div class="col-md-2"><button type="submit" class="gradient-btn" style="width:100%;">Filter</button></div>
+                            </form>
+                            <div class="admin-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr><th>User</th><th>Account</th><th>Status</th><th>Added</th><th>Actions</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php if (!empty($pageData['accounts'])): ?>
+                                            <?php foreach ($pageData['accounts'] as $account): ?>
+                                                <tr>
+                                                    <td><?php echo h($account['user_name']); ?><br><small style="color:#cbe5ff;"><?php echo h($account['user_email']); ?></small></td>
+                                                    <td><?php echo h($account['display']); ?><?php if ($account['is_default']): ?> <small style="color:#fe998b;">(default)</small><?php endif; ?></td>
+                                                    <td><span class="status-<?php echo $account['status'] === 'verified' ? 'completed' : ($account['status'] === 'rejected' ? 'failed' : 'pending'); ?>"><?php echo h(ucfirst($account['status'])); ?></span></td>
+                                                    <td><?php echo $account['created_formatted']; ?></td>
+                                                    <td>
+                                                        <?php if ($account['status'] === 'pending'): ?>
+                                                            <form method="POST" style="display:inline;">
+                                                                <?php echo csrfField(); ?>
+                                                                <input type="hidden" name="action" value="review_payout_account">
+                                                                <input type="hidden" name="account_id" value="<?php echo (int)$account['id']; ?>">
+                                                                <input type="hidden" name="review_action" value="approve">
+                                                                <button type="submit" class="action-btn btn-approve">Verify</button>
+                                                            </form>
+                                                            <form method="POST" style="display:inline;">
+                                                                <?php echo csrfField(); ?>
+                                                                <input type="hidden" name="action" value="review_payout_account">
+                                                                <input type="hidden" name="account_id" value="<?php echo (int)$account['id']; ?>">
+                                                                <input type="hidden" name="review_action" value="reject">
+                                                                <input type="text" name="rejection_reason" class="form-control" placeholder="Reason" style="display:inline-block;width:140px;">
+                                                                <button type="submit" class="action-btn btn-reject">Reject</button>
+                                                            </form>
+                                                        <?php else: ?>
+                                                            <span style="color:#cbe5ff;">—</span>
+                                                        <?php endif; ?>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="5" style="text-align:center;color:#cbe5ff;">No payout accounts found</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Company Accounts Section -->
+                    <div id="admin-company-section" class="admin-section" style="display: <?php echo $currentSection === 'company' ? 'block' : 'none'; ?>;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Company Receiving Accounts</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Add the bank accounts and crypto wallets users transfer to.</p>
+                        </div>
+
+                        <?php $editing = $pageData['editing'] ?? null; ?>
+                        <div class="dashboard-card">
+                            <h3 style="color:#fff;margin-bottom:20px;"><?php echo $editing ? 'Edit Account' : 'Add Receiving Account'; ?></h3>
+                            <form method="POST" enctype="multipart/form-data">
+                                <?php echo csrfField(); ?>
+                                <input type="hidden" name="action" value="save_company_account">
+                                <?php if ($editing): ?><input type="hidden" name="account_id" value="<?php echo (int)$editing['id']; ?>"><?php endif; ?>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Label</label>
+                                            <input type="text" name="label" class="form-control" required value="<?php echo h($editing['label'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Method</label>
+                                            <select name="method" class="form-control" id="company-method">
+                                                <option value="bank" <?php echo ($editing['method'] ?? '') === 'bank' ? 'selected' : ''; ?>>Bank (NGN)</option>
+                                                <option value="crypto" <?php echo ($editing['method'] ?? '') === 'crypto' ? 'selected' : ''; ?>>Crypto wallet</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Active</label>
+                                            <select name="is_active" class="form-control">
+                                                <option value="1" <?php echo ($editing['is_active'] ?? 1) ? 'selected' : ''; ?>>Yes</option>
+                                                <option value="0" <?php echo isset($editing['is_active']) && !$editing['is_active'] ? 'selected' : ''; ?>>No</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Currency</label>
+                                            <select name="currency" class="form-control">
+                                                <?php foreach (['NGN', 'BTC', 'ETH', 'USDT', 'LTC', 'XRP'] as $cur): ?>
+                                                    <option value="<?php echo $cur; ?>" <?php echo ($editing['currency'] ?? '') === $cur ? 'selected' : ''; ?>><?php echo $cur; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Network (crypto)</label>
+                                            <select name="network" class="form-control">
+                                                <?php foreach (['', 'TRC20', 'ERC20', 'BEP20', 'Bitcoin', 'Litecoin', 'XRP'] as $net): ?>
+                                                    <option value="<?php echo $net; ?>" <?php echo ($editing['network'] ?? '') === $net ? 'selected' : ''; ?>><?php echo $net === '' ? '—' : $net; ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Wallet address (crypto)</label>
+                                            <input type="text" name="wallet_address" class="form-control" value="<?php echo h($editing['wallet_address'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Bank name (NGN)</label>
+                                            <input type="text" name="bank_name" class="form-control" value="<?php echo h($editing['bank_name'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Account name (NGN)</label>
+                                            <input type="text" name="account_name" class="form-control" value="<?php echo h($editing['account_name'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Account number (NGN)</label>
+                                            <input type="text" name="account_number" class="form-control" value="<?php echo h($editing['account_number'] ?? ''); ?>">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">Instructions to users</label>
+                                            <textarea name="instructions" class="form-control" rows="2"><?php echo h($editing['instructions'] ?? ''); ?></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-group">
+                                            <label style="color:#cbe5ff;">QR code image (optional)</label>
+                                            <input type="file" name="qr_code" class="form-control" accept="image/*">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="gradient-btn"><?php echo $editing ? 'Update Account' : 'Add Account'; ?></button>
+                                <?php if ($editing): ?>
+                                    <a href="?section=company" class="action-btn btn-view" style="margin-left:10px;">Cancel</a>
+                                <?php endif; ?>
+                            </form>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <h3 style="color:#fff;margin-bottom:20px;">Configured Accounts</h3>
+                            <div class="admin-table">
+                                <table class="table">
+                                    <thead><tr><th>Label</th><th>Details</th><th>Status</th><th>Actions</th></tr></thead>
+                                    <tbody>
+                                        <?php if (!empty($pageData['accounts'])): ?>
+                                            <?php foreach ($pageData['accounts'] as $account): ?>
+                                                <tr>
+                                                    <td><?php echo h($account['label']); ?></td>
+                                                    <td><?php echo h($account['display']); ?></td>
+                                                    <td><span class="status-<?php echo $account['is_active'] ? 'completed' : 'cancelled'; ?>"><?php echo $account['is_active'] ? 'Active' : 'Inactive'; ?></span></td>
+                                                    <td>
+                                                        <a href="?section=company&edit=<?php echo (int)$account['id']; ?>" class="action-btn btn-view">Edit</a>
+                                                        <form method="POST" style="display:inline;">
+                                                            <?php echo csrfField(); ?>
+                                                            <input type="hidden" name="action" value="toggle_company_account">
+                                                            <input type="hidden" name="account_id" value="<?php echo (int)$account['id']; ?>">
+                                                            <button type="submit" class="action-btn btn-reject"><?php echo $account['is_active'] ? 'Disable' : 'Enable'; ?></button>
+                                                        </form>
+                                                    </td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <tr><td colspan="4" style="text-align:center;color:#cbe5ff;">No receiving accounts yet. Add one above.</td></tr>
+                                        <?php endif; ?>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
                     <!-- Placeholder sections -->
                     <div id="admin-rates-section" class="admin-section" style="display: <?php echo $currentSection === 'rates' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
@@ -872,6 +1436,7 @@ switch ($currentSection) {
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Cryptocurrency Rates</h3>
                             <form method="POST">
+                                <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="update_crypto_rates">
                                 <div class="admin-table">
                                     <table class="table">
@@ -919,6 +1484,7 @@ switch ($currentSection) {
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Gift Card Rates</h3>
                             <form method="POST">
+                                <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="update_giftcard_rates">
                                 <div class="admin-table">
                                     <table class="table">
@@ -971,6 +1537,7 @@ switch ($currentSection) {
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Generate Reports</h3>
                             <form method="POST">
+                                <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="generate_report">
                                 <div class="row">
                                     <div class="col-md-3">
@@ -1050,13 +1617,18 @@ switch ($currentSection) {
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">General Settings</h3>
                             <form method="POST">
+                                <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="update_settings">
+                                <input type="hidden" name="usd_to_ngn_rate" value="<?php echo h(getSystemSetting('usd_to_ngn_rate', '1500')); ?>">
+                                <input type="hidden" name="transfer_fee_percentage" value="<?php echo h(getSystemSetting('transfer_fee_percentage', '0.5')); ?>">
+                                <input type="hidden" name="min_transfer_usd" value="<?php echo h(getSystemSetting('min_transfer_usd', '10')); ?>">
+                                <input type="hidden" name="max_transfer_usd" value="<?php echo h(getSystemSetting('max_transfer_usd', '50000')); ?>">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
                                             <label style="color: #cbe5ff;">Site Name</label>
                                             <input type="text" name="site_name" class="form-control" 
-                                                   value="<?php echo htmlspecialchars(getSystemSetting('site_name', 'FEX Trading Platform')); ?>">
+                                                   value="<?php echo htmlspecialchars(getSystemSetting('site_name', 'DFQ Exchange')); ?>">
                                         </div>
                                     </div>
                                     <div class="col-md-6">
@@ -1109,21 +1681,64 @@ switch ($currentSection) {
                             </form>
                         </div>
 
+                        <!-- Transfer Settings -->
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;">Transfer &amp; Payout Settings</h3>
+                            <form method="POST">
+                                <?php echo csrfField(); ?>
+                                <input type="hidden" name="action" value="update_settings">
+                                <input type="hidden" name="site_name" value="<?php echo h(getSystemSetting('site_name', 'DFQ Exchange')); ?>">
+                                <input type="hidden" name="trading_fee_percentage" value="<?php echo h(getSystemSetting('trading_fee_percentage', '1.00')); ?>">
+                                <input type="hidden" name="min_trade_amount" value="<?php echo h(getSystemSetting('min_trade_amount', '10.00')); ?>">
+                                <input type="hidden" name="max_trade_amount" value="<?php echo h(getSystemSetting('max_trade_amount', '50000.00')); ?>">
+                                <input type="hidden" name="gift_card_processing_time" value="<?php echo h(getSystemSetting('gift_card_processing_time', '24')); ?>">
+                                <input type="hidden" name="maintenance_mode" value="<?php echo h(getSystemSetting('maintenance_mode', '0')); ?>">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">USD → NGN Rate</label>
+                                            <input type="number" name="usd_to_ngn_rate" class="form-control"
+                                                   value="<?php echo h(getSystemSetting('usd_to_ngn_rate', '1500')); ?>"
+                                                   step="0.01" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Transfer Fee (%)</label>
+                                            <input type="number" name="transfer_fee_percentage" class="form-control"
+                                                   value="<?php echo h(getSystemSetting('transfer_fee_percentage', '0.5')); ?>"
+                                                   step="0.01" min="0" max="100">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Minimum Transfer (USD)</label>
+                                            <input type="number" name="min_transfer_usd" class="form-control"
+                                                   value="<?php echo h(getSystemSetting('min_transfer_usd', '10')); ?>"
+                                                   step="0.01" min="1">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label style="color: #cbe5ff;">Maximum Transfer (USD)</label>
+                                            <input type="number" name="max_transfer_usd" class="form-control"
+                                                   value="<?php echo h(getSystemSetting('max_transfer_usd', '50000')); ?>"
+                                                   step="0.01" min="1">
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="gradient-btn">Update Transfer Settings</button>
+                            </form>
+                        </div>
+
                         <!-- System Information -->
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">System Information</h3>
                             <div class="row">
                                 <div class="col-md-6">
                                     <p style="color: #cbe5ff;"><strong>PHP Version:</strong> <?php echo PHP_VERSION; ?></p>
-                                    <p style="color: #cbe5ff;"><strong>MySQL Version:</strong> 
-                                        <?php 
-                                        try {
-                                            $version = $this->db->query('SELECT VERSION()')->fetchColumn();
-                                            echo $version;
-                                        } catch (Exception $e) {
-                                            echo 'Unable to fetch';
-                                        }
-                                        ?>
+                                    <p style="color: #cbe5ff;"><strong>MySQL Version:</strong>
+                                        <?php echo h($dashboard->getDatabaseVersion() ?: 'Unable to fetch'); ?>
                                     </p>
                                     <p style="color: #cbe5ff;"><strong>Server Time:</strong> <?php echo date('Y-m-d H:i:s'); ?></p>
                                 </div>

@@ -1,6 +1,6 @@
 <?php
 /**
- * Admin Authentication Functions for FEX Trading Platform
+ * Admin Authentication Functions for DFQ Exchange
  * Created: October 31, 2025
  */
 
@@ -68,7 +68,8 @@ class AdminAuth {
                 ];
             }
             
-            // Create admin session
+            // Create admin session (rotate the session ID to prevent fixation)
+            session_regenerate_id(true);
             $sessionToken = $this->createAdminSession($admin['id']);
             
             // Update last login

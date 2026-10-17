@@ -1,6 +1,6 @@
 <?php
 /**
- * User Authentication Functions for FEX Trading Platform
+ * User Authentication Functions for DFQ Exchange
  * Created: October 31, 2025
  */
 
@@ -19,6 +19,14 @@ class UserAuth {
      */
     public function register($userData) {
         try {
+            $rateLimit = checkRateLimit('user_register_' . getUserIP(), 5, 3600);
+            if (!$rateLimit['allowed']) {
+                return [
+                    'success' => false,
+                    'message' => 'Too many registration attempts. Please try again later.'
+                ];
+            }
+
             // Validate input data
             $validation = $this->validateRegistrationData($userData);
             if (!$validation['success']) {
@@ -89,7 +97,15 @@ class UserAuth {
                     'message' => 'Email and password are required'
                 ];
             }
-            
+
+            $rateLimit = checkRateLimit('user_login_' . strtolower(trim($email)) . '_' . getUserIP(), 8, 900);
+            if (!$rateLimit['allowed']) {
+                return [
+                    'success' => false,
+                    'message' => 'Too many failed login attempts. Please try again in 15 minutes.'
+                ];
+            }
+
             // Get user by email
             $sql = "SELECT id, first_name, last_name, email, password_hash, status, email_verified 
                     FROM users WHERE email = :email LIMIT 1";
@@ -122,7 +138,8 @@ class UserAuth {
                 ];
             }
             
-            // Create session
+            // Create session (rotate the session ID to prevent fixation)
+            session_regenerate_id(true);
             $sessionToken = $this->createUserSession($user['id'], $rememberMe);
             
             // Update last login
@@ -306,10 +323,11 @@ class UserAuth {
             }
             
             // Validate new password
-            if (strlen($newPassword) < 8) {
+            $passwordValidation = validatePassword($newPassword);
+            if (!$passwordValidation['valid']) {
                 return [
                     'success' => false,
-                    'message' => 'New password must be at least 8 characters long'
+                    'message' => implode('. ', $passwordValidation['errors'])
                 ];
             }
             
@@ -422,8 +440,11 @@ class UserAuth {
         }
         
         // Password validation
-        if (!empty($data['password']) && strlen($data['password']) < 8) {
-            $errors[] = 'Password must be at least 8 characters long';
+        if (!empty($data['password'])) {
+            $passwordValidation = validatePassword($data['password']);
+            if (!$passwordValidation['valid']) {
+                $errors = array_merge($errors, $passwordValidation['errors']);
+            }
         }
         
         // Password confirmation

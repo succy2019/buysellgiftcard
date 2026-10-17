@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once 'includes/user_auth.php';
 
 $error = '';
@@ -21,7 +20,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $confirmPassword = $_POST['confirm_password'] ?? '';
     $country = $_POST['country'] ?? '';
     $terms = isset($_POST['terms']);
-    
+
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        $error = 'Your session expired. Please refresh the page and try again.';
+    } else {
     // Validation
     $errors = [];
     
@@ -66,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $auth->register($userData);
         
         if ($result['success']) {
-            $success = 'Account created successfully! Please check your email to verify your account.';
+            $success = 'Account created successfully! You can now sign in.';
             // Optionally auto-login the user
             // header('Location: user-dashboard.php');
             // exit();
@@ -74,12 +76,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $error = $result['message'];
         }
     }
+    }
 }
 ?>
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Register - FEX</title>
+    <title>Register - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -212,6 +215,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6bcf7f;
         }
     </style>
+    <!-- PWA / install prompt -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#062489">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DFQ Exchange">
+    <link rel="apple-touch-icon" href="static/assets/img/apple-touch-icon.png">
+    <link rel="stylesheet" href="static/assets/css/pwa-install.css">
+    <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
 <body>
     <!--header area start-->
@@ -254,7 +267,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <div class="col-12 col-md-8 col-lg-7">
                     <div class="register-card">
                         <div class="register-header">
-                            <h1>Join FEX</h1>
+                            <h1>Join DFQ Exchange</h1>
                             <p>Create your account and start trading cryptocurrencies and gift cards</p>
                         </div>
                         
@@ -270,6 +283,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
                         
                         <form method="POST" id="registerForm">
+                            <?php echo csrfField(); ?>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
@@ -295,12 +309,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="password" name="password" class="form-control" placeholder="Password" required>
+                                        <input type="password" name="password" class="form-control" placeholder="Password" minlength="8" required autocomplete="new-password">
+                                        <small style="color:#cbe5ff;">Min. 8 characters with upper case, lower case and a number.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" required>
+                                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" minlength="8" required autocomplete="new-password">
                                     </div>
                                 </div>
                             </div>
@@ -342,7 +357,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <p style="margin: 0; color: #cbe5ff;">Copyright &copy;<script>document.write(new Date().getFullYear());</script> FEX. All rights reserved</p>
+                    <p style="margin: 0; color: #cbe5ff;">Copyright &copy;<script>document.write(new Date().getFullYear());</script> DFQ Exchange. All rights reserved</p>
                 </div>
             </div>
         </div>

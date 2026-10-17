@@ -1,14 +1,17 @@
 <?php
 /**
- * API Endpoints for FEX Trading Platform
+ * API Endpoints for DFQ Exchange
  * Handles AJAX requests for dynamic functionality
  */
 
-session_start();
+require_once 'includes/user_auth.php';
+require_once 'includes/user_dashboard.php';
+require_once 'includes/admin_auth.php';
+require_once 'includes/admin_dashboard.php';
+
 header('Content-Type: application/json');
-header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('X-Content-Type-Options: nosniff');
+header('Cache-Control: no-store');
 
 require_once 'includes/user_auth.php';
 require_once 'includes/user_dashboard.php';
@@ -34,15 +37,25 @@ function apiResponse($success, $data = null, $message = '', $code = 200) {
 // Authentication helper
 function requireAuth($type = 'user') {
     if ($type === 'user') {
-        if (!isset($_SESSION['user_id'])) {
+        $auth = new UserAuth();
+        if (!$auth->isLoggedIn()) {
             apiResponse(false, null, 'Authentication required', 401);
         }
         return $_SESSION['user_id'];
     } elseif ($type === 'admin') {
-        if (!isset($_SESSION['admin_id'])) {
+        $auth = new AdminAuth();
+        if (!$auth->isLoggedIn()) {
             apiResponse(false, null, 'Admin authentication required', 401);
         }
         return $_SESSION['admin_id'];
+    }
+}
+
+// Reject state-changing requests that do not carry the session CSRF token.
+function requireApiCsrf() {
+    $token = $_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_POST['csrf_token'] ?? null);
+    if (!verifyCsrfToken($token)) {
+        apiResponse(false, null, 'Invalid or missing CSRF token', 403);
     }
 }
 
@@ -86,7 +99,14 @@ try {
             }
             
             $auth = new UserAuth();
-            $result = $auth->register($firstName, $lastName, $email, $phone, $password, $country);
+            $result = $auth->register([
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+                'email' => $email,
+                'phone' => $phone,
+                'password' => $password,
+                'country' => $country,
+            ]);
             apiResponse($result['success'], $result['data'] ?? null, $result['message']);
             break;
             
@@ -107,8 +127,7 @@ try {
         case 'user/balance':
             $userId = requireAuth('user');
             $dashboard = new UserDashboard();
-            $balance = $dashboard->getUserBalance($userId);
-            apiResponse(true, ['balance' => $balance]);
+            apiResponse(true, $dashboard->getWalletBalances($userId));
             break;
             
         case 'user/crypto-holdings':
@@ -124,7 +143,7 @@ try {
             $limit = (int)($_GET['limit'] ?? 20);
             
             $dashboard = new UserDashboard();
-            $transactions = $dashboard->getTransactionHistory($userId, $page, $limit);
+            $transactions = $dashboard->getTransactionHistory($page, $limit, null, $userId);
             apiResponse(true, $transactions);
             break;
             
@@ -134,14 +153,15 @@ try {
             }
             
             $userId = requireAuth('user');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $symbol = $input['symbol'] ?? '';
             $amount = (float)($input['amount'] ?? 0);
-            
+
             if (empty($symbol) || $amount <= 0) {
                 apiResponse(false, null, 'Invalid parameters', 400);
             }
-            
+
             $dashboard = new UserDashboard();
             $result = $dashboard->buyCryptocurrency($userId, $symbol, $amount);
             apiResponse($result['success'], $result['data'] ?? null, $result['message']);
@@ -153,14 +173,15 @@ try {
             }
             
             $userId = requireAuth('user');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $symbol = $input['symbol'] ?? '';
             $amount = (float)($input['amount'] ?? 0);
-            
+
             if (empty($symbol) || $amount <= 0) {
                 apiResponse(false, null, 'Invalid parameters', 400);
             }
-            
+
             $dashboard = new UserDashboard();
             $result = $dashboard->sellCryptocurrency($userId, $symbol, $amount);
             apiResponse($result['success'], $result['data'] ?? null, $result['message']);
@@ -172,6 +193,7 @@ try {
             }
             
             $userId = requireAuth('user');
+            requireApiCsrf();
             $brand = $_POST['brand'] ?? '';
             $value = (float)($_POST['value'] ?? 0);
             $code = $_POST['code'] ?? '';
@@ -180,20 +202,11 @@ try {
                 apiResponse(false, null, 'Invalid parameters', 400);
             }
             
-            // Handle file upload
-            $imagePath = '';
-            if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-                $dashboard = new UserDashboard();
-                $uploadResult = $dashboard->uploadGiftCardImage($_FILES['image']);
-                if ($uploadResult['success']) {
-                    $imagePath = $uploadResult['file_path'];
-                } else {
-                    apiResponse(false, null, 'Image upload failed', 400);
-                }
-            }
-            
+            // Handle file upload (validated inside submitGiftCard)
+            $image = $_FILES['image'] ?? null;
+
             $dashboard = new UserDashboard();
-            $result = $dashboard->submitGiftCard($userId, $brand, $value, $code, $imagePath);
+            $result = $dashboard->submitGiftCard($userId, $brand, $value, $code, $image);
             apiResponse($result['success'], $result['data'] ?? null, $result['message']);
             break;
             
@@ -281,6 +294,7 @@ try {
             }
             
             $adminId = requireAuth('admin');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $userId = (int)($input['user_id'] ?? 0);
             $status = $input['status'] ?? '';
@@ -300,6 +314,7 @@ try {
             }
             
             $adminId = requireAuth('admin');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $submissionId = (int)($input['submission_id'] ?? 0);
             $action = $input['action'] ?? '';
@@ -320,13 +335,14 @@ try {
             }
             
             $adminId = requireAuth('admin');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $rates = $input['rates'] ?? [];
-            
+
             if (empty($rates)) {
                 apiResponse(false, null, 'No rates provided', 400);
             }
-            
+
             $dashboard = new AdminDashboard();
             $result = $dashboard->updateCryptoRates($rates);
             apiResponse($result['success'], null, $result['message']);
@@ -338,13 +354,14 @@ try {
             }
             
             $adminId = requireAuth('admin');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $rates = $input['rates'] ?? [];
-            
+
             if (empty($rates)) {
                 apiResponse(false, null, 'No rates provided', 400);
             }
-            
+
             $dashboard = new AdminDashboard();
             $result = $dashboard->updateGiftCardRates($rates);
             apiResponse($result['success'], null, $result['message']);
@@ -356,6 +373,7 @@ try {
             }
             
             $adminId = requireAuth('admin');
+            requireApiCsrf();
             $input = json_decode(file_get_contents('php://input'), true);
             $type = $input['type'] ?? '';
             $startDate = $input['start_date'] ?? '';

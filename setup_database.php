@@ -1,14 +1,26 @@
 <?php
 /**
- * Database Setup Script for FEX Trading Platform
+ * Database Setup Script for DFQ Exchange
  * Run this file once to create the database and tables
+ *
+ * For security this script only runs from the command line:
+ *     php setup_database.php
+ * After updating an existing installation, run:
+ *     php database/migrate.php
  */
 
+if (PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit("This setup script can only be run from the command line.\n");
+}
+
+require_once __DIR__ . '/config/env.php';
+
 // Database connection settings
-$host = 'localhost';
-$username = 'root';
-$password = '';
-$database = 'fex_trading_platform';
+$host = getenv('DFQ_DB_HOST') ?: 'localhost';
+$username = getenv('DFQ_DB_USER') ?: 'root';
+$password = getenv('DFQ_DB_PASS') !== false ? getenv('DFQ_DB_PASS') : '';
+$database = getenv('DFQ_DB_NAME') ?: 'dfqexchange';
 
 try {
     // Connect to MySQL server (without selecting a database)
@@ -63,6 +75,7 @@ try {
             status ENUM('active', 'suspended', 'pending') DEFAULT 'pending',
             email_verified BOOLEAN DEFAULT FALSE,
             balance DECIMAL(15, 2) DEFAULT 0.00,
+            balance_ngn DECIMAL(18, 2) DEFAULT 0.00,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
             last_login TIMESTAMP NULL,
@@ -260,10 +273,11 @@ try {
         $stmt = $pdo->prepare("SELECT COUNT(*) FROM admin_users WHERE username = 'admin'");
         $stmt->execute();
         if ($stmt->fetchColumn() == 0) {
-            $adminPassword = password_hash('admin123', PASSWORD_BCRYPT);
-            $stmt = $pdo->prepare("INSERT INTO admin_users (username, email, password_hash, role) VALUES ('admin', 'admin@fex.com', ?, 'super_admin')");
+            $adminPassword = password_hash('Admin@12345', PASSWORD_BCRYPT, ['cost' => 12]);
+            $stmt = $pdo->prepare("INSERT INTO admin_users (username, email, password_hash, role) VALUES ('admin', 'admin@dfqexchange.com.ng', ?, 'super_admin')");
             $stmt->execute([$adminPassword]);
-            echo "✅ Default admin user created (username: admin, password: admin123)\n";
+            echo "✅ Default admin user created (username: admin, password: Admin@12345)\n";
+            echo "⚠️  Change the admin password immediately after your first login.\n";
         }
     } catch (PDOException $e) {
         echo "Warning: Could not create admin user: " . $e->getMessage() . "\n";
@@ -322,12 +336,16 @@ try {
         $stmt->execute();
         if ($stmt->fetchColumn() == 0) {
             $settings = [
-                ['site_name', 'FEX Trading Platform', 'Site name'],
+                ['site_name', 'DFQ Exchange', 'Site name'],
                 ['maintenance_mode', '0', 'Maintenance mode (0=off, 1=on)'],
                 ['min_trade_amount', '10.00', 'Minimum trade amount in USD'],
                 ['max_trade_amount', '50000.00', 'Maximum trade amount in USD'],
                 ['trading_fee_percentage', '0.5', 'Trading fee percentage'],
-                ['gift_card_processing_time', '24', 'Gift card processing time in hours']
+                ['gift_card_processing_time', '24', 'Gift card processing time in hours'],
+                ['usd_to_ngn_rate', '1500.00', 'Naira value of 1 USD used for payouts'],
+                ['transfer_fee_percentage', '0.5', 'Fee percentage applied to crypto transfer payouts'],
+                ['min_transfer_usd', '10.00', 'Minimum crypto transfer value in USD'],
+                ['max_transfer_usd', '50000.00', 'Maximum crypto transfer value in USD']
             ];
             
             $stmt = $pdo->prepare("INSERT INTO system_settings (setting_key, setting_value, description) VALUES (?, ?, ?)");
@@ -346,13 +364,14 @@ try {
     echo "✅ Database setup complete! Found " . count($tables) . " tables\n";
     
     // Show admin login info
+    $appUrl = getenv('DFQ_APP_URL') ?: 'http://localhost/dfqexchange';
     echo "\n🎉 Setup successful!\n";
-    echo "📧 Admin login URL: http://localhost/fex.org.ng/admin-login.php\n";
+    echo "📧 Admin login URL: $appUrl/admin-login.php\n";
     echo "👤 Admin username: admin\n";
-    echo "🔑 Admin password: admin123\n\n";
-    echo "🌐 User registration: http://localhost/fex.org.ng/register.php\n";
-    echo "🔗 User login: http://localhost/fex.org.ng/login.php\n\n";
-    echo "📊 All sections are now fully functional with real data!\n";
+    echo "🔑 Admin password: Admin@12345 (change this immediately)\n\n";
+    echo "🌐 User registration: $appUrl/register.php\n";
+    echo "🔗 User login: $appUrl/login.php\n\n";
+    echo "📊 Admin: add company receiving accounts under Company Accounts.\n";
     
 } catch (PDOException $e) {
     echo "❌ Database setup failed: " . $e->getMessage() . "\n";

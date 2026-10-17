@@ -16,6 +16,7 @@ CREATE TABLE users (
     status ENUM('active', 'suspended', 'pending') DEFAULT 'pending',
     email_verified BOOLEAN DEFAULT FALSE,
     balance DECIMAL(15, 2) DEFAULT 0.00,
+    balance_ngn DECIMAL(18, 2) DEFAULT 0.00,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     last_login TIMESTAMP NULL,
@@ -216,6 +217,114 @@ CREATE TABLE activity_logs (
     INDEX idx_created_at (created_at)
 );
 
+-- Company receiving accounts: the bank/wallet details users pay into
+CREATE TABLE company_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    label VARCHAR(100) NOT NULL,
+    method ENUM('bank', 'crypto') NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    network VARCHAR(30) NULL,
+    bank_name VARCHAR(100) NULL,
+    account_name VARCHAR(100) NULL,
+    account_number VARCHAR(50) NULL,
+    wallet_address VARCHAR(255) NULL,
+    qr_code_path VARCHAR(500) NULL,
+    instructions TEXT NULL,
+    is_active BOOLEAN DEFAULT TRUE,
+    created_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    INDEX idx_company_active (is_active),
+    INDEX idx_company_currency (currency)
+);
+
+-- User payout accounts: where the user wants to receive NGN or USDT
+CREATE TABLE user_payout_accounts (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    label VARCHAR(100) NULL,
+    method ENUM('bank', 'crypto') NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    network VARCHAR(30) NULL,
+    bank_name VARCHAR(100) NULL,
+    account_name VARCHAR(100) NULL,
+    account_number VARCHAR(50) NULL,
+    wallet_address VARCHAR(255) NULL,
+    is_default BOOLEAN DEFAULT FALSE,
+    status ENUM('pending', 'verified', 'rejected') DEFAULT 'pending',
+    rejection_reason VARCHAR(255) NULL,
+    verified_by INT NULL,
+    verified_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (verified_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    INDEX idx_payout_user (user_id),
+    INDEX idx_payout_status (status)
+);
+
+-- Manual crypto transfer requests (deposit into the platform or withdrawal)
+CREATE TABLE transfer_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    reference VARCHAR(50) UNIQUE NOT NULL,
+    user_id INT NOT NULL,
+    direction ENUM('deposit', 'withdrawal') NOT NULL DEFAULT 'deposit',
+    crypto_symbol VARCHAR(10) NOT NULL,
+    network VARCHAR(30) NULL,
+    crypto_amount DECIMAL(20, 8) NOT NULL DEFAULT 0.00000000,
+    amount_usd DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    payout_currency ENUM('NGN', 'USDT') NOT NULL DEFAULT 'NGN',
+    payout_amount DECIMAL(20, 8) NULL,
+    rate_used DECIMAL(20, 8) NULL,
+    fee DECIMAL(15, 2) NOT NULL DEFAULT 0.00,
+    company_account_id INT NULL,
+    user_payout_account_id INT NULL,
+    user_tx_hash VARCHAR(255) NULL,
+    user_proof_path VARCHAR(500) NULL,
+    admin_tx_hash VARCHAR(255) NULL,
+    admin_proof_path VARCHAR(500) NULL,
+    user_notes TEXT NULL,
+    admin_notes TEXT NULL,
+    status ENUM('awaiting_payment', 'proof_submitted', 'under_review', 'verified', 'processing', 'paid', 'rejected', 'cancelled') DEFAULT 'proof_submitted',
+    verified_by INT NULL,
+    verified_at TIMESTAMP NULL,
+    processed_by INT NULL,
+    processed_at TIMESTAMP NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (company_account_id) REFERENCES company_accounts(id) ON DELETE SET NULL,
+    FOREIGN KEY (user_payout_account_id) REFERENCES user_payout_accounts(id) ON DELETE SET NULL,
+    FOREIGN KEY (verified_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    FOREIGN KEY (processed_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    INDEX idx_transfer_user (user_id),
+    INDEX idx_transfer_reference (reference),
+    INDEX idx_transfer_status (status),
+    INDEX idx_transfer_direction (direction),
+    INDEX idx_transfer_created (created_at)
+);
+
+-- Immutable ledger of every wallet movement
+CREATE TABLE ledger_entries (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    currency VARCHAR(10) NOT NULL,
+    direction ENUM('credit', 'debit') NOT NULL,
+    amount DECIMAL(20, 8) NOT NULL,
+    balance_after DECIMAL(20, 8) NOT NULL,
+    reference_type VARCHAR(50) NOT NULL,
+    reference_id INT NULL,
+    created_by INT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (created_by) REFERENCES admin_users(id) ON DELETE SET NULL,
+    INDEX idx_ledger_user (user_id),
+    INDEX idx_ledger_currency (currency),
+    INDEX idx_ledger_reference (reference_type, reference_id),
+    INDEX idx_ledger_created (created_at)
+);
+
 -- Insert default cryptocurrency rates
 INSERT INTO cryptocurrency_rates (symbol, name, buy_rate, sell_rate) VALUES
 ('BTC', 'Bitcoin', 67845.00000000, 67800.00000000),
@@ -234,8 +343,9 @@ INSERT INTO gift_card_brands (brand_name, brand_code, exchange_rate, min_amount,
 ('Target', 'TARGET', 81.00, 25.00, 500.00);
 
 -- Insert default admin user
+-- Password: Admin@12345 (change immediately after first login)
 INSERT INTO admin_users (username, email, password_hash, role) VALUES
-('admin', 'admin@fex.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'super_admin'); -- password: admin123
+('admin', 'admin@dfqexchange.com.ng', '$2y$12$qIzfmv0ku74.443GmiwWD.JFovgzkWh6tV2HWu04VYBFs9p8Bu11i', 'super_admin');
 
 -- Insert default system settings
 INSERT INTO system_settings (setting_key, setting_value, description) VALUES
@@ -244,4 +354,8 @@ INSERT INTO system_settings (setting_key, setting_value, description) VALUES
 ('min_trade_amount', '10.00', 'Minimum trade amount in USD'),
 ('max_trade_amount', '50000.00', 'Maximum trade amount in USD'),
 ('trading_fee_percentage', '0.5', 'Trading fee percentage'),
-('gift_card_processing_time', '24', 'Gift card processing time in hours');
+('gift_card_processing_time', '24', 'Gift card processing time in hours'),
+('usd_to_ngn_rate', '1500.00', 'Naira value of 1 USD used for payouts'),
+('transfer_fee_percentage', '0.5', 'Fee percentage applied to crypto transfer payouts'),
+('min_transfer_usd', '10.00', 'Minimum crypto transfer value in USD'),
+('max_transfer_usd', '50000.00', 'Maximum crypto transfer value in USD');

@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once 'includes/admin_auth.php';
 
 $error = '';
@@ -15,8 +14,10 @@ if (isset($_SESSION['admin_id'])) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email = $_POST['email'] ?? '';
     $password = $_POST['password'] ?? '';
-    
-    if (empty($email) || empty($password)) {
+
+    if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
+        $error = 'Your session expired. Please refresh the page and try again.';
+    } elseif (empty($email) || empty($password)) {
         $error = 'Please fill in all fields';
     } else {
         $auth = new AdminAuth();
@@ -34,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <!doctype html>
 <html lang="en">
 <head>
-    <title>Admin Login - FEX</title>
+    <title>Admin Login - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
@@ -222,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 <i class="fa fa-shield"></i>
                             </div>
                             <h1>Admin Access</h1>
-                            <p>Administrative Portal for FEX Platform</p>
+                            <p>Administrative Portal for DFQ Exchange</p>
                         </div>
                         
                         <div class="security-notice">
@@ -239,6 +240,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <?php endif; ?>
                         
                         <form method="POST" id="adminLoginForm">
+                            <?php echo csrfField(); ?>
                             <div class="form-group">
                                 <input type="email" name="email" class="form-control" placeholder="Admin Email Address" 
                                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
@@ -263,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="container">
             <div class="row">
                 <div class="col-12 text-center">
-                    <p style="margin: 0; color: #cbe5ff;">Copyright &copy;<script>document.write(new Date().getFullYear());</script> FEX. All rights reserved</p>
+                    <p style="margin: 0; color: #cbe5ff;">Copyright &copy;<script>document.write(new Date().getFullYear());</script> DFQ Exchange. All rights reserved</p>
                 </div>
             </div>
         </div>
