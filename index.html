@@ -7,6 +7,37 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- Installed app: start at the splash screen instead of the website landing page. -->
+    <script>
+        (function () {
+            'use strict';
+
+            var media = window.matchMedia;
+            var inApp = !!(media && (
+                media('(display-mode: standalone)').matches ||
+                media('(display-mode: fullscreen)').matches ||
+                media('(display-mode: minimal-ui)').matches
+            )) || window.navigator.standalone === true ||
+                !!(window.Capacitor &&
+                    typeof window.Capacitor.isNativePlatform === 'function' &&
+                    window.Capacitor.isNativePlatform());
+
+            if (!inApp) {
+                return;
+            }
+
+            // The splash marks itself as done so in-app links back to the
+            // landing page keep working normally during the same app session.
+            var splashDone = false;
+            try {
+                splashDone = window.sessionStorage.getItem('dfq_app_splash_done') === '1';
+            } catch (e) { /* storage unavailable — show the splash */ }
+
+            if (!splashDone) {
+                window.location.replace('splash.html');
+            }
+        })();
+    </script>
     <meta name="description" content="Nigeria's #1 platform for buying and selling cryptocurrencies and gift cards. Trade Bitcoin, Ethereum, Amazon, iTunes gift cards with instant payments.">
     <meta name="keywords" content="buy bitcoin Nigeria, sell cryptocurrency, gift card exchange, Amazon gift card, iTunes gift card, crypto trading">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->

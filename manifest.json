@@ -3,7 +3,7 @@
     "short_name": "DFQ",
     "description": "Buy and sell cryptocurrencies and gift cards in Nigeria. Trade Bitcoin, Ethereum, USDT and popular gift cards with instant payouts.",
     "id": "./",
-    "start_url": "./index.html",
+    "start_url": "./splash.html",
     "scope": "./",
     "display": "standalone",
     "display_override": ["standalone", "minimal-ui"],

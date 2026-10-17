@@ -185,6 +185,31 @@ and icons in `static/assets/img/`.
   LAN IP (`http://192.168.x.x/...`) will not register the service worker and
   Android will not offer installation.
 
+### Separate startup: website vs. installed app
+
+| How the user arrives | Startup experience |
+| --- | --- |
+| Website URL in a normal browser tab | `index.html` landing page, unchanged |
+| Installed app (home-screen icon) | `splash.html`, then automatic hand-off to `login.php` |
+
+How it works:
+
+- `manifest.json` sets `start_url` to `./splash.html`, so a freshly installed
+  app opens the splash screen.
+- `splash.html` checks `display-mode` (`standalone` / `fullscreen` /
+  `minimal-ui`), iOS `navigator.standalone`, and Capacitor's
+  `isNativePlatform()`. Browsers that open the file directly are redirected
+  to `index.html` immediately.
+- `index.html` contains the mirror check: if an already-installed app launches
+  the landing page (for example an older install whose cached manifest still
+  points there), it redirects to `splash.html`. A `sessionStorage` marker stops
+  in-app links back to the landing page from replaying the splash.
+- The splash holds for ~2 seconds, fades out, and calls
+  `location.replace('login.php')`. `login.php` already sends signed-in users to
+  their dashboard, so authentication is preserved without duplicating it.
+- `splash.html?preview=app` previews the splash in an ordinary browser tab
+  without installing the app.
+
 ## 🗄️ Database Schema
 
 ### Core Tables

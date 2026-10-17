@@ -1,9 +1,10 @@
 /* DFQ Exchange service worker — safe, minimal offline support. */
-const CACHE_NAME = 'dfq-shell-v1';
+const CACHE_NAME = 'dfq-shell-v2';
 const OFFLINE_URL = './offline.html';
 
 const SHELL_ASSETS = [
     OFFLINE_URL,
+    './splash.html',
     './manifest.json',
     './static/assets/img/app-icon-192.png',
     './static/assets/img/app-icon-512.png',
@@ -44,10 +45,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // Page navigations: network first, fall back to the offline page.
+    // Page navigations: network first, then the cached shell page (e.g. the
+    // app splash), then the offline page. Authenticated pages are never cached.
     if (request.mode === 'navigate') {
         event.respondWith(
-            fetch(request).catch(() => caches.match(OFFLINE_URL))
+            fetch(request).catch(() => caches.match(request).then((cached) => cached || caches.match(OFFLINE_URL)))
         );
         return;
     }

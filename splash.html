@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>DFQ Exchange</title>
+    <meta name="robots" content="noindex">
+    <meta name="description" content="DFQ Exchange mobile app startup screen.">
+    <meta name="theme-color" content="#062489">
+
+    <!-- Installed-app metadata -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="DFQ Exchange">
+    <link rel="apple-touch-icon" href="static/assets/img/apple-touch-icon.png">
+
+    <script>
+        /*
+         * Splash screen is part of the installed-app experience only.
+         * A normal browser opening this file directly is sent straight back
+         * to the website. `?preview=app` lets developers preview the splash
+         * in an ordinary browser tab.
+         */
+        (function () {
+            'use strict';
+
+            function isInstalledApp() {
+                var media = window.matchMedia;
+                var standalone = !!(media && (
+                    media('(display-mode: standalone)').matches ||
+                    media('(display-mode: fullscreen)').matches ||
+                    media('(display-mode: minimal-ui)').matches
+                ));
+                var iosStandalone = window.navigator.standalone === true;
+                var capacitor = !!(window.Capacitor &&
+                    typeof window.Capacitor.isNativePlatform === 'function' &&
+                    window.Capacitor.isNativePlatform());
+                return standalone || iosStandalone || capacitor;
+            }
+
+            var preview = /[?&]preview=app(?:&|$)/.test(window.location.search);
+
+            if (!isInstalledApp() && !preview) {
+                window.location.replace('index.html');
+                return;
+            }
+
+            // Remember that the splash already ran so in-app links back to
+            // index.html do not replay it during the same app session.
+            try {
+                window.sessionStorage.setItem('dfq_app_splash_done', '1');
+            } catch (e) { /* storage unavailable — ignore */ }
+        })();
+    </script>
+    <noscript><meta http-equiv="refresh" content="1;url=index.html"></noscript>
+
+    <style>
+        :root {
+            --dfq-navy: #062489;
+            --dfq-blue: #0a2ea8;
+            --dfq-deep: #04144f;
+            --dfq-accent: #8ab4ff;
+            --splash-fade: 420ms;
+        }
+
+        * { box-sizing: border-box; }
+
+        html, body {
+            height: 100%;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            min-height: 100dvh;
+            padding: calc(env(safe-area-inset-top) + 32px) 24px calc(env(safe-area-inset-bottom) + 56px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            color: #ffffff;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                "Helvetica Neue", Arial, sans-serif;
+            text-align: center;
+            background:
+                radial-gradient(120% 75% at 50% 0%, rgba(79, 140, 255, 0.38) 0%, rgba(79, 140, 255, 0) 62%),
+                linear-gradient(165deg, var(--dfq-deep) 0%, var(--dfq-navy) 48%, var(--dfq-blue) 100%);
+            -webkit-font-smoothing: antialiased;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+            transition: opacity var(--splash-fade) ease, transform var(--splash-fade) ease;
+        }
+
+        body.is-leaving {
+            opacity: 0;
+            transform: scale(1.015);
+            pointer-events: none;
+        }
+
+        .splash {
+            width: 100%;
+            max-width: 360px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: splash-rise 700ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+        }
+
+        .splash__icon-wrap {
+            position: relative;
+            width: 112px;
+            height: 112px;
+            margin-bottom: 30px;
+            animation: splash-pop 850ms cubic-bezier(0.2, 0.9, 0.25, 1.12) both;
+        }
+
+        .splash__icon-wrap::before {
+            content: "";
+            position: absolute;
+            inset: -26px;
+            border-radius: 42px;
+            background: radial-gradient(circle, rgba(79, 140, 255, 0.5) 0%, rgba(79, 140, 255, 0) 68%);
+            filter: blur(10px);
+            animation: splash-glow 2.6s ease-in-out infinite;
+        }
+
+        .splash__icon {
+            position: relative;
+            z-index: 1;
+            display: block;
+            width: 100%;
+            height: 100%;
+            border-radius: 26px;
+            box-shadow:
+                0 20px 55px rgba(0, 0, 0, 0.45),
+                0 0 0 1px rgba(255, 255, 255, 0.14) inset;
+        }
+
+        .splash__name {
+            margin: 0;
+            font-size: 30px;
+            font-weight: 800;
+            letter-spacing: 0.4px;
+            line-height: 1.15;
+        }
+
+        .splash__name span {
+            font-weight: 300;
+            letter-spacing: 0.2px;
+        }
+
+        .splash__tagline {
+            margin: 11px 0 0;
+            font-size: 13.5px;
+            letter-spacing: 0.3px;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .splash__loader {
+            position: relative;
+            width: 132px;
+            height: 4px;
+            margin-top: 42px;
+            border-radius: 99px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .splash__loader::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 46%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, transparent, var(--dfq-accent), #ffffff, var(--dfq-accent), transparent);
+            animation: splash-slide 1.25s ease-in-out infinite;
+        }
+
+        .splash__status {
+            margin: 15px 0 0;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .splash__footer {
+            position: fixed;
+            left: 0;
+            right: 0;
+            bottom: calc(env(safe-area-inset-bottom) + 22px);
+            margin: 0;
+            font-size: 10.5px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.34);
+        }
+
+        @keyframes splash-rise {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes splash-pop {
+            0%   { opacity: 0; transform: scale(0.72); }
+            60%  { opacity: 1; }
+            100% { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes splash-glow {
+            0%, 100% { opacity: 0.65; transform: scale(0.96); }
+            50%      { opacity: 1; transform: scale(1.04); }
+        }
+
+        @keyframes splash-slide {
+            0%   { left: -46%; }
+            100% { left: 100%; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .splash,
+            .splash__icon-wrap,
+            .splash__icon-wrap::before,
+            .splash__loader::after {
+                animation: none !important;
+            }
+            body { transition: opacity 200ms ease; }
+        }
+    </style>
+</head>
+<body>
+    <main class="splash" role="status" aria-live="polite" aria-label="DFQ Exchange is starting">
+        <div class="splash__icon-wrap">
+            <img class="splash__icon" src="static/assets/img/app-icon-512.png"
+                 alt="DFQ Exchange app icon" width="112" height="112">
+        </div>
+
+        <h1 class="splash__name">DFQ <span>Exchange</span></h1>
+        <p class="splash__tagline">Buy &amp; sell crypto and gift cards</p>
+
+        <div class="splash__loader" aria-hidden="true"></div>
+        <p class="splash__status">Preparing your account</p>
+    </main>
+
+    <p class="splash__footer">Secure payments &middot; Instant payouts</p>
+
+    <script>
+        /*
+         * Native-style hand-off: hold the branding briefly, fade out, then
+         * replace the splash with the existing login page. login.php already
+         * forwards signed-in users to their dashboard, so authentication is
+         * preserved without duplicating any login logic here.
+         */
+        (function () {
+            'use strict';
+
+            var HOLD_MS = 2000;
+            var FADE_MS = 420;
+
+            window.setTimeout(function () {
+                document.body.classList.add('is-leaving');
+                window.setTimeout(function () {
+                    window.location.replace('login.php');
+                }, FADE_MS);
+            }, HOLD_MS);
+        })();
+    </script>
+</body>
+</html>
