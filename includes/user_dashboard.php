@@ -6,6 +6,8 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/utils.php';
+require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/email_templates.php';
 
 class UserDashboard {
     private $db;
@@ -554,7 +556,10 @@ class UserDashboard {
             
             // Log activity
             $this->logUserActivity('gift_card_submission', "Submitted {$brand['brand_name']} gift card worth " . formatCurrency($cardValue));
-            
+
+            // Receipt for the user + review alert for the admin team.
+            $this->sendGiftCardNotifications($userId, $brand['brand_name'], $cardValue, $payoutAmount, $submissionId);
+
             return [
                 'success' => true,
                 'message' => 'Gift card submitted successfully! It will be reviewed within 24 hours.',
@@ -1107,6 +1112,8 @@ class UserDashboard {
                 $this->db->commit();
                 $this->logUserActivity('transfer_request', "Submitted crypto transfer $reference");
 
+                $this->sendTransferNotifications($userId, $reference, 'deposit', $payoutAmount, $payoutCurrency);
+
                 return [
                     'success' => true,
                     'message' => 'Transfer submitted for review. Reference: ' . $reference,
@@ -1195,6 +1202,8 @@ class UserDashboard {
             $this->db->commit();
             $this->logUserActivity('transfer_request', "Submitted withdrawal request $reference");
 
+            $this->sendTransferNotifications($userId, $reference, 'withdrawal', $amount, $payoutCurrency);
+
             return [
                 'success' => true,
                 'message' => 'Withdrawal request submitted. Reference: ' . $reference,
@@ -1263,7 +1272,74 @@ class UserDashboard {
     /**
      * Helper Methods
      */
-    
+
+    /**
+     * Email a receipt to the user and a review alert to the admin team.
+     * Mail problems are logged and never affect the completed transaction.
+     */
+    private function sendGiftCardNotifications($userId, $brand, $cardValue, $payout, $submissionId) {
+        try {
+            $contact = $this->getUserContact($userId);
+            if (!$contact) {
+                return;
+            }
+
+            $userMail = emailTemplateGiftCardReceived(
+                $contact['first_name'], $brand, $cardValue, $payout, $submissionId
+            );
+            sendAppEmail($contact['email'], $userMail['subject'], $userMail['html'], $userMail['text'], $contact['name']);
+
+            $adminMail = emailTemplateAdminNewGiftCard(
+                $submissionId, $brand, $cardValue, $payout, $contact['name'], $contact['email']
+            );
+            notifyAdmin($adminMail['subject'], $adminMail['html'], $adminMail['text']);
+        } catch (Throwable $e) {
+            logError('Gift card email error: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Email a transfer receipt to the user and an alert to the admin team.
+     */
+    private function sendTransferNotifications($userId, $reference, $direction, $payoutAmount, $payoutCurrency) {
+        try {
+            $contact = $this->getUserContact($userId);
+            if (!$contact) {
+                return;
+            }
+
+            $userMail = emailTemplateTransferReceived(
+                $contact['first_name'], $reference, $direction, $payoutAmount, $payoutCurrency
+            );
+            sendAppEmail($contact['email'], $userMail['subject'], $userMail['html'], $userMail['text'], $contact['name']);
+
+            $adminMail = emailTemplateAdminNewTransfer(
+                $reference, $direction, $contact['name'], $contact['email'], $payoutAmount, $payoutCurrency
+            );
+            notifyAdmin($adminMail['subject'], $adminMail['html'], $adminMail['text']);
+        } catch (Throwable $e) {
+            logError('Transfer email error: ' . $e->getMessage());
+        }
+    }
+
+    private function getUserContact($userId) {
+        $stmt = $this->db->prepare(
+            "SELECT first_name, last_name, email FROM users WHERE id = :user_id LIMIT 1"
+        );
+        $stmt->execute([':user_id' => $userId]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'first_name' => $row['first_name'],
+            'name' => trim($row['first_name'] . ' ' . $row['last_name']),
+            'email' => $row['email'],
+        ];
+    }
+
     private function getUserBalance($forUpdate = false) {
         $sql = "SELECT balance FROM users WHERE id = :user_id LIMIT 1" . ($forUpdate ? " FOR UPDATE" : "");
         $stmt = $this->db->prepare($sql);

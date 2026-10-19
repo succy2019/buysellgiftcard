@@ -39,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="theme-color" content="#101828">
 
     <!-- carousel CSS -->
     <link rel="stylesheet" href="static/assets/css/owl.carousel.min.css">
@@ -46,16 +47,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" href="static/assets/img/fabicon.png">
     <!-- animations CSS -->
     <link rel="stylesheet" href="static/assets/css/animate.min.css">
-    <!-- font-awsome CSS -->
-    <link rel="stylesheet" href="static/assets/css/font-awesome.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="static/assets/css/bootstrap.min.css">
     <!-- mobile menu CSS -->
     <link rel="stylesheet" href="static/assets/css/slicknav.min.css">
     <!--css animation-->
     <link rel="stylesheet" href="static/assets/css/animation.css">
-    <!--css animation-->
-    <link rel="stylesheet" href="static/assets/css/material-design-iconic-font.min.css">
     <!-- style CSS -->
     <link rel="stylesheet" href="static/assets/css/style.css">
     <!-- responsive CSS -->
@@ -177,8 +174,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6bcf7f;
         }
     </style>
+    <link rel="stylesheet" href="static/assets/css/dfq-app.css">
 </head>
-<body>
+<body class="dfq-auth">
     <!--header area start-->
     <div class="header-area wow fadeInDown header-absolate" id="nav">
         <div class="container">
@@ -188,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-4 col-lg-2">
                     <div class="logo-area">
-                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt=""></a>
+                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt="DFQ Exchange home"></a>
                     </div>
                 </div>
                 <div class="col-4 col-lg-8 d-none d-lg-block">
@@ -232,26 +230,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                            <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
                         <?php endif; ?>
                         
                         <?php if (!empty($success)): ?>
-                            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+                            <div class="alert alert-success" role="status"><?php echo htmlspecialchars($success); ?></div>
                         <?php endif; ?>
                         
                         <form method="POST" id="adminLoginForm">
                             <?php echo csrfField(); ?>
                             <div class="form-group">
-                                <input type="email" name="email" class="form-control" placeholder="Admin Email Address" 
+                                <label for="admin-email">Admin email address</label>
+                                <input type="email" id="admin-email" name="email" class="form-control" placeholder="you@example.com" autocomplete="username"
                                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
                             </div>
                             <div class="form-group">
-                                <input type="password" name="password" class="form-control" placeholder="Admin Password" required>
+                                <label for="admin-password">Password</label>
+                                <input type="password" id="admin-password" name="password" class="form-control" autocomplete="current-password" required>
+                            </div>
+                            <div style="text-align:right;margin:-12px 0 18px;">
+                                <a href="forgot-password.php?type=admin" style="color:#cbe5ff;font-size:13px;text-decoration:none;">Forgot Password?</a>
                             </div>
                             <button type="submit" class="admin-btn">Access Admin Panel</button>
                         </form>
                         <div class="admin-login-footer">
-                            <p>Need access? <a href="#">Contact System Administrator</a></p>
+                            <p>Need access? <a href="mailto:support@dfqexchange.com.ng?subject=Admin%20access%20request">Contact support</a></p>
                         </div>
                     </div>
                 </div>
@@ -282,40 +285,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="static/assets/js/bootstrap.min.js"></script>
     <!--mobile menu js-->
     <script src="static/assets/js/jquery.slicknav.min.js"></script>
-    <!-- main js-->
-    <script src="static/assets/js/main.js"></script>
-    
     <script>
-        // Form validation
-        document.getElementById('adminLoginForm').addEventListener('submit', function(e) {
-            const email = document.querySelector('input[name="email"]').value;
-            const password = document.querySelector('input[name="password"]').value;
-            
-            if (!email || !password) {
-                e.preventDefault();
-                alert('Please fill in all fields');
-                return false;
-            }
-            
-            if (!isValidEmail(email)) {
-                e.preventDefault();
-                alert('Please enter a valid email address');
-                return false;
-            }
+        document.getElementById('adminLoginForm').addEventListener('submit', function() {
+            const button = this.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.setAttribute('aria-busy', 'true');
+            button.textContent = 'Signing in…';
         });
-        
-        function isValidEmail(email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return emailRegex.test(email);
-        }
-
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(alert => {
-                alert.style.display = 'none';
-            });
-        }, 5000);
     </script>
 </body>
 </html>

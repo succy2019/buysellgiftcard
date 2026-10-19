@@ -15,7 +15,7 @@ Options -Indexes
 # Block direct web access to application internals
 <IfModule mod_rewrite.c>
     RewriteEngine On
-    RewriteRule ^(config|includes|database)(/|$) - [F,L]
+    RewriteRule ^(config|includes|database|logs)(/|$) - [F,L]
 </IfModule>
 
 # Setup and migration scripts are CLI-only

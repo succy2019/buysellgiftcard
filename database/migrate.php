@@ -183,7 +183,30 @@ if (!tableExists($db, 'ledger_entries')) {
     echo "  = ledger_entries already present\n";
 }
 
-// 6. Default settings for the transfer flow
+// 6. Single-use password reset tokens
+if (!tableExists($db, 'password_resets')) {
+    $db->exec("
+        CREATE TABLE password_resets (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            account_type ENUM('user','admin') NOT NULL,
+            account_id INT NOT NULL,
+            email VARCHAR(100) NOT NULL,
+            token_hash CHAR(64) NOT NULL,
+            ip_address VARCHAR(45) NULL,
+            expires_at DATETIME NOT NULL,
+            used_at DATETIME NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_token_hash (token_hash),
+            INDEX idx_account (account_type, account_id),
+            INDEX idx_expires_at (expires_at)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
+    ");
+    echo "  + password_resets created\n";
+} else {
+    echo "  = password_resets already present\n";
+}
+
+// 7. Default settings for the transfer flow
 $settings = [
     ['usd_to_ngn_rate', '1500.00', 'Naira value of 1 USD used for payouts'],
     ['transfer_fee_percentage', '0.5', 'Fee percentage applied to crypto transfer payouts'],

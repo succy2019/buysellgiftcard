@@ -217,6 +217,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get current page data based on section
 $currentSection = $_GET['section'] ?? 'dashboard';
+$adminSections = ['dashboard', 'users', 'transactions', 'giftcards', 'transfers', 'payouts', 'company', 'rates', 'reports', 'settings'];
+if (!in_array($currentSection, $adminSections, true)) {
+    $currentSection = 'dashboard';
+}
 $pageData = [];
 
 switch ($currentSection) {
@@ -287,16 +291,12 @@ switch ($currentSection) {
     <link rel="icon" href="static/assets/img/fabicon.png">
     <!-- animations CSS -->
     <link rel="stylesheet" href="static/assets/css/animate.min.css">
-    <!-- font-awsome CSS -->
-    <link rel="stylesheet" href="static/assets/css/font-awesome.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="static/assets/css/bootstrap.min.css">
     <!-- mobile menu CSS -->
     <link rel="stylesheet" href="static/assets/css/slicknav.min.css">
     <!--css animation-->
     <link rel="stylesheet" href="static/assets/css/animation.css">
-    <!--css animation-->
-    <link rel="stylesheet" href="static/assets/css/material-design-iconic-font.min.css">
     <!-- style CSS -->
     <link rel="stylesheet" href="static/assets/css/style.css">
     <!-- responsive CSS -->
@@ -536,8 +536,9 @@ switch ($currentSection) {
             border-color: #fe998b;
         }
     </style>
+    <link rel="stylesheet" href="static/assets/css/dfq-app.css">
 </head>
-<body>
+<body class="dfq-app dfq-admin">
     <!--header area start-->
     <div class="header-area wow fadeInDown header-absolate" id="nav">
         <div class="container">
@@ -554,12 +555,11 @@ switch ($currentSection) {
                     <div class="main-menu text-center">
                         <nav>
                             <ul id="slick-nav">
-                                <li><a href="#" class="active">Admin Panel</a></li>
-                                <li><a href="#" onclick="showAdminSection('dashboard')">Dashboard</a></li>
-                                <li><a href="#" onclick="showAdminSection('users')">Users</a></li>
-                                <li><a href="#" onclick="showAdminSection('transactions')">Transactions</a></li>
-                                <li><a href="#" onclick="showAdminSection('transfers')">Transfers</a></li>
-                                <li><a href="#" onclick="showAdminSection('giftcards')">Gift Cards</a></li>
+                                <li><a href="?section=dashboard">Admin Panel</a></li>
+                                <li><a href="?section=users">Users</a></li>
+                                <li><a href="?section=transactions">Transactions</a></li>
+                                <li><a href="?section=transfers">Transfers</a></li>
+                                <li><a href="?section=giftcards">Gift Cards</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -593,16 +593,16 @@ switch ($currentSection) {
                             </div>
                         </div>
                         <ul class="admin-menu">
-                            <li><a href="#" class="<?php echo $currentSection === 'dashboard' ? 'active' : ''; ?>" onclick="showAdminSection('dashboard')"><i class="fa fa-dashboard"></i>Dashboard</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'users' ? 'active' : ''; ?>" onclick="showAdminSection('users')"><i class="fa fa-users"></i>User Management</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'transactions' ? 'active' : ''; ?>" onclick="showAdminSection('transactions')"><i class="fa fa-exchange"></i>Transactions</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'transfers' ? 'active' : ''; ?>" onclick="showAdminSection('transfers')"><i class="fa fa-paper-plane"></i>Transfers</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'payouts' ? 'active' : ''; ?>" onclick="showAdminSection('payouts')"><i class="fa fa-credit-card"></i>Payout Accounts</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'giftcards' ? 'active' : ''; ?>" onclick="showAdminSection('giftcards')"><i class="fa fa-gift"></i>Gift Cards</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'rates' ? 'active' : ''; ?>" onclick="showAdminSection('rates')"><i class="fa fa-line-chart"></i>Exchange Rates</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'company' ? 'active' : ''; ?>" onclick="showAdminSection('company')"><i class="fa fa-university"></i>Company Accounts</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'reports' ? 'active' : ''; ?>" onclick="showAdminSection('reports')"><i class="fa fa-bar-chart"></i>Reports</a></li>
-                            <li><a href="#" class="<?php echo $currentSection === 'settings' ? 'active' : ''; ?>" onclick="showAdminSection('settings')"><i class="fa fa-cog"></i>Settings</a></li>
+                            <li><a href="?section=dashboard" class="<?php echo $currentSection === 'dashboard' ? 'active' : ''; ?>" <?php echo $currentSection === 'dashboard' ? 'aria-current="page"' : ''; ?>><i class="fa fa-dashboard"></i>Dashboard</a></li>
+                            <li><a href="?section=users" class="<?php echo $currentSection === 'users' ? 'active' : ''; ?>" <?php echo $currentSection === 'users' ? 'aria-current="page"' : ''; ?>><i class="fa fa-users"></i>User Management</a></li>
+                            <li><a href="?section=transactions" class="<?php echo $currentSection === 'transactions' ? 'active' : ''; ?>" <?php echo $currentSection === 'transactions' ? 'aria-current="page"' : ''; ?>><i class="fa fa-exchange"></i>Transactions</a></li>
+                            <li><a href="?section=transfers" class="<?php echo $currentSection === 'transfers' ? 'active' : ''; ?>" <?php echo $currentSection === 'transfers' ? 'aria-current="page"' : ''; ?>><i class="fa fa-paper-plane"></i>Transfers</a></li>
+                            <li><a href="?section=payouts" class="<?php echo $currentSection === 'payouts' ? 'active' : ''; ?>" <?php echo $currentSection === 'payouts' ? 'aria-current="page"' : ''; ?>><i class="fa fa-credit-card"></i>Payout Accounts</a></li>
+                            <li><a href="?section=giftcards" class="<?php echo $currentSection === 'giftcards' ? 'active' : ''; ?>" <?php echo $currentSection === 'giftcards' ? 'aria-current="page"' : ''; ?>><i class="fa fa-gift"></i>Gift Cards</a></li>
+                            <li><a href="?section=rates" class="<?php echo $currentSection === 'rates' ? 'active' : ''; ?>" <?php echo $currentSection === 'rates' ? 'aria-current="page"' : ''; ?>><i class="fa fa-line-chart"></i>Exchange Rates</a></li>
+                            <li><a href="?section=company" class="<?php echo $currentSection === 'company' ? 'active' : ''; ?>" <?php echo $currentSection === 'company' ? 'aria-current="page"' : ''; ?>><i class="fa fa-university"></i>Company Accounts</a></li>
+                            <li><a href="?section=reports" class="<?php echo $currentSection === 'reports' ? 'active' : ''; ?>" <?php echo $currentSection === 'reports' ? 'aria-current="page"' : ''; ?>><i class="fa fa-bar-chart"></i>Reports</a></li>
+                            <li><a href="?section=settings" class="<?php echo $currentSection === 'settings' ? 'active' : ''; ?>" <?php echo $currentSection === 'settings' ? 'aria-current="page"' : ''; ?>><i class="fa fa-cog"></i>Settings</a></li>
                             <li>
                                 <form method="POST">
                                     <?php echo csrfField(); ?>
@@ -620,11 +620,11 @@ switch ($currentSection) {
                 <div class="col-lg-9">
                     <!-- Global Alerts -->
                     <?php if (!empty($error)): ?>
-                        <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                        <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
                     <?php endif; ?>
                     
                     <?php if (!empty($success)): ?>
-                        <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+                        <div class="alert alert-success" role="status"><?php echo htmlspecialchars($success); ?></div>
                     <?php endif; ?>
 
                     <!-- Admin Dashboard Section -->
@@ -1774,15 +1774,7 @@ switch ($currentSection) {
     <script src="static/assets/js/bootstrap.min.js"></script>
     <!--mobile menu js-->
     <script src="static/assets/js/jquery.slicknav.min.js"></script>
-    <!-- main js-->
-    <script src="static/assets/js/main.js"></script>
-    
     <script>
-        function showAdminSection(sectionName) {
-            // Update URL
-            window.location.href = '?section=' + sectionName;
-        }
-
         // Auto-hide alerts after 5 seconds
         setTimeout(function() {
             const alerts = document.querySelectorAll('.alert');

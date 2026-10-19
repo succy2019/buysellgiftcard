@@ -6,6 +6,8 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/utils.php';
+require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/email_templates.php';
 
 class AdminDashboard {
     private $db;
@@ -345,18 +347,26 @@ class AdminDashboard {
                     'message' => 'Invalid status'
                 ];
             }
-            
+
+            $stmt = $this->db->prepare("SELECT first_name, email FROM users WHERE id = :user_id LIMIT 1");
+            $stmt->execute([':user_id' => $userId]);
+            $user = $stmt->fetch();
+
             $sql = "UPDATE users SET status = :status, updated_at = NOW() WHERE id = :user_id";
             $stmt = $this->db->prepare($sql);
             $result = $stmt->execute([
                 ':status' => $status,
                 ':user_id' => $userId
             ]);
-            
+
             if ($result) {
                 // Log admin activity
                 $this->logAdminActivity('user_status_update', "Updated user #$userId status to: $status");
-                
+
+                if ($user) {
+                    $this->sendAccountStatusEmail($user, $status);
+                }
+
                 return [
                     'success' => true,
                     'message' => 'User status updated successfully'
@@ -622,10 +632,27 @@ class AdminDashboard {
             }
             
             $this->db->commit();
-            
+
             // Log admin activity
             $this->logAdminActivity('gift_card_review', "$message: {$submission['submission_id']}");
-            
+
+            // Tell the user the outcome.
+            try {
+                $contact = $this->getUserContact($submission['user_id']);
+                if ($contact) {
+                    $mail = emailTemplateGiftCardReviewed(
+                        $contact['first_name'],
+                        $submission['brand_name'] ?? 'Gift Card',
+                        $action === 'approve',
+                        $submission['payout_amount'],
+                        $rejectionReason
+                    );
+                    sendAppEmail($contact['email'], $mail['subject'], $mail['html'], $mail['text'], $contact['name']);
+                }
+            } catch (Throwable $e) {
+                logError('Gift card review email error: ' . $e->getMessage());
+            }
+
             return [
                 'success' => true,
                 'message' => $message
@@ -1160,6 +1187,17 @@ class AdminDashboard {
             }
 
             $status = $action === 'approve' ? 'verified' : 'rejected';
+
+            // Read the account and its owner before the status changes.
+            $stmt = $this->db->prepare(
+                "SELECT a.*, u.first_name, u.last_name, u.email
+                 FROM user_payout_accounts a
+                 LEFT JOIN users u ON u.id = a.user_id
+                 WHERE a.id = :id AND a.status = 'pending' LIMIT 1"
+            );
+            $stmt->execute([':id' => $accountId]);
+            $account = $stmt->fetch();
+
             $sql = "UPDATE user_payout_accounts
                     SET status = :status, rejection_reason = :reason,
                         verified_by = :admin_id, verified_at = NOW(), updated_at = NOW()
@@ -1179,11 +1217,49 @@ class AdminDashboard {
 
             $this->logAdminActivity('payout_account_review', "Payout account #$accountId marked $status");
 
+            if ($account && !empty($account['email'])) {
+                try {
+                    $label = $this->payoutAccountLabel($account);
+                    $mail = emailTemplatePayoutAccountReviewed(
+                        $account['first_name'],
+                        $label,
+                        $action === 'approve',
+                        $reason
+                    );
+                    sendAppEmail(
+                        $account['email'],
+                        $mail['subject'],
+                        $mail['html'],
+                        $mail['text'],
+                        trim($account['first_name'] . ' ' . $account['last_name'])
+                    );
+                } catch (Throwable $e) {
+                    logError('Payout account review email error: ' . $e->getMessage());
+                }
+            }
+
             return ['success' => true, 'message' => 'Payout account ' . $status];
         } catch (Exception $e) {
             logError('Review payout account error: ' . $e->getMessage());
             return ['success' => false, 'message' => 'Unable to review the payout account'];
         }
+    }
+
+    /**
+     * Short, non-sensitive label for a payout account (used in emails).
+     */
+    private function payoutAccountLabel($account) {
+        if (($account['method'] ?? '') === 'bank') {
+            $last4 = substr((string)$account['account_number'], -4);
+            return trim(($account['bank_name'] ?: 'Bank') . ' •••• ' . $last4);
+        }
+
+        $address = (string)$account['wallet_address'];
+        $short = strlen($address) > 12
+            ? substr($address, 0, 6) . '…' . substr($address, -4)
+            : $address;
+
+        return strtoupper((string)$account['currency']) . ' ' . $short;
     }
 
     /* ------------------------------------------------------------------
@@ -1364,6 +1440,21 @@ class AdminDashboard {
             $this->db->commit();
             $this->logAdminActivity('transfer_review', "Transfer {$request['reference']} $action");
 
+            try {
+                $contact = $this->getUserContact($request['user_id']);
+                if ($contact) {
+                    $mail = emailTemplateTransferReviewed(
+                        $contact['first_name'],
+                        $request['reference'],
+                        $action === 'verify',
+                        $notes
+                    );
+                    sendAppEmail($contact['email'], $mail['subject'], $mail['html'], $mail['text'], $contact['name']);
+                }
+            } catch (Throwable $e) {
+                logError('Transfer review email error: ' . $e->getMessage());
+            }
+
             return ['success' => true, 'message' => $message];
         } catch (Exception $e) {
             if ($this->db->inTransaction()) {
@@ -1457,6 +1548,21 @@ class AdminDashboard {
             $this->db->commit();
             $this->logAdminActivity('transfer_process', "Paid transfer {$request['reference']}");
 
+            try {
+                $contact = $this->getUserContact($request['user_id']);
+                if ($contact) {
+                    $mail = emailTemplateTransferPaid(
+                        $contact['first_name'],
+                        $request['reference'],
+                        $request['payout_amount'],
+                        $request['payout_currency']
+                    );
+                    sendAppEmail($contact['email'], $mail['subject'], $mail['html'], $mail['text'], $contact['name']);
+                }
+            } catch (Throwable $e) {
+                logError('Transfer paid email error: ' . $e->getMessage());
+            }
+
             return ['success' => true, 'message' => 'Transfer marked as paid'];
         } catch (Exception $e) {
             if ($this->db->inTransaction()) {
@@ -1513,6 +1619,33 @@ class AdminDashboard {
      * Private helper methods
      */
     
+    private function getUserContact($userId) {
+        $stmt = $this->db->prepare(
+            "SELECT first_name, last_name, email FROM users WHERE id = :user_id LIMIT 1"
+        );
+        $stmt->execute([':user_id' => $userId]);
+        $row = $stmt->fetch();
+
+        if (!$row) {
+            return null;
+        }
+
+        return [
+            'first_name' => $row['first_name'],
+            'name' => trim($row['first_name'] . ' ' . $row['last_name']),
+            'email' => $row['email'],
+        ];
+    }
+
+    private function sendAccountStatusEmail($user, $status) {
+        try {
+            $mail = emailTemplateAccountStatus($user['first_name'], $status);
+            sendAppEmail($user['email'], $mail['subject'], $mail['html'], $mail['text'], $user['first_name']);
+        } catch (Throwable $e) {
+            logError('Account status email error: ' . $e->getMessage());
+        }
+    }
+
     private function formatTransactionType($transaction) {
         switch ($transaction['type']) {
             case 'buy_crypto':

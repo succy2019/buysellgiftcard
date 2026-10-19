@@ -1,8 +1,8 @@
 -- FEX Cryptocurrency & Gift Card Trading Platform Database Schema
 -- Created: October 31, 2025
 
-CREATE DATABASE IF NOT EXISTS fex_trading_platform;
-USE fex_trading_platform;
+CREATE DATABASE IF NOT EXISTS dfqexchange;
+USE dfqexchange;
 
 -- Users table for customer accounts
 CREATE TABLE users (
@@ -166,6 +166,23 @@ CREATE TABLE admin_sessions (
     INDEX idx_admin_id (admin_id),
     INDEX idx_expires_at (expires_at)
 );
+
+-- Single-use password reset tokens (users and admins).
+-- Only the SHA-256 hash of each token is stored.
+CREATE TABLE password_resets (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    account_type ENUM('user', 'admin') NOT NULL,
+    account_id INT NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    token_hash CHAR(64) NOT NULL,
+    ip_address VARCHAR(45),
+    expires_at DATETIME NOT NULL,
+    used_at DATETIME NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY uniq_token_hash (token_hash),
+    INDEX idx_account (account_type, account_id),
+    INDEX idx_expires_at (expires_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- Support tickets table
 CREATE TABLE support_tickets (

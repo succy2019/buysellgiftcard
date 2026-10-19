@@ -1,0 +1,1099 @@
+:root {
+    --dfq-canvas: #f8fafc;
+    --dfq-surface: #ffffff;
+    --dfq-ink: #101828;
+    --dfq-ink-secondary: #1d2939;
+    --dfq-muted: #667085;
+    --dfq-border: #e2e8f0;
+    --dfq-border-subtle: #f1f5f9;
+    --dfq-accent: #12b76a;
+    --dfq-accent-soft: #ecfdf3;
+    --dfq-warning: #f59e0b;
+    --dfq-warning-soft: #fef0c7;
+    --dfq-info: #0ba5ec;
+    --dfq-info-soft: #f0f9ff;
+    --dfq-danger: #f04438;
+    --dfq-danger-soft: #fef3f2;
+    --dfq-shadow: 0 1px 2px rgba(16, 24, 40, .05);
+    --dfq-shadow-raised: 0 4px 12px rgba(16, 24, 40, .08);
+}
+
+body.dfq-auth,
+body.dfq-app {
+    margin: 0;
+    color: var(--dfq-ink);
+    background: var(--dfq-canvas) !important;
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "tnum";
+    -webkit-font-smoothing: antialiased;
+}
+
+.dfq-auth *,
+.dfq-app * {
+    box-sizing: border-box;
+}
+
+.dfq-auth .fa,
+.dfq-app .fa {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Segoe UI Symbol", "Noto Sans Symbols 2", sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1;
+}
+
+.fa-user::before { content: "●"; }
+.fa-user-shield::before,
+.fa-shield::before { content: "◈"; }
+.fa-lock::before { content: "▣"; }
+.fa-dashboard::before { content: "▦"; }
+.fa-exchange::before { content: "⇄"; }
+.fa-wallet::before,
+.fa-credit-card::before { content: "▰"; }
+.fa-send::before,
+.fa-paper-plane::before { content: "➤"; }
+.fa-list::before { content: "☷"; }
+.fa-gift::before { content: "◇"; }
+.fa-support::before { content: "?"; }
+.fa-sign-out::before { content: "↪"; }
+.fa-download::before { content: "↓"; }
+.fa-users::before { content: "●●"; }
+.fa-line-chart::before { content: "↗"; }
+.fa-university::before { content: "▤"; }
+.fa-bar-chart::before { content: "▥"; }
+.fa-cog::before { content: "⚙"; }
+
+.dfq-auth a,
+.dfq-app a {
+    transition: color .16s ease, background-color .16s ease, border-color .16s ease, box-shadow .16s ease;
+}
+
+.dfq-auth a:focus-visible,
+.dfq-app a:focus-visible,
+.dfq-auth button:focus-visible,
+.dfq-app button:focus-visible,
+.dfq-auth input:focus-visible,
+.dfq-app input:focus-visible,
+.dfq-auth select:focus-visible,
+.dfq-app select:focus-visible,
+.dfq-auth textarea:focus-visible,
+.dfq-app textarea:focus-visible {
+    outline: 2px solid var(--dfq-ink);
+    outline-offset: 2px;
+}
+
+.dfq-auth .header-area {
+    position: absolute !important;
+    z-index: 5;
+    top: 0;
+    width: 100%;
+    min-height: 72px;
+    background: var(--dfq-surface);
+    border-bottom: 1px solid var(--dfq-border);
+    box-shadow: var(--dfq-shadow);
+}
+
+.dfq-auth .header-area .container {
+    max-width: 1200px;
+}
+
+.dfq-auth .header-area .main-menu a {
+    color: var(--dfq-muted);
+}
+
+.dfq-auth .header-area .main-menu a:hover {
+    color: var(--dfq-ink);
+}
+
+.dfq-auth .header-area .logibtn,
+.dfq-auth .gradient-btn,
+.dfq-auth .admin-btn,
+.dfq-auth button,
+.dfq-auth .button {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 18px;
+    color: #fff;
+    background: var(--dfq-ink);
+    border: 1px solid var(--dfq-ink);
+    border-radius: 8px;
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .16s ease, border-color .16s ease, transform .16s ease;
+}
+
+.dfq-auth .header-area .logibtn:hover,
+.dfq-auth .gradient-btn:hover,
+.dfq-auth .admin-btn:hover,
+.dfq-auth button:hover,
+.dfq-auth .button:hover {
+    color: #fff;
+    background: var(--dfq-ink-secondary);
+    border-color: var(--dfq-ink-secondary);
+    transform: translateY(-1px);
+}
+
+.dfq-auth .login-area,
+.dfq-auth .register-area,
+.dfq-auth .admin-login-area {
+    min-height: 100vh;
+    padding: 112px 16px 48px;
+    background:
+        linear-gradient(rgba(16, 24, 40, .025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(16, 24, 40, .025) 1px, transparent 1px),
+        var(--dfq-canvas);
+    background-size: 32px 32px;
+}
+
+.dfq-auth .login-card,
+.dfq-auth .register-card,
+.dfq-auth .admin-login-card,
+.dfq-auth .card {
+    width: 100%;
+    padding: clamp(24px, 5vw, 40px);
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border: 1px solid var(--dfq-border);
+    border-radius: 16px;
+    box-shadow: var(--dfq-shadow-raised);
+    backdrop-filter: none;
+}
+
+.dfq-auth .login-card,
+.dfq-auth .admin-login-card {
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.dfq-auth .register-card {
+    max-width: 720px;
+    margin: 0 auto;
+}
+
+.dfq-auth .login-header,
+.dfq-auth .register-header,
+.dfq-auth .admin-login-header {
+    margin-bottom: 28px;
+    text-align: left;
+}
+
+.dfq-auth .login-header h1,
+.dfq-auth .register-header h1,
+.dfq-auth .admin-login-header h1,
+.dfq-auth h1 {
+    margin: 0 0 8px;
+    color: var(--dfq-ink);
+    font-size: clamp(24px, 4vw, 30px);
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: -.02em;
+}
+
+.dfq-auth .login-header p,
+.dfq-auth .register-header p,
+.dfq-auth .admin-login-header p,
+.dfq-auth .lead {
+    margin: 0;
+    color: var(--dfq-muted);
+    font-size: 15px;
+    line-height: 1.6;
+}
+
+.dfq-auth .admin-login-header .admin-icon {
+    display: inline-grid;
+    width: 48px;
+    height: 48px;
+    margin: 0 0 16px;
+    place-items: center;
+    color: var(--dfq-ink);
+    background: var(--dfq-info-soft);
+    border-radius: 12px;
+    font-size: 22px;
+}
+
+.dfq-auth .form-group {
+    margin-bottom: 18px;
+}
+
+.dfq-auth .form-group > label,
+.dfq-auth .field > label,
+.dfq-auth form > label {
+    display: block;
+    margin: 0 0 7px;
+    color: #344054;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.dfq-auth .form-group > small {
+    display: block;
+    margin-top: 6px;
+    color: var(--dfq-muted) !important;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.dfq-auth .form-control,
+.dfq-auth input[type="email"],
+.dfq-auth input[type="password"],
+.dfq-auth input[type="text"],
+.dfq-auth input[type="tel"],
+.dfq-auth select {
+    width: 100%;
+    min-height: 44px;
+    padding: 11px 14px;
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 15px;
+    line-height: 1.4;
+}
+
+.dfq-auth .form-control:focus,
+.dfq-auth input:focus,
+.dfq-auth select:focus {
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border-color: var(--dfq-ink);
+    box-shadow: 0 0 0 3px rgba(16, 24, 40, .08);
+    outline: 0;
+}
+
+.dfq-auth .form-control::placeholder,
+.dfq-auth input::placeholder {
+    color: #98a2b3;
+}
+
+.dfq-auth select option {
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+}
+
+.dfq-auth .forgot-password a,
+.dfq-auth .login-footer a,
+.dfq-auth .register-footer a,
+.dfq-auth .admin-login-footer a,
+.dfq-auth .terms-checkbox a,
+.dfq-auth .back a,
+.dfq-auth .support a {
+    color: var(--dfq-ink);
+    font-weight: 600;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+}
+
+.dfq-auth .forgot-password a:hover,
+.dfq-auth .login-footer a:hover,
+.dfq-auth .register-footer a:hover,
+.dfq-auth .admin-login-footer a:hover,
+.dfq-auth .terms-checkbox a:hover,
+.dfq-auth .back a:hover,
+.dfq-auth .support a:hover {
+    color: var(--dfq-accent);
+}
+
+.dfq-auth .login-footer,
+.dfq-auth .register-footer,
+.dfq-auth .admin-login-footer {
+    margin-top: 24px;
+    color: var(--dfq-muted);
+    text-align: center;
+}
+
+.dfq-auth .login-btn,
+.dfq-auth .register-btn,
+.dfq-auth .admin-btn,
+.dfq-auth form > button {
+    width: 100%;
+    min-height: 48px;
+    margin-top: 12px;
+}
+
+.dfq-auth button:disabled {
+    opacity: .72;
+    cursor: wait;
+    transform: none;
+}
+
+.dfq-auth .terms-checkbox {
+    margin-top: 18px;
+    color: var(--dfq-muted);
+}
+
+.dfq-auth .terms-checkbox label {
+    color: var(--dfq-muted);
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.dfq-auth .terms-checkbox input[type="checkbox"] {
+    margin: 0 8px 0 0;
+    accent-color: var(--dfq-accent);
+}
+
+.dfq-auth .security-notice {
+    margin-bottom: 22px;
+    padding: 14px 16px;
+    color: #175cd3;
+    background: var(--dfq-info-soft);
+    border: 1px solid #b9e6fe;
+    border-radius: 8px;
+    text-align: left;
+}
+
+.dfq-auth .security-notice i,
+.dfq-auth .security-notice span {
+    color: inherit;
+}
+
+.dfq-auth .alert {
+    margin-bottom: 20px;
+    padding: 12px 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.5;
+}
+
+.dfq-auth .alert-danger {
+    color: #b42318;
+    background: var(--dfq-danger-soft);
+    border: 1px solid #fecdca;
+}
+
+.dfq-auth .alert-success {
+    color: #067647;
+    background: var(--dfq-accent-soft);
+    border: 1px solid #a6f4c5;
+}
+
+.dfq-auth .footera-area {
+    padding: 20px 16px !important;
+    color: var(--dfq-muted);
+    background: var(--dfq-surface);
+    border-top: 1px solid var(--dfq-border);
+}
+
+.dfq-auth .footera-area p {
+    color: var(--dfq-muted) !important;
+}
+
+.dfq-auth .brand img {
+    box-shadow: none;
+}
+
+.dfq-app .header-area {
+    position: sticky !important;
+    z-index: 1000;
+    top: 0;
+    width: 100%;
+    min-height: 68px;
+    padding: 8px 0;
+    background: var(--dfq-surface);
+    border-bottom: 1px solid var(--dfq-border);
+    box-shadow: var(--dfq-shadow);
+}
+
+.dfq-app .header-area .container {
+    max-width: 1440px;
+}
+
+.dfq-app .header-area .main-menu {
+    display: none !important;
+}
+
+.dfq-app .header-area .logo-area img {
+    max-width: 150px;
+    max-height: 44px;
+    object-fit: contain;
+}
+
+.dfq-app .header-area .logibtn {
+    min-height: 40px;
+    padding: 9px 14px;
+    color: #344054;
+    background: #fff;
+    border: 1px solid #d0d5dd !important;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.dfq-app .header-area .logibtn:hover {
+    color: var(--dfq-ink);
+    background: var(--dfq-canvas);
+}
+
+.dfq-app .dashboard-area,
+.dfq-app .admin-dashboard-area {
+    min-height: calc(100vh - 68px);
+    padding: 28px 24px 48px;
+    background: var(--dfq-canvas);
+}
+
+.dfq-app .dashboard-area > .container-fluid,
+.dfq-app .admin-dashboard-area > .container-fluid {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-right: 0;
+    padding-left: 0;
+}
+
+.dfq-app .dashboard-area > .container-fluid > .row,
+.dfq-app .admin-dashboard-area > .container-fluid > .row {
+    margin-right: -12px;
+    margin-left: -12px;
+}
+
+.dfq-app .dashboard-area > .container-fluid > .row > [class*="col-"],
+.dfq-app .admin-dashboard-area > .container-fluid > .row > [class*="col-"] {
+    padding-right: 12px;
+    padding-left: 12px;
+}
+
+.dfq-app .sidebar,
+.dfq-app .admin-sidebar {
+    position: sticky;
+    top: 88px;
+    padding: 20px 16px;
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border: 1px solid var(--dfq-border);
+    border-radius: 12px;
+    box-shadow: var(--dfq-shadow);
+}
+
+.dfq-app .user-info,
+.dfq-app .admin-info {
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: 0 4px 18px;
+    border-bottom: 1px solid var(--dfq-border-subtle);
+}
+
+.dfq-app .user-info small,
+.dfq-app .admin-info small,
+.dfq-app .dashboard-card small,
+.dfq-app .admin-table small {
+    color: var(--dfq-muted) !important;
+}
+
+.dfq-app .user-avatar,
+.dfq-app .admin-avatar {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    color: var(--dfq-ink);
+    background: #eef2f6;
+    font-size: 17px;
+}
+
+.dfq-app .admin-avatar {
+    color: #175cd3;
+    background: var(--dfq-info-soft);
+}
+
+.dfq-app .sidebar-menu,
+.dfq-app .admin-menu {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dfq-app .sidebar-menu li,
+.dfq-app .admin-menu li {
+    margin: 0;
+}
+
+.dfq-app .sidebar-menu a,
+.dfq-app .admin-menu a,
+.dfq-app .sidebar-menu button.logout-btn,
+.dfq-app .admin-menu button.logout-btn {
+    display: flex;
+    min-height: 42px;
+    align-items: center;
+    padding: 10px 12px;
+    color: #475467;
+    background: transparent;
+    border: 0;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.35;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.dfq-app .sidebar-menu a:hover,
+.dfq-app .admin-menu a:hover,
+.dfq-app .sidebar-menu a.active,
+.dfq-app .admin-menu a.active {
+    color: var(--dfq-ink);
+    background: #f2f4f7;
+}
+
+.dfq-app .sidebar-menu i,
+.dfq-app .admin-menu i {
+    flex: 0 0 22px;
+    width: 22px;
+    margin-right: 10px;
+    color: var(--dfq-muted);
+    text-align: center;
+}
+
+.dfq-app .sidebar-menu a.active i,
+.dfq-app .admin-menu a.active i {
+    color: var(--dfq-ink);
+}
+
+.dfq-app .sidebar-menu button.logout-btn,
+.dfq-app .admin-menu button.logout-btn {
+    width: 100%;
+    margin-top: 12px;
+    color: #b42318 !important;
+    border-top: 1px solid var(--dfq-border-subtle);
+    border-radius: 0 0 8px 8px;
+}
+
+.dfq-app .dashboard-header,
+.dfq-app .dashboard-card,
+.dfq-app .stat-card,
+.dfq-app .admin-stat-card {
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border: 1px solid var(--dfq-border);
+    border-radius: 12px;
+    box-shadow: var(--dfq-shadow);
+    backdrop-filter: none;
+}
+
+.dfq-app .dashboard-header {
+    margin-bottom: 20px;
+    padding: 24px;
+}
+
+.dfq-app .dashboard-card {
+    margin-bottom: 20px;
+    padding: 24px;
+}
+
+.dfq-app .dashboard-header h1,
+.dfq-app .dashboard-card h1,
+.dfq-app .dashboard-card h2,
+.dfq-app .dashboard-card h3,
+.dfq-app .dashboard-card h4,
+.dfq-app .admin-section h1,
+.dfq-app .admin-section h2,
+.dfq-app .admin-section h3,
+.dfq-app .admin-section h4 {
+    color: var(--dfq-ink) !important;
+    font-weight: 600;
+    letter-spacing: -.015em;
+}
+
+.dfq-app .dashboard-header h1 {
+    font-size: clamp(22px, 3vw, 30px);
+}
+
+.dfq-app .dashboard-header p,
+.dfq-app .dashboard-card p,
+.dfq-app .admin-section p {
+    color: var(--dfq-muted) !important;
+}
+
+.dfq-app .balance-amount,
+.dfq-app .stat-value {
+    color: var(--dfq-ink);
+    font-feature-settings: "tnum";
+    font-variant-numeric: tabular-nums;
+}
+
+.dfq-app .balance-label,
+.dfq-app .stat-label {
+    color: var(--dfq-muted);
+}
+
+.dfq-app .balance-card {
+    text-align: left;
+}
+
+.dfq-app .balance-amount {
+    margin: 8px 0 20px;
+    font-size: clamp(30px, 4vw, 40px);
+    font-weight: 700;
+    letter-spacing: -.03em;
+}
+
+.dfq-app .stat-card,
+.dfq-app .admin-stat-card {
+    height: 100%;
+    padding: 20px;
+    text-align: left;
+}
+
+.dfq-app .admin-stat-card {
+    border-left-width: 3px;
+}
+
+.dfq-app .admin-stat-card.revenue { border-left-color: var(--dfq-accent); }
+.dfq-app .admin-stat-card.users { border-left-color: var(--dfq-info); }
+.dfq-app .admin-stat-card.transactions { border-left-color: var(--dfq-warning); }
+.dfq-app .admin-stat-card.pending { border-left-color: var(--dfq-danger); }
+
+.dfq-app .admin-stats-grid,
+.dfq-app .stats-grid {
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr));
+    gap: 16px;
+}
+
+.dfq-app .quick-actions {
+    justify-content: flex-start;
+    gap: 10px;
+    margin-top: 22px;
+}
+
+.dfq-app .quick-action-btn,
+.dfq-app .gradient-btn {
+    display: inline-flex;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 15px;
+    color: #fff;
+    background: var(--dfq-ink);
+    border: 1px solid var(--dfq-ink);
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.dfq-app .quick-action-btn:hover,
+.dfq-app .gradient-btn:hover {
+    color: #fff;
+    background: var(--dfq-ink-secondary);
+    border-color: var(--dfq-ink-secondary);
+}
+
+.dfq-app .form-control,
+.dfq-app input:not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+.dfq-app select,
+.dfq-app textarea {
+    min-height: 44px;
+    padding: 10px 13px;
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    box-shadow: none;
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.dfq-app .form-control:focus,
+.dfq-app input:focus,
+.dfq-app select:focus,
+.dfq-app textarea:focus {
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+    border-color: var(--dfq-ink);
+    box-shadow: 0 0 0 3px rgba(16, 24, 40, .08);
+    outline: 0;
+}
+
+.dfq-app input[type="checkbox"],
+.dfq-app input[type="radio"] {
+    accent-color: var(--dfq-ink);
+}
+
+.dfq-app .table {
+    min-width: 620px;
+    margin: 0;
+    color: var(--dfq-ink);
+    background: var(--dfq-surface);
+}
+
+.dfq-app .table thead th {
+    padding: 12px 14px;
+    color: #475467;
+    background: var(--dfq-canvas);
+    border-top: 0;
+    border-bottom: 1px solid var(--dfq-border);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    vertical-align: middle;
+}
+
+.dfq-app .table td[colspan] {
+    color: var(--dfq-muted) !important;
+    text-align: center;
+}
+
+.dfq-app .table td {
+    min-height: 52px;
+    padding: 13px 14px;
+    color: #344054;
+    border-color: var(--dfq-border-subtle);
+    vertical-align: middle;
+}
+
+.dfq-app .table tbody tr:hover {
+    background: var(--dfq-canvas);
+}
+
+.dfq-app .transaction-table,
+.dfq-app .admin-table {
+    overflow-x: auto;
+    border: 1px solid var(--dfq-border);
+    border-radius: 8px;
+}
+
+.dfq-app .status-completed,
+.dfq-app .status-verified,
+.dfq-app .status-approved,
+.dfq-app .status-paid,
+.dfq-app .status-active,
+.dfq-app .status-resolved {
+    color: #067647;
+    background: var(--dfq-accent-soft);
+}
+
+.dfq-app .status-pending,
+.dfq-app .status-unverified,
+.dfq-app .status-awaiting_payment,
+.dfq-app .status-open {
+    color: #b54708;
+    background: var(--dfq-warning-soft);
+}
+
+.dfq-app .status-processing,
+.dfq-app .status-proof_submitted,
+.dfq-app .status-under_review,
+.dfq-app .status-in_progress {
+    color: #175cd3;
+    background: var(--dfq-info-soft);
+}
+
+.dfq-app .status-rejected,
+.dfq-app .status-failed,
+.dfq-app .status-suspended,
+.dfq-app .status-cancelled,
+.dfq-app .status-inactive,
+.dfq-app .status-closed {
+    color: #b42318;
+    background: var(--dfq-danger-soft);
+}
+
+.dfq-app .status-completed,
+.dfq-app .status-verified,
+.dfq-app .status-approved,
+.dfq-app .status-paid,
+.dfq-app .status-active,
+.dfq-app .status-resolved,
+.dfq-app .status-pending,
+.dfq-app .status-unverified,
+.dfq-app .status-awaiting_payment,
+.dfq-app .status-open,
+.dfq-app .status-processing,
+.dfq-app .status-proof_submitted,
+.dfq-app .status-under_review,
+.dfq-app .status-in_progress,
+.dfq-app .status-rejected,
+.dfq-app .status-failed,
+.dfq-app .status-suspended,
+.dfq-app .status-cancelled,
+.dfq-app .status-inactive,
+.dfq-app .status-closed {
+    display: inline-flex;
+    min-height: 24px;
+    align-items: center;
+    padding: 3px 9px;
+    border: 1px solid transparent;
+    border-radius: 9999px;
+    font-size: 12px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.dfq-app .action-btn {
+    min-height: 34px;
+    align-items: center;
+    padding: 7px 10px;
+    border-radius: 7px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.dfq-app .btn-view {
+    color: #175cd3;
+    background: var(--dfq-info-soft);
+    border-color: #b9e6fe;
+}
+
+.dfq-app .btn-approve {
+    color: #067647;
+    background: var(--dfq-accent-soft);
+    border-color: #a6f4c5;
+}
+
+.dfq-app .btn-reject {
+    color: #b42318;
+    background: var(--dfq-danger-soft);
+    border-color: #fecdca;
+}
+
+.dfq-app .alert {
+    padding: 12px 14px;
+    border-radius: 8px;
+}
+
+.dfq-app .alert-danger {
+    color: #b42318;
+    background: var(--dfq-danger-soft);
+    border-color: #fecdca;
+}
+
+.dfq-app .alert-success {
+    color: #067647;
+    background: var(--dfq-accent-soft);
+    border-color: #a6f4c5;
+}
+
+.dfq-app .pagination {
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.dfq-app .page-link {
+    color: #344054;
+    background: var(--dfq-surface);
+    border-color: var(--dfq-border);
+    border-radius: 6px;
+}
+
+.dfq-app .page-item.active .page-link {
+    color: #fff;
+    background: var(--dfq-ink);
+    border-color: var(--dfq-ink);
+}
+
+@media (max-width: 991.98px) {
+    .dfq-app .dashboard-area,
+    .dfq-app .admin-dashboard-area {
+        padding: 20px 16px 36px;
+    }
+
+    .dfq-app .sidebar,
+    .dfq-app .admin-sidebar {
+        position: static;
+        margin-bottom: 20px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dfq-auth .header-area {
+        min-height: 64px;
+        padding: 7px 0;
+    }
+
+    .dfq-auth .header-area .main-menu,
+    .dfq-auth .header-area .mobile-menu {
+        display: none !important;
+    }
+
+    .dfq-auth .header-area .col-4 {
+        display: flex !important;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dfq-auth .header-area .logo-area img {
+        max-width: 135px;
+        max-height: 42px;
+    }
+
+    .dfq-auth .login-area,
+    .dfq-auth .register-area,
+    .dfq-auth .admin-login-area {
+        min-height: 100svh;
+        padding: 88px 12px 28px;
+    }
+
+    .dfq-auth .login-card,
+    .dfq-auth .register-card,
+    .dfq-auth .admin-login-card,
+    .dfq-auth .card {
+        padding: 24px 20px;
+        border-radius: 12px;
+    }
+
+    .dfq-app .header-area {
+        min-height: 60px;
+        padding: 6px 0;
+    }
+
+    .dfq-app .header-area .container {
+        padding-right: 12px;
+        padding-left: 12px;
+    }
+
+    .dfq-app .header-area .logo-area img {
+        max-width: 122px;
+        max-height: 38px;
+    }
+
+    .dfq-app .header-area .col-4 {
+        display: flex;
+        align-items: center;
+    }
+
+    .dfq-app .header-area .col-4.text-right {
+        justify-content: flex-end;
+    }
+
+    .dfq-app .dashboard-area,
+    .dfq-app .admin-dashboard-area {
+        min-height: calc(100vh - 60px);
+        padding: 16px 12px calc(92px + env(safe-area-inset-bottom));
+    }
+
+    .dfq-app .dashboard-area > .container-fluid > .row,
+    .dfq-app .admin-dashboard-area > .container-fluid > .row {
+        margin-right: 0;
+        margin-left: 0;
+    }
+
+    .dfq-app .dashboard-area > .container-fluid > .row > [class*="col-"],
+    .dfq-app .admin-dashboard-area > .container-fluid > .row > [class*="col-"] {
+        padding-right: 0;
+        padding-left: 0;
+    }
+
+    .dfq-app .sidebar,
+    .dfq-app .admin-sidebar {
+        position: fixed;
+        z-index: 1100;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        margin: 0;
+        padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+        border: 0;
+        border-top: 1px solid var(--dfq-border);
+        border-radius: 0;
+        box-shadow: 0 -4px 16px rgba(16, 24, 40, .08);
+    }
+
+    .dfq-app .user-info,
+    .dfq-app .admin-info {
+        display: none;
+    }
+
+    .dfq-app .sidebar-menu,
+    .dfq-app .admin-menu {
+        flex-direction: row;
+        gap: 4px;
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: thin;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .dfq-app .sidebar-menu li,
+    .dfq-app .admin-menu li {
+        flex: 0 0 auto;
+    }
+
+    .dfq-app .sidebar-menu a,
+    .dfq-app .admin-menu a,
+    .dfq-app .sidebar-menu button.logout-btn,
+    .dfq-app .admin-menu button.logout-btn {
+        min-width: 66px;
+        min-height: 58px;
+        flex-direction: column;
+        justify-content: center;
+        gap: 3px;
+        padding: 5px 9px;
+        border: 0;
+        border-radius: 8px;
+        font-size: 10px;
+        white-space: nowrap;
+    }
+
+    .dfq-app .sidebar-menu i,
+    .dfq-app .admin-menu i {
+        flex: 0 0 auto;
+        width: auto;
+        margin: 0;
+        font-size: 16px;
+    }
+
+    .dfq-app .sidebar-menu button.logout-btn,
+    .dfq-app .admin-menu button.logout-btn {
+        width: auto !important;
+        margin: 0;
+        padding: 5px 9px !important;
+        text-align: center !important;
+    }
+
+    .dfq-app .dashboard-header,
+    .dfq-app .dashboard-card {
+        padding: 18px;
+    }
+
+    .dfq-app .stat-card,
+    .dfq-app .admin-stat-card {
+        padding: 16px;
+    }
+
+    .dfq-app .balance-card {
+        padding: 18px;
+    }
+
+    .dfq-app .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .dfq-app .quick-action-btn {
+        min-height: 46px;
+        padding: 8px;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    .dfq-app .action-btn {
+        margin: 2px 0;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dfq-auth *,
+    .dfq-app * {
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+        animation-duration: .01ms !important;
+    }
+}

@@ -113,7 +113,7 @@
             steps.className = 'fex-install-steps';
             steps.innerHTML =
                 '<li>Tap the Share button ' +
-                '<svg class="fex-share-icon" viewBox="0 0 24 24" fill="none" stroke="#fe998b" stroke-width="2" ' +
+                '<svg class="fex-share-icon" viewBox="0 0 24 24" fill="none" stroke="#32d583" stroke-width="2" ' +
                 'stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
                 '<path d="M12 16V4"/><path d="M8 8l4-4 4 4"/>' +
                 '<path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></svg>' +

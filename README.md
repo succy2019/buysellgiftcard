@@ -49,6 +49,14 @@ DFQ Exchange/
 └── README.md                 # This file
 ```
 
+## Application Pages & Navigation
+
+- Sign in at `login.php`; create an account at `register.php`.
+- Recover or change a password with `forgot-password.php` and `reset-password.php`.
+- The authenticated user workspace is `user-dashboard.php`. Its `section` query parameter supports `dashboard`, `trading`, `giftcards`, `wallet`, `transfers`, `transactions`, `profile`, and `support`.
+- Administrators sign in at `admin-login.php`. The protected `admin-dashboard.php` workspace supports `dashboard`, `users`, `transactions`, `giftcards`, `transfers`, `payouts`, `company`, `rates`, `reports`, and `settings` sections.
+- Legacy `.html` entry points redirect to their PHP equivalents; authentication and authorization are enforced by the PHP routes.
+
 ## ⚙️ Setup Instructions
 
 ### Prerequisites
@@ -91,6 +99,13 @@ DFQ Exchange/
    | `DFQ_PRODUCTION` | `1` to hide errors | `0` |
    | `DFQ_ENCRYPTION_KEY` | Key for encrypted fields | derived fallback |
    | `DFQ_TIMEZONE` | App timezone | `Africa/Lagos` |
+   | `DFQ_MAIL_TRANSPORT` | `smtp`, `mail`, or `log` | `log` |
+   | `DFQ_MAIL_FROM` | Sender address | `no-reply@<app-domain>` |
+   | `DFQ_SUPPORT_EMAIL` | Support address shown in emails | `support@dfqexchange.com.ng` |
+   | `DFQ_ADMIN_NOTIFY_EMAIL` | New-user/transaction alerts | support address |
+   | `DFQ_SMTP_HOST` / `DFQ_SMTP_PORT` | SMTP server and port | — / `587` |
+   | `DFQ_SMTP_USER` / `DFQ_SMTP_PASS` | SMTP credentials | — |
+   | `DFQ_SMTP_SECURE` | `tls`, `ssl`, or `none` | `tls` |
 
    In production, set `DFQ_ENCRYPTION_KEY` to a long random string (for example
    the output of `php -r "echo bin2hex(random_bytes(32));"`) and set
@@ -210,6 +225,59 @@ How it works:
 - `splash.html?preview=app` previews the splash in an ordinary browser tab
   without installing the app.
 
+## 📧 Email
+
+All transactional email goes through `includes/mailer.php` and the branded
+templates in `includes/email_templates.php`. No external library is required.
+
+### Transports
+
+| `DFQ_MAIL_TRANSPORT` | Behaviour |
+| --- | --- |
+| `smtp` | Authenticated SMTP with STARTTLS (`587`) or SSL (`465`). Recommended. |
+| `mail` | PHP `mail()` via the host's sendmail. Works on many cPanel hosts. |
+| `log` | Writes the full message to `logs/mail.log`. Local development default. |
+
+`logs/` is blocked from web access by both `.htaccess` files and is ignored by
+git. Password reset links appear in that log while using the `log` transport.
+
+For production set `DFQ_MAIL_TRANSPORT=smtp` with the mailbox created in
+cPanel, for example:
+
+```env
+DFQ_MAIL_TRANSPORT=smtp
+DFQ_MAIL_FROM=no-reply@dfqexchange.com.ng
+DFQ_SMTP_HOST=mail.dfqexchange.com.ng
+DFQ_SMTP_PORT=465
+DFQ_SMTP_USER=no-reply@dfqexchange.com.ng
+DFQ_SMTP_PASS=your-mailbox-password
+DFQ_SMTP_SECURE=ssl
+```
+
+### Emails sent automatically
+
+- Welcome email on registration, plus a new-registration alert to the admin
+  team.
+- Account activated / suspended notification when an admin changes user status.
+- Password reset link (users and admins) and a "password changed" confirmation.
+- Gift card received, approved or rejected (with the rejection reason).
+- Transfer/deposit request received, verified or rejected, and payout sent.
+- Payout account (bank or USDT wallet) verified or rejected.
+- Admin alerts for every new gift card submission and transfer request.
+
+### Password reset
+
+- `forgot-password.php` — request a link. It always shows the same message so
+  the page cannot be used to discover registered emails.
+- `reset-password.php` — sets the new password. Tokens are single-use, expire
+  after 60 minutes, are stored as SHA-256 hashes, and resetting a password signs
+  the account out of all other sessions.
+- Admin resets use the same flow with `forgot-password.php?type=admin`.
+- Existing installations must create the `password_resets` table by running:
+  ```bash
+  php database/migrate.php
+  ```
+
 ## 🗄️ Database Schema
 
 ### Core Tables
@@ -224,6 +292,7 @@ How it works:
 - **user_payout_accounts** - User bank/wallet payout destinations
 - **transfer_requests** - Manual crypto deposit and withdrawal requests
 - **ledger_entries** - Immutable record of every balance movement
+- **password_resets** - Single-use, hashed password reset tokens (users and admins)
 - **activity_logs** - Admin activity tracking
 - **rate_history** - Historical exchange rate data
 - **system_settings** - Platform configuration (`usd_to_ngn_rate`,

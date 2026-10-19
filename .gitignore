@@ -8,6 +8,11 @@ uploads/*
 !uploads/.htaccess
 !uploads/index.html
 
+# Mail logs (may contain password reset links)
+logs/*
+!logs/.htaccess
+!logs/index.html
+
 # Logs and OS/editor cruft
 *.log
 .DS_Store

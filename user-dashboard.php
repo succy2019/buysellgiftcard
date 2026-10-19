@@ -160,6 +160,11 @@ $payoutAccounts = $dashboard->getPayoutAccounts($_SESSION['user_id']);
 $verifiedPayoutAccounts = $dashboard->getPayoutAccounts($_SESSION['user_id'], true);
 $companyAccounts = $dashboard->getCompanyAccounts(true);
 $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
+$currentSection = $_GET['section'] ?? 'dashboard';
+$userSections = ['dashboard', 'trading', 'giftcards', 'wallet', 'transfers', 'transactions', 'profile', 'support'];
+if (!in_array($currentSection, $userSections, true)) {
+    $currentSection = 'dashboard';
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -175,16 +180,12 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
     <link rel="icon" href="static/assets/img/fabicon.png">
     <!-- animations CSS -->
     <link rel="stylesheet" href="static/assets/css/animate.min.css">
-    <!-- font-awsome CSS -->
-    <link rel="stylesheet" href="static/assets/css/font-awesome.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="static/assets/css/bootstrap.min.css">
     <!-- mobile menu CSS -->
     <link rel="stylesheet" href="static/assets/css/slicknav.min.css">
     <!--css animation-->
     <link rel="stylesheet" href="static/assets/css/animation.css">
-    <!--css animation-->
-    <link rel="stylesheet" href="static/assets/css/material-design-iconic-font.min.css">
     <!-- style CSS -->
     <link rel="stylesheet" href="static/assets/css/style.css">
     <!-- responsive CSS -->
@@ -396,6 +397,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
             color: #6bcf7f;
         }
     </style>
+    <link rel="stylesheet" href="static/assets/css/dfq-app.css">
     <!-- PWA / install prompt -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#062489">
@@ -407,7 +409,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
     <link rel="stylesheet" href="static/assets/css/pwa-install.css">
     <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
-<body>
+<body class="dfq-app dfq-user">
     <!--header area start-->
     <div class="header-area wow fadeInDown header-absolate" id="nav">
         <div class="container">
@@ -424,12 +426,12 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     <div class="main-menu text-center">
                         <nav>
                             <ul id="slick-nav">
-                                <li><a href="#" class="active">Dashboard</a></li>
-                                <li><a href="#" onclick="showSection('trading')">Trading</a></li>
-                                <li><a href="#" onclick="showSection('wallet')">Wallet</a></li>
-                                <li><a href="#" onclick="showSection('transfers')">Transfers</a></li>
-                                <li><a href="#" onclick="showSection('transactions')">Transactions</a></li>
-                                <li><a href="#" onclick="showSection('profile')">Profile</a></li>
+                                <li><a href="?section=dashboard">Dashboard</a></li>
+                                <li><a href="?section=trading">Trading</a></li>
+                                <li><a href="?section=wallet">Wallet</a></li>
+                                <li><a href="?section=transfers">Transfers</a></li>
+                                <li><a href="?section=transactions">Transactions</a></li>
+                                <li><a href="?section=profile">Profile</a></li>
                             </ul>
                         </nav>
                     </div>
@@ -463,14 +465,14 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                             </div>
                         </div>
                         <ul class="sidebar-menu">
-                            <li><a href="#" class="active" onclick="showSection('dashboard')"><i class="fa fa-dashboard"></i>Dashboard</a></li>
-                            <li><a href="#" onclick="showSection('trading')"><i class="fa fa-exchange"></i>Trading</a></li>
-                            <li><a href="#" onclick="showSection('wallet')"><i class="fa fa-wallet"></i>Wallet</a></li>
-                            <li><a href="#" onclick="showSection('transfers')"><i class="fa fa-send"></i>Transfers</a></li>
-                            <li><a href="#" onclick="showSection('transactions')"><i class="fa fa-list"></i>Transactions</a></li>
-                            <li><a href="#" onclick="showSection('giftcards')"><i class="fa fa-gift"></i>Gift Cards</a></li>
-                            <li><a href="#" onclick="showSection('profile')"><i class="fa fa-user"></i>Profile</a></li>
-                            <li><a href="#" onclick="showSection('support')"><i class="fa fa-support"></i>Support</a></li>
+                            <li><a href="?section=dashboard" class="<?php echo $currentSection === 'dashboard' ? 'active' : ''; ?>" <?php echo $currentSection === 'dashboard' ? 'aria-current="page"' : ''; ?>><i class="fa fa-dashboard"></i>Dashboard</a></li>
+                            <li><a href="?section=trading" class="<?php echo $currentSection === 'trading' ? 'active' : ''; ?>" <?php echo $currentSection === 'trading' ? 'aria-current="page"' : ''; ?>><i class="fa fa-exchange"></i>Trading</a></li>
+                            <li><a href="?section=wallet" class="<?php echo $currentSection === 'wallet' ? 'active' : ''; ?>" <?php echo $currentSection === 'wallet' ? 'aria-current="page"' : ''; ?>><i class="fa fa-wallet"></i>Wallet</a></li>
+                            <li><a href="?section=transfers" class="<?php echo $currentSection === 'transfers' ? 'active' : ''; ?>" <?php echo $currentSection === 'transfers' ? 'aria-current="page"' : ''; ?>><i class="fa fa-send"></i>Transfers</a></li>
+                            <li><a href="?section=transactions" class="<?php echo $currentSection === 'transactions' ? 'active' : ''; ?>" <?php echo $currentSection === 'transactions' ? 'aria-current="page"' : ''; ?>><i class="fa fa-list"></i>Transactions</a></li>
+                            <li><a href="?section=giftcards" class="<?php echo $currentSection === 'giftcards' ? 'active' : ''; ?>" <?php echo $currentSection === 'giftcards' ? 'aria-current="page"' : ''; ?>><i class="fa fa-gift"></i>Gift Cards</a></li>
+                            <li><a href="?section=profile" class="<?php echo $currentSection === 'profile' ? 'active' : ''; ?>" <?php echo $currentSection === 'profile' ? 'aria-current="page"' : ''; ?>><i class="fa fa-user"></i>Profile</a></li>
+                            <li><a href="?section=support" class="<?php echo $currentSection === 'support' ? 'active' : ''; ?>" <?php echo $currentSection === 'support' ? 'aria-current="page"' : ''; ?>><i class="fa fa-support"></i>Support</a></li>
                             <li>
                                 <form method="POST" style="margin:0;">
                                     <?php echo csrfField(); ?>
@@ -487,18 +489,18 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                 <!-- Main Content -->
                 <div class="col-lg-9">
                     <!-- Dashboard Section -->
-                    <div id="dashboard-section" class="dashboard-section">
+                    <div id="dashboard-section" class="dashboard-section" style="display: <?php echo $currentSection === 'dashboard' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Welcome Back, <?php echo htmlspecialchars($user['first_name']); ?>!</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Here's what's happening with your account today.</p>
                         </div>
 
                         <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                            <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
                         <?php endif; ?>
                         
                         <?php if (!empty($success)): ?>
-                            <div class="alert alert-success"><?php echo htmlspecialchars($success); ?></div>
+                            <div class="alert alert-success" role="status"><?php echo htmlspecialchars($success); ?></div>
                         <?php endif; ?>
 
                         <!-- Balance Card -->
@@ -526,19 +528,19 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                                 </div>
                             </div>
                             <div class="quick-actions">
-                                <a href="#" class="quick-action-btn" onclick="showSection('transfers')">
+                                <a href="?section=transfers" class="quick-action-btn">
                                     <i class="fa fa-download"></i>
                                     Deposit Crypto
                                 </a>
-                                <a href="#" class="quick-action-btn" onclick="showSection('transfers')">
+                                <a href="?section=transfers" class="quick-action-btn">
                                     <i class="fa fa-send"></i>
                                     Withdraw
                                 </a>
-                                <a href="#" class="quick-action-btn" onclick="showSection('trading')">
+                                <a href="?section=trading" class="quick-action-btn">
                                     <i class="fa fa-exchange"></i>
                                     Trade
                                 </a>
-                                <a href="#" class="quick-action-btn" onclick="showSection('giftcards')">
+                                <a href="?section=giftcards" class="quick-action-btn">
                                     <i class="fa fa-gift"></i>
                                     Gift Cards
                                 </a>
@@ -604,7 +606,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     </div>
 
                     <!-- Trading Section -->
-                    <div id="trading-section" class="dashboard-section" style="display: none;">
+                    <div id="trading-section" class="dashboard-section" style="display: <?php echo $currentSection === 'trading' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Cryptocurrency Trading</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Buy and sell cryptocurrencies with competitive rates.</p>
@@ -678,7 +680,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     </div>
 
                     <!-- Gift Cards Section -->
-                    <div id="giftcards-section" class="dashboard-section" style="display: none;">
+                    <div id="giftcards-section" class="dashboard-section" style="display: <?php echo $currentSection === 'giftcards' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Gift Card Exchange</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Exchange your gift cards for cash or cryptocurrency.</p>
@@ -748,7 +750,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     </div>
 
                     <!-- Wallet Section -->
-                    <div id="wallet-section" class="dashboard-section" style="display: none;">
+                    <div id="wallet-section" class="dashboard-section" style="display: <?php echo $currentSection === 'wallet' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Wallet</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Manage your balances and cryptocurrency holdings.</p>
@@ -793,12 +795,12 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                             </div>
                         </div>
                         <div class="dashboard-card" style="text-align:center;">
-                            <a href="#" class="gradient-btn" onclick="showSection('transfers')">Deposit or Withdraw</a>
+                            <a href="?section=transfers" class="gradient-btn">Deposit or Withdraw</a>
                         </div>
                     </div>
 
                     <!-- Transfers Section -->
-                    <div id="transfers-section" class="dashboard-section" style="display: none;">
+                    <div id="transfers-section" class="dashboard-section" style="display: <?php echo $currentSection === 'transfers' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Deposits &amp; Withdrawals</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Send crypto to our company wallet or withdraw your balance in NGN or USDT.</p>
@@ -986,7 +988,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     </div>
 
                     <!-- Transactions Section -->
-                    <div id="transactions-section" class="dashboard-section" style="display: none;">
+                    <div id="transactions-section" class="dashboard-section" style="display: <?php echo $currentSection === 'transactions' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Transaction History</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">View all your trading activities.</p>
@@ -1033,7 +1035,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     </div>
 
                     <!-- Profile Section -->
-                    <div id="profile-section" class="dashboard-section" style="display: none;">
+                    <div id="profile-section" class="dashboard-section" style="display: <?php echo $currentSection === 'profile' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Profile Settings</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Update your account information and preferences.</p>
@@ -1211,7 +1213,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                     </div>
 
                     <!-- Support Section -->
-                    <div id="support-section" class="dashboard-section" style="display: none;">
+                    <div id="support-section" class="dashboard-section" style="display: <?php echo $currentSection === 'support' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Support</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Get help with your account and trading activities.</p>
@@ -1219,8 +1221,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Contact Support</h3>
                             <p style="color: #cbe5ff;">For assistance, please contact our support team:</p>
-                            <p style="color: #cbe5ff;"><strong>Email:</strong> support@dfqexchange.com.ng</p>
-                            <p style="color: #cbe5ff;"><strong>Live Chat:</strong> Available 24/7</p>
+                            <p><strong>Email:</strong> <a href="mailto:support@dfqexchange.com.ng">support@dfqexchange.com.ng</a></p>
                         </div>
                     </div>
                 </div>
@@ -1239,33 +1240,7 @@ $transferRequests = $dashboard->getTransferRequests($_SESSION['user_id']);
     <script src="static/assets/js/bootstrap.min.js"></script>
     <!--mobile menu js-->
     <script src="static/assets/js/jquery.slicknav.min.js"></script>
-    <!-- main js-->
-    <script src="static/assets/js/main.js"></script>
-    
     <script>
-        function showSection(sectionName) {
-            // Hide all sections
-            const sections = document.querySelectorAll('.dashboard-section');
-            sections.forEach(section => {
-                section.style.display = 'none';
-            });
-            
-            // Show selected section
-            document.getElementById(sectionName + '-section').style.display = 'block';
-            
-            // Update active menu item
-            const menuItems = document.querySelectorAll('.sidebar-menu a:not(.logout-btn)');
-            menuItems.forEach(item => {
-                item.classList.remove('active');
-            });
-            
-            // Find and activate the clicked menu item
-            const activeItem = document.querySelector(`.sidebar-menu a[onclick="showSection('${sectionName}')"]`);
-            if (activeItem) {
-                activeItem.classList.add('active');
-            }
-        }
-
         function togglePayoutFields() {
             const method = document.getElementById('payout-method').value;
             document.getElementById('payout-bank-fields').style.display = method === 'bank' ? 'block' : 'none';

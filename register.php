@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $result = $auth->register($userData);
         
         if ($result['success']) {
-            $success = 'Account created successfully! You can now sign in.';
+            $success = 'Account created successfully! Your account is pending activation — please check your email for details.';
             // Optionally auto-login the user
             // header('Location: user-dashboard.php');
             // exit();
@@ -93,16 +93,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="icon" href="static/assets/img/fabicon.png">
     <!-- animations CSS -->
     <link rel="stylesheet" href="static/assets/css/animate.min.css">
-    <!-- font-awsome CSS -->
-    <link rel="stylesheet" href="static/assets/css/font-awesome.min.css">
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="static/assets/css/bootstrap.min.css">
     <!-- mobile menu CSS -->
     <link rel="stylesheet" href="static/assets/css/slicknav.min.css">
     <!--css animation-->
     <link rel="stylesheet" href="static/assets/css/animation.css">
-    <!--css animation-->
-    <link rel="stylesheet" href="static/assets/css/material-design-iconic-font.min.css">
     <!-- style CSS -->
     <link rel="stylesheet" href="static/assets/css/style.css">
     <!-- responsive CSS -->
@@ -215,9 +211,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             color: #6bcf7f;
         }
     </style>
+    <link rel="stylesheet" href="static/assets/css/dfq-app.css">
     <!-- PWA / install prompt -->
     <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#062489">
+    <meta name="theme-color" content="#101828">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -226,7 +223,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link rel="stylesheet" href="static/assets/css/pwa-install.css">
     <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
-<body>
+<body class="dfq-auth">
     <!--header area start-->
     <div class="header-area wow fadeInDown header-absolate" id="nav">
         <div class="container">
@@ -236,7 +233,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-4 col-lg-2">
                     <div class="logo-area">
-                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt=""></a>
+                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt="DFQ Exchange home"></a>
                     </div>
                 </div>
                 <div class="col-4 col-lg-8 d-none d-lg-block">
@@ -272,11 +269,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                         
                         <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger"><?php echo htmlspecialchars($error); ?></div>
+                            <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
                         <?php endif; ?>
                         
                         <?php if (!empty($success)): ?>
-                            <div class="alert alert-success">
+                            <div class="alert alert-success" role="status">
                                 <?php echo htmlspecialchars($success); ?>
                                 <br><a href="login.php" style="color: #6bcf7f; text-decoration: underline;">Click here to login</a>
                             </div>
@@ -287,40 +284,47 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="text" name="first_name" class="form-control" placeholder="First Name" 
+                                        <label for="register-first-name">First name</label>
+                                        <input type="text" id="register-first-name" name="first_name" class="form-control" placeholder="First name" autocomplete="given-name"
                                                value="<?php echo htmlspecialchars($_POST['first_name'] ?? ''); ?>" required>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="text" name="last_name" class="form-control" placeholder="Last Name" 
+                                        <label for="register-last-name">Last name</label>
+                                        <input type="text" id="register-last-name" name="last_name" class="form-control" placeholder="Last name" autocomplete="family-name"
                                                value="<?php echo htmlspecialchars($_POST['last_name'] ?? ''); ?>" required>
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <input type="email" name="email" class="form-control" placeholder="Email Address" 
+                                <label for="register-email">Email address</label>
+                                <input type="email" id="register-email" name="email" class="form-control" placeholder="you@example.com" autocomplete="email"
                                        value="<?php echo htmlspecialchars($_POST['email'] ?? ''); ?>" required>
                             </div>
                             <div class="form-group">
-                                <input type="tel" name="phone" class="form-control" placeholder="Phone Number" 
+                                <label for="register-phone">Phone number</label>
+                                <input type="tel" id="register-phone" name="phone" class="form-control" placeholder="Phone number" autocomplete="tel"
                                        value="<?php echo htmlspecialchars($_POST['phone'] ?? ''); ?>" required>
                             </div>
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="password" name="password" class="form-control" placeholder="Password" minlength="8" required autocomplete="new-password">
+                                        <label for="register-password">Password</label>
+                                        <input type="password" id="register-password" name="password" class="form-control" minlength="8" required autocomplete="new-password">
                                         <small style="color:#cbe5ff;">Min. 8 characters with upper case, lower case and a number.</small>
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <input type="password" name="confirm_password" class="form-control" placeholder="Confirm Password" minlength="8" required autocomplete="new-password">
+                                        <label for="register-confirm-password">Confirm password</label>
+                                        <input type="password" id="register-confirm-password" name="confirm_password" class="form-control" minlength="8" required autocomplete="new-password">
                                     </div>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <select name="country" class="form-control" required>
+                                <label for="register-country">Country</label>
+                                <select id="register-country" name="country" class="form-control" required>
                                     <option value="" disabled <?php echo empty($_POST['country']) ? 'selected' : ''; ?>>Select Country</option>
                                     <option value="US" <?php echo (($_POST['country'] ?? '') === 'US') ? 'selected' : ''; ?>>United States</option>
                                     <option value="UK" <?php echo (($_POST['country'] ?? '') === 'UK') ? 'selected' : ''; ?>>United Kingdom</option>
@@ -337,7 +341,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             <div class="terms-checkbox">
                                 <label>
                                     <input type="checkbox" name="terms" required>
-                                    I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                                    I agree to the Terms of Service and Privacy Policy.
                                 </label>
                             </div>
                             <button type="submit" class="gradient-btn register-btn">Create Account</button>
@@ -374,120 +378,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <script src="static/assets/js/bootstrap.min.js"></script>
     <!--mobile menu js-->
     <script src="static/assets/js/jquery.slicknav.min.js"></script>
-    <!-- main js-->
-    <script src="static/assets/js/main.js"></script>
-    
     <script>
-        // Form validation
-        document.getElementById('registerForm').addEventListener('submit', function(e) {
-            const firstName = document.querySelector('input[name="first_name"]').value.trim();
-            const lastName = document.querySelector('input[name="last_name"]').value.trim();
-            const email = document.querySelector('input[name="email"]').value.trim();
-            const phone = document.querySelector('input[name="phone"]').value.trim();
-            const password = document.querySelector('input[name="password"]').value;
-            const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
-            const country = document.querySelector('select[name="country"]').value;
-            const terms = document.querySelector('input[name="terms"]').checked;
-            
-            // Check all required fields
-            if (!firstName) {
-                e.preventDefault();
-                alert('First name is required');
-                document.querySelector('input[name="first_name"]').focus();
-                return false;
-            }
-            
-            if (!lastName) {
-                e.preventDefault();
-                alert('Last name is required');
-                document.querySelector('input[name="last_name"]').focus();
-                return false;
-            }
-            
-            if (!email) {
-                e.preventDefault();
-                alert('Email is required');
-                document.querySelector('input[name="email"]').focus();
-                return false;
-            }
-            
-            if (!phone) {
-                e.preventDefault();
-                alert('Phone number is required');
-                document.querySelector('input[name="phone"]').focus();
-                return false;
-            }
-            
-            if (!password) {
-                e.preventDefault();
-                alert('Password is required');
-                document.querySelector('input[name="password"]').focus();
-                return false;
-            }
-            
-            if (!confirmPassword) {
-                e.preventDefault();
-                alert('Please confirm your password');
-                document.querySelector('input[name="confirm_password"]').focus();
-                return false;
-            }
-            
-            if (!country) {
-                e.preventDefault();
-                alert('Country is required');
-                document.querySelector('select[name="country"]').focus();
-                return false;
-            }
-            
-            if (password !== confirmPassword) {
-                e.preventDefault();
-                alert('Passwords do not match');
-                document.querySelector('input[name="confirm_password"]').focus();
-                return false;
-            }
-            
-            if (password.length < 8) {
-                e.preventDefault();
-                alert('Password must be at least 8 characters long');
-                document.querySelector('input[name="password"]').focus();
-                return false;
-            }
-            
-            if (!terms) {
-                e.preventDefault();
-                alert('Please accept the Terms of Service and Privacy Policy');
-                document.querySelector('input[name="terms"]').focus();
-                return false;
-            }
-        });
-        
-        // Real-time password confirmation check
-        document.querySelector('input[name="confirm_password"]').addEventListener('input', function() {
-            const password = document.querySelector('input[name="password"]').value;
-            const confirmPassword = this.value;
-            
-            if (confirmPassword && password !== confirmPassword) {
-                this.style.borderColor = '#dc3545';
-            } else {
-                this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            }
-        });
-        
-        // Add visual feedback for empty required fields
-        document.querySelectorAll('input[required], select[required]').forEach(function(field) {
-            field.addEventListener('blur', function() {
-                if (!this.value.trim()) {
-                    this.style.borderColor = '#dc3545';
-                } else {
-                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                }
-            });
-            
-            field.addEventListener('input', function() {
-                if (this.value.trim()) {
-                    this.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-                }
-            });
+        const registerForm = document.getElementById('registerForm');
+        const passwordField = registerForm.querySelector('input[name="password"]');
+        const confirmationField = registerForm.querySelector('input[name="confirm_password"]');
+
+        function validatePasswordConfirmation() {
+            confirmationField.setCustomValidity(
+                confirmationField.value && confirmationField.value !== passwordField.value
+                    ? 'Passwords do not match.'
+                    : ''
+            );
+        }
+
+        passwordField.addEventListener('input', validatePasswordConfirmation);
+        confirmationField.addEventListener('input', validatePasswordConfirmation);
+        registerForm.addEventListener('submit', function() {
+            const button = this.querySelector('button[type="submit"]');
+            button.disabled = true;
+            button.setAttribute('aria-busy', 'true');
+            button.textContent = 'Creating account…';
         });
     </script>
 </body>

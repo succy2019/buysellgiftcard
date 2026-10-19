@@ -666,14 +666,14 @@ class AdminAuth {
 function requireAdminLogin($requiredRole = 'admin') {
     $auth = new AdminAuth();
     if (!$auth->isLoggedIn() || !$auth->hasPermission($requiredRole)) {
-        header('Location: admin-login.html');
+        header('Location: admin-login.php');
         exit;
     }
     return $auth->getCurrentAdmin();
 }
 
 // Helper function to redirect if admin logged in
-function redirectIfAdminLoggedIn($redirectTo = 'admin-dashboard.html') {
+function redirectIfAdminLoggedIn($redirectTo = 'admin-dashboard.php') {
     $auth = new AdminAuth();
     if ($auth->isLoggedIn()) {
         header("Location: $redirectTo");

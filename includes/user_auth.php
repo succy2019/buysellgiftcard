@@ -6,6 +6,8 @@
 
 require_once __DIR__ . '/../config/database.php';
 require_once __DIR__ . '/utils.php';
+require_once __DIR__ . '/mailer.php';
+require_once __DIR__ . '/email_templates.php';
 
 class UserAuth {
     private $db;
@@ -60,13 +62,35 @@ class UserAuth {
             
             if ($result) {
                 $userId = $this->db->lastInsertId();
-                
+
                 // Log registration activity
                 $this->logActivity($userId, 'user_registration', 'User registered successfully');
-                
+
+                // Welcome message for the user and a heads-up for the admin
+                // team. Accounts start as "pending" and are activated by an
+                // admin, so both emails describe that workflow.
+                try {
+                    $email = strtolower(sanitizeInput($userData['email']));
+                    $firstName = sanitizeInput($userData['first_name']);
+
+                    $welcome = emailTemplateWelcome($firstName, $email, true);
+                    sendAppEmail($email, $welcome['subject'], $welcome['html'], $welcome['text'], $firstName);
+
+                    $adminNotice = emailTemplateAdminNewUser(
+                        $firstName,
+                        sanitizeInput($userData['last_name']),
+                        $email,
+                        sanitizeInput($userData['phone']),
+                        sanitizeInput($userData['country'])
+                    );
+                    notifyAdmin($adminNotice['subject'], $adminNotice['html'], $adminNotice['text']);
+                } catch (Throwable $e) {
+                    logError('Registration email error: ' . $e->getMessage());
+                }
+
                 return [
                     'success' => true,
-                    'message' => 'Registration successful! Please login to continue.',
+                    'message' => 'Registration successful! Your account is pending activation. Please check your email for details.',
                     'user_id' => $userId
                 ];
             } else {
@@ -590,14 +614,14 @@ class UserAuth {
 function requireUserLogin() {
     $auth = new UserAuth();
     if (!$auth->isLoggedIn()) {
-        header('Location: login.html');
+        header('Location: login.php');
         exit;
     }
     return $auth->getCurrentUser();
 }
 
 // Helper function to redirect if logged in
-function redirectIfLoggedIn($redirectTo = 'user-dashboard.html') {
+function redirectIfLoggedIn($redirectTo = 'user-dashboard.php') {
     $auth = new UserAuth();
     if ($auth->isLoggedIn()) {
         header("Location: $redirectTo");

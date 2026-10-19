@@ -21,7 +21,7 @@
 .fex-install-card {
     width: 100%;
     max-width: 430px;
-    background: #0a1b52;
+    background: #101828;
     color: #fff;
     border-radius: 20px 20px 0 0;
     padding: 26px 22px calc(22px + env(safe-area-inset-bottom, 0px));
@@ -92,9 +92,9 @@
 }
 
 .fex-install-btn-primary {
-    background: linear-gradient(135deg, #fe998b, #ff6b7a);
+    background: #12b76a;
     color: #fff;
-    box-shadow: 0 6px 18px rgba(254, 153, 139, 0.35);
+    box-shadow: 0 6px 18px rgba(18, 183, 106, 0.35);
 }
 
 .fex-install-btn-primary:disabled {
@@ -135,8 +135,8 @@
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    background: rgba(254, 153, 139, 0.2);
-    color: #fe998b;
+    background: rgba(18, 183, 106, 0.2);
+    color: #32d583;
     font-size: 12px;
     font-weight: 700;
     display: flex;
