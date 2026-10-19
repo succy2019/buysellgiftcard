@@ -811,8 +811,21 @@ class AdminDashboard {
     public function generateReport($type, $startDate, $endDate) {
         try {
             $reports = [];
-            
+
+            $startOk = DateTime::createFromFormat('Y-m-d', (string)$startDate);
+            $endOk = DateTime::createFromFormat('Y-m-d', (string)$endDate);
+            if (!$startOk || !$endOk || $startOk > $endOk) {
+                return ['success' => false, 'message' => 'Please choose a valid date range.'];
+            }
+            // Make the end date inclusive of the whole day.
+            $startDate = $startOk->format('Y-m-d') . ' 00:00:00';
+            $endDate = $endOk->format('Y-m-d') . ' 23:59:59';
+             
             switch ($type) {
+                case 'gift_cards':
+                    $reports = $this->generateGiftCardsReport($startDate, $endDate);
+                    break;
+                     
                 case 'revenue':
                     $reports = $this->generateRevenueReport($startDate, $endDate);
                     break;
@@ -1869,6 +1882,25 @@ class AdminDashboard {
         return $stmt->fetchAll();
     }
     
+    private function generateGiftCardsReport($startDate, $endDate) {
+        $sql = "SELECT 
+                    b.brand_name AS brand,
+                    s.status,
+                    COUNT(*) AS submissions,
+                    SUM(s.card_value) AS total_value,
+                    SUM(s.payout_amount) AS total_payout
+                FROM gift_card_submissions s
+                LEFT JOIN gift_card_brands b ON b.id = s.brand_id
+                WHERE s.created_at BETWEEN :start_date AND :end_date
+                GROUP BY b.brand_name, s.status
+                ORDER BY b.brand_name, s.status";
+         
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute([':start_date' => $startDate, ':end_date' => $endDate]);
+         
+        return $stmt->fetchAll();
+    }
+     
     private function generateTransactionsReport($startDate, $endDate) {
         $sql = "SELECT 
                     type,

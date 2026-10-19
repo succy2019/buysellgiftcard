@@ -1,9 +1,11 @@
 <?php
 require_once 'includes/admin_auth.php';
 require_once 'includes/admin_dashboard.php';
+require_once 'includes/support.php';
 
 $auth = new AdminAuth();
 $dashboard = new AdminDashboard();
+$support = new SupportService();
 
 // Check if admin is logged in (validates the session server-side)
 if (!$auth->isLoggedIn()) {
@@ -29,6 +31,10 @@ $systemStatus = $overviewData['data']['system_status'] ?? [];
 
 $error = '';
 $success = '';
+if (!empty($_SESSION['dfq_flash'])) {
+    $success = (string)$_SESSION['dfq_flash'];
+    unset($_SESSION['dfq_flash']);
+}
 
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -198,6 +204,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
 
+            case 'reply_ticket':
+                $result = $support->addAdminReply($_SESSION['admin_id'], $_POST['ticket_id'] ?? '', $_POST['message'] ?? '', $_POST['status'] ?? null);
+                if ($result['success']) { $success = $result['message']; } else { $error = $result['message']; }
+                break;
+
+            case 'update_ticket_status':
+                $result = $support->updateStatus($_SESSION['admin_id'], $_POST['ticket_id'] ?? '', $_POST['status'] ?? '');
+                if ($result['success']) { $success = $result['message']; } else { $error = $result['message']; }
+                break;
+
             case 'generate_report':
                 $reportType = $_POST['report_type'] ?? '';
                 $startDate = $_POST['start_date'] ?? '';
@@ -205,19 +221,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 $result = $dashboard->generateReport($reportType, $startDate, $endDate);
                 if ($result['success']) {
-                    $success = 'Report generated successfully!';
-                    // You could add CSV download functionality here
+                    $reportRows = $result['data'];
+                    if (($_POST['format'] ?? '') === 'csv') {
+                        header('Content-Type: text/csv; charset=utf-8');
+                        header('Content-Disposition: attachment; filename="dfq-' . preg_replace('/[^a-z_]/', '', $reportType) . '-report-' . date('Ymd') . '.csv"');
+                        $out = fopen('php://output', 'w');
+                        if ($reportRows) {
+                            fputcsv($out, array_keys($reportRows[0]));
+                            foreach ($reportRows as $row) {
+                                fputcsv($out, array_map(function ($v) {
+                                    $v = (string)$v;
+                                    return preg_match('/^[=+\-@]/', $v) ? "'" . $v : $v;
+                                }, $row));
+                            }
+                        } else {
+                            fputcsv($out, ['No data for the selected range']);
+                        }
+                        fclose($out);
+                        exit();
+                    }
+                    $reportTitle = ucfirst(str_replace('_', ' ', $reportType)) . ' report: ' . $startDate . ' to ' . $endDate;
+                    $success = 'Report generated: ' . count($reportRows) . ' row(s).';
                 } else {
                     $error = $result['message'];
                 }
                 break;
         }
     }
+
+    // Post/redirect/get so a refresh never repeats an admin action.
+    if ($success !== '' && $error === '' && !isset($reportRows)) {
+        $_SESSION['dfq_flash'] = $success;
+        header('Location: ' . strtok($_SERVER['REQUEST_URI'], '#'));
+        exit();
+    }
 }
 
 // Get current page data based on section
 $currentSection = $_GET['section'] ?? 'dashboard';
-$adminSections = ['dashboard', 'users', 'transactions', 'giftcards', 'transfers', 'payouts', 'company', 'rates', 'reports', 'settings'];
+$adminSections = ['dashboard', 'users', 'transactions', 'giftcards', 'transfers', 'payouts', 'company', 'rates', 'support', 'reports', 'settings'];
 if (!in_array($currentSection, $adminSections, true)) {
     $currentSection = 'dashboard';
 }
@@ -283,7 +325,7 @@ switch ($currentSection) {
     <title>Admin Dashboard - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
     <!-- carousel CSS -->
     <link rel="stylesheet" href="static/assets/css/owl.carousel.min.css">
@@ -537,6 +579,10 @@ switch ($currentSection) {
         }
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
+    <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <script src="static/assets/js/dfq-shell.js" defer></script>
+    <link rel="stylesheet" href="static/assets/css/pwa-install.css">
+    <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
 <body class="dfq-app dfq-admin">
     <!--header area start-->
@@ -548,7 +594,7 @@ switch ($currentSection) {
                 </div>
                 <div class="col-4 col-lg-2">
                     <div class="logo-area">
-                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt=""></a>
+                        <a href="?section=dashboard" class="dfq-brand" aria-label="DFQ Exchange admin dashboard"><img src="static/assets/img/dfq-mark.svg" alt="" width="36" height="36"><span>DFQ <b>Admin</b></span></a>
                     </div>
                 </div>
                 <div class="col-4 col-lg-8 d-none d-lg-block">
@@ -601,6 +647,7 @@ switch ($currentSection) {
                             <li><a href="?section=giftcards" class="<?php echo $currentSection === 'giftcards' ? 'active' : ''; ?>" <?php echo $currentSection === 'giftcards' ? 'aria-current="page"' : ''; ?>><i class="fa fa-gift"></i>Gift Cards</a></li>
                             <li><a href="?section=rates" class="<?php echo $currentSection === 'rates' ? 'active' : ''; ?>" <?php echo $currentSection === 'rates' ? 'aria-current="page"' : ''; ?>><i class="fa fa-line-chart"></i>Exchange Rates</a></li>
                             <li><a href="?section=company" class="<?php echo $currentSection === 'company' ? 'active' : ''; ?>" <?php echo $currentSection === 'company' ? 'aria-current="page"' : ''; ?>><i class="fa fa-university"></i>Company Accounts</a></li>
+                            <li><a href="?section=support" class="<?php echo $currentSection === 'support' ? 'active' : ''; ?>" <?php echo $currentSection === 'support' ? 'aria-current="page"' : ''; ?>><i class="fa fa-support"></i>Support<?php $openSupport = $support->countOpen(); echo $openSupport ? ' <span class="badge badge-warning">' . (int)$openSupport . '</span>' : ''; ?></a></li>
                             <li><a href="?section=reports" class="<?php echo $currentSection === 'reports' ? 'active' : ''; ?>" <?php echo $currentSection === 'reports' ? 'aria-current="page"' : ''; ?>><i class="fa fa-bar-chart"></i>Reports</a></li>
                             <li><a href="?section=settings" class="<?php echo $currentSection === 'settings' ? 'active' : ''; ?>" <?php echo $currentSection === 'settings' ? 'aria-current="page"' : ''; ?>><i class="fa fa-cog"></i>Settings</a></li>
                             <li>
@@ -1527,6 +1574,105 @@ switch ($currentSection) {
                         </div>
                     </div>
 
+                    <div id="admin-support-section" class="admin-section" style="display: <?php echo $currentSection === 'support' ? 'block' : 'none'; ?>;">
+                        <div class="dashboard-header">
+                            <h1 style="color: #fff; margin: 0;">Support Tickets</h1>
+                            <p style="color: #cbe5ff; margin: 10px 0 0 0;">Answer customer requests and track their status.</p>
+                        </div>
+                        <?php if ($currentSection === 'support'): ?>
+                        <?php
+                        $tkStatus = $_GET['status'] ?? '';
+                        $tkSearch = trim((string)($_GET['search'] ?? ''));
+                        $adminTicket = !empty($_GET['ticket']) ? $support->getTicket((string)$_GET['ticket']) : null;
+                        ?>
+                        <?php if ($adminTicket): ?>
+                            <div class="dashboard-card">
+                                <a href="?section=support" class="btn dfq-ghost btn-sm" style="margin-bottom: 14px;">&larr; All tickets</a>
+                                <h3 style="color: #fff; margin-bottom: 4px;"><?php echo h($adminTicket['subject']); ?></h3>
+                                <p style="color: #cbe5ff; margin-bottom: 16px;">
+                                    #<?php echo h($adminTicket['ticket_id']); ?> &middot;
+                                    <?php echo h($adminTicket['first_name'] . ' ' . $adminTicket['last_name']); ?> (<?php echo h($adminTicket['email']); ?>) &middot;
+                                    <?php echo h(SupportService::CATEGORIES[$adminTicket['category']] ?? 'General'); ?> &middot;
+                                    <?php echo h(ucfirst($adminTicket['priority'])); ?> priority &middot;
+                                    <strong><?php echo h(ucwords(str_replace('_', ' ', $adminTicket['status']))); ?></strong>
+                                </p>
+                                <div class="dfq-thread">
+                                    <div class="dfq-msg dfq-msg--me"><div class="dfq-msg__meta">Customer &middot; <?php echo h(date('M d, H:i', strtotime($adminTicket['created_at']))); ?></div><?php echo nl2br(h($adminTicket['message'])); ?></div>
+                                    <?php foreach ($adminTicket['replies'] as $reply): ?>
+                                        <div class="dfq-msg <?php echo $reply['author_type'] === 'admin' ? 'dfq-msg--staff' : 'dfq-msg--me'; ?>">
+                                            <div class="dfq-msg__meta"><?php echo $reply['author_type'] === 'admin' ? 'Support' : 'Customer'; ?> &middot; <?php echo h(date('M d, H:i', strtotime($reply['created_at']))); ?></div>
+                                            <?php echo nl2br(h($reply['message'])); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <form method="POST" style="margin-top: 16px;">
+                                    <?php echo csrfField(); ?>
+                                    <input type="hidden" name="action" value="reply_ticket">
+                                    <input type="hidden" name="ticket_id" value="<?php echo h($adminTicket['ticket_id']); ?>">
+                                    <textarea name="message" class="form-control" rows="3" maxlength="5000" placeholder="Write a reply to the customer" required></textarea>
+                                    <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                                        <select name="status" class="form-control" style="max-width: 200px;" aria-label="Status after reply">
+                                            <option value="in_progress">Reply &amp; mark in progress</option>
+                                            <option value="resolved">Reply &amp; mark resolved</option>
+                                            <option value="closed">Reply &amp; close</option>
+                                        </select>
+                                        <button type="submit" class="gradient-btn">Send reply</button>
+                                    </div>
+                                </form>
+                                <form method="POST" style="margin-top: 12px; display: flex; gap: 10px; flex-wrap: wrap;">
+                                    <?php echo csrfField(); ?>
+                                    <input type="hidden" name="action" value="update_ticket_status">
+                                    <input type="hidden" name="ticket_id" value="<?php echo h($adminTicket['ticket_id']); ?>">
+                                    <select name="status" class="form-control" style="max-width: 200px;" aria-label="Change status">
+                                        <?php foreach (SupportService::STATUSES as $s): ?>
+                                            <option value="<?php echo h($s); ?>" <?php echo $adminTicket['status'] === $s ? 'selected' : ''; ?>><?php echo h(ucwords(str_replace('_', ' ', $s))); ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <button type="submit" class="btn dfq-ghost btn-sm">Update status</button>
+                                </form>
+                            </div>
+                        <?php else: ?>
+                            <?php $adminTickets = $support->listAllTickets($tkStatus, $tkSearch); ?>
+                            <div class="dashboard-card">
+                                <form method="GET" class="row">
+                                    <input type="hidden" name="section" value="support">
+                                    <div class="col-md-5 form-group"><input type="text" name="search" class="form-control" placeholder="Search ticket, subject or email" value="<?php echo h($tkSearch); ?>"></div>
+                                    <div class="col-md-4 form-group">
+                                        <select name="status" class="form-control" onchange="this.form.submit()">
+                                            <option value="">All statuses</option>
+                                            <?php foreach (SupportService::STATUSES as $s): ?>
+                                                <option value="<?php echo h($s); ?>" <?php echo $tkStatus === $s ? 'selected' : ''; ?>><?php echo h(ucwords(str_replace('_', ' ', $s))); ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3 form-group"><button type="submit" class="gradient-btn" style="width:100%;">Filter</button></div>
+                                </form>
+                                <?php if (empty($adminTickets)): ?>
+                                    <p style="color: #cbe5ff; text-align: center; margin: 0;">No tickets match.</p>
+                                <?php else: ?>
+                                    <div class="table-responsive">
+                                        <table class="table">
+                                            <thead><tr><th>Ticket</th><th>Customer</th><th>Subject</th><th>Priority</th><th>Status</th><th>Updated</th></tr></thead>
+                                            <tbody>
+                                                <?php foreach ($adminTickets as $t): ?>
+                                                    <tr>
+                                                        <td><a href="?section=support&amp;ticket=<?php echo h(urlencode($t['ticket_id'])); ?>">#<?php echo h($t['ticket_id']); ?></a></td>
+                                                        <td><?php echo h($t['first_name'] . ' ' . $t['last_name']); ?><br><small><?php echo h($t['email']); ?></small></td>
+                                                        <td><?php echo h($t['subject']); ?></td>
+                                                        <td><?php echo h(ucfirst($t['priority'])); ?></td>
+                                                        <td><span class="status-<?php echo in_array($t['status'], ['resolved', 'closed'], true) ? 'completed' : 'pending'; ?>"><?php echo h(ucwords(str_replace('_', ' ', $t['status']))); ?></span></td>
+                                                        <td><?php echo h(timeAgo($t['updated_at'])); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+
                     <div id="admin-reports-section" class="admin-section" style="display: <?php echo $currentSection === 'reports' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Reports & Analytics</h1>
@@ -1557,10 +1703,39 @@ switch ($currentSection) {
                                     </div>
                                     <div class="col-md-3">
                                         <button type="submit" class="gradient-btn" style="width: 100%;">Generate Report</button>
+                                        <button type="submit" name="format" value="csv" class="btn dfq-ghost btn-sm mt-2" style="width: 100%;">Download CSV</button>
                                     </div>
                                 </div>
                             </form>
                         </div>
+
+                        <?php if (isset($reportRows)): ?>
+                        <div class="dashboard-card">
+                            <h3 style="color: #fff; margin-bottom: 20px;"><?php echo h($reportTitle ?? 'Report'); ?></h3>
+                            <?php if (empty($reportRows)): ?>
+                                <p style="color: #cbe5ff;">No data for the selected range.</p>
+                            <?php else: ?>
+                                <div class="table-responsive">
+                                    <table class="table">
+                                        <thead><tr>
+                                            <?php foreach (array_keys($reportRows[0]) as $col): ?>
+                                                <th><?php echo h(ucwords(str_replace('_', ' ', $col))); ?></th>
+                                            <?php endforeach; ?>
+                                        </tr></thead>
+                                        <tbody>
+                                            <?php foreach ($reportRows as $row): ?>
+                                                <tr>
+                                                    <?php foreach ($row as $val): ?>
+                                                        <td><?php echo h((string)$val); ?></td>
+                                                    <?php endforeach; ?>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                        <?php endif; ?>
 
                         <!-- Summary Statistics -->
                         <div class="row">

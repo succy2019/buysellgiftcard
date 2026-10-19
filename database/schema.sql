@@ -1,4 +1,4 @@
--- FEX Cryptocurrency & Gift Card Trading Platform Database Schema
+-- DFQ Exchange Cryptocurrency & Gift Card Trading Platform Database Schema
 -- Created: October 31, 2025
 
 CREATE DATABASE IF NOT EXISTS dfqexchange;
@@ -204,6 +204,18 @@ CREATE TABLE support_tickets (
     INDEX idx_status (status)
 );
 
+-- Support ticket conversation
+CREATE TABLE support_ticket_replies (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ticket_id INT NOT NULL,
+    author_type ENUM('user', 'admin') NOT NULL,
+    author_id INT NOT NULL,
+    message TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_ticket_id (ticket_id),
+    FOREIGN KEY (ticket_id) REFERENCES support_tickets(id) ON DELETE CASCADE
+);
+
 -- System settings table
 CREATE TABLE system_settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -366,7 +378,7 @@ INSERT INTO admin_users (username, email, password_hash, role) VALUES
 
 -- Insert default system settings
 INSERT INTO system_settings (setting_key, setting_value, description) VALUES
-('site_name', 'FEX Trading Platform', 'Site name'),
+('site_name', 'DFQ Exchange', 'Site name'),
 ('maintenance_mode', '0', 'Maintenance mode (0=off, 1=on)'),
 ('min_trade_amount', '10.00', 'Minimum trade amount in USD'),
 ('max_trade_amount', '50000.00', 'Maximum trade amount in USD'),

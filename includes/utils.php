@@ -522,10 +522,26 @@ function validateCryptoAddress($address, $currency, $network = null) {
  */
 function calculateTradingFee($amount, $feePercentage = null) {
     if ($feePercentage === null) {
-        $feePercentage = DEFAULT_TRADING_FEE;
+        // Admin-configured percentage (e.g. 0.5 = 0.5%); fall back to the default constant.
+        $configured = getSystemSetting('trading_fee_percentage', null);
+        $feePercentage = ($configured !== null && is_numeric($configured))
+            ? max(0, (float)$configured) / 100
+            : DEFAULT_TRADING_FEE;
     }
 
     return $amount * $feePercentage;
+}
+
+/**
+ * Admin-configurable trade limits in USD, falling back to the defaults.
+ */
+function getTradeLimits() {
+    $min = getSystemSetting('min_trade_amount', null);
+    $max = getSystemSetting('max_trade_amount', null);
+    return [
+        'min' => is_numeric($min) ? (float)$min : MIN_TRADE_AMOUNT,
+        'max' => is_numeric($max) ? (float)$max : MAX_TRADE_AMOUNT,
+    ];
 }
 
 /**

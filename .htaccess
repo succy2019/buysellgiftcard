@@ -1,6 +1,10 @@
 # DFQ Exchange — Apache hardening
 Options -Indexes
 
+# Branded error pages (404.php reads the status code from the query string)
+ErrorDocument 404 /dfqexchange/404.php?code=404
+ErrorDocument 403 /dfqexchange/404.php?code=403
+
 # Never serve dotfiles (e.g. .env, .git)
 <FilesMatch "^\.">
     <IfModule mod_authz_core.c>

@@ -54,7 +54,9 @@ DFQ Exchange/
 - Sign in at `login.php`; create an account at `register.php`.
 - Recover or change a password with `forgot-password.php` and `reset-password.php`.
 - The authenticated user workspace is `user-dashboard.php`. Its `section` query parameter supports `dashboard`, `trading`, `giftcards`, `wallet`, `transfers`, `transactions`, `profile`, and `support`.
-- Administrators sign in at `admin-login.php`. The protected `admin-dashboard.php` workspace supports `dashboard`, `users`, `transactions`, `giftcards`, `transfers`, `payouts`, `company`, `rates`, `reports`, and `settings` sections.
+- Administrators sign in at `admin-login.php`. The protected `admin-dashboard.php` workspace supports `dashboard`, `users`, `transactions`, `giftcards`, `transfers`, `payouts`, `company`, `rates`, `support`, `reports`, and `settings` sections. Reports can be viewed on screen or downloaded as CSV.
+- Support tickets: users open and follow tickets under `user-dashboard.php?section=support`; admins reply and change status under `admin-dashboard.php?section=support` (stored in `support_tickets` and `support_ticket_replies`, the latter created automatically).
+- Public pages: `index.html` (landing), `terms.php`, `privacy.php`, and `404.php` (also used for 403). `.htaccess` maps `ErrorDocument` to `/dfqexchange/404.php`; edit that path if the app is deployed at a different URL prefix.
 - Legacy `.html` entry points redirect to their PHP equivalents; authentication and authorization are enforced by the PHP routes.
 
 ## ⚙️ Setup Instructions

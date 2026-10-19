@@ -112,6 +112,9 @@ $displayName = $reset['display_name'] ?? '';
         .support a { color: #062489; text-decoration: none; }
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
+    <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <link rel="stylesheet" href="static/assets/css/pwa-install.css">
+    <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
 <body class="dfq-auth">
     <main class="card">

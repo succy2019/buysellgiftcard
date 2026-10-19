@@ -1,9 +1,11 @@
 <?php
 require_once 'includes/user_auth.php';
 require_once 'includes/user_dashboard.php';
+require_once 'includes/support.php';
 
 $auth = new UserAuth();
 $dashboard = new UserDashboard();
+$support = new SupportService();
 
 if (!$auth->isLoggedIn()) {
     header('Location: login.php');
@@ -22,6 +24,12 @@ $user = $userData['data'];
 $error = '';
 $success = '';
 
+// One-shot flash message carried over from a successful action (post/redirect/get).
+if (!empty($_SESSION['dfq_flash'])) {
+    $success = (string)$_SESSION['dfq_flash'];
+    unset($_SESSION['dfq_flash']);
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!verifyCsrfToken($_POST['csrf_token'] ?? null)) {
@@ -33,6 +41,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $auth->logout();
             header('Location: login.php');
             exit();
+        }
+
+        $moneyActions = ['buy_crypto', 'sell_crypto', 'submit_gift_card', 'submit_transfer'];
+        if (in_array($action, $moneyActions, true) && isMaintenanceMode()) {
+            $error = 'The platform is under maintenance. Trading and transfers are temporarily disabled; please try again shortly.';
+            $action = '';
         }
 
         switch ($action) {
@@ -129,6 +143,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
 
+            case 'create_ticket':
+                $result = $support->createTicket(
+                    $_SESSION['user_id'],
+                    $_POST['subject'] ?? '',
+                    $_POST['category'] ?? 'general',
+                    $_POST['priority'] ?? 'medium',
+                    $_POST['message'] ?? ''
+                );
+                if ($result['success']) {
+                    $success = $result['message'];
+                    $_SESSION['dfq_flash'] = $success;
+                    header('Location: ?section=support&ticket=' . urlencode($result['ticket_id']));
+                    exit();
+                }
+                $error = $result['message'];
+                break;
+
+            case 'reply_ticket':
+                $result = $support->addUserReply($_SESSION['user_id'], $_POST['ticket_id'] ?? '', $_POST['message'] ?? '');
+                if ($result['success']) {
+                    $success = $result['message'];
+                } else {
+                    $error = $result['message'];
+                }
+                break;
+
             case 'change_password':
                 $result = $auth->changePassword(
                     $_SESSION['user_id'],
@@ -142,6 +182,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
                 break;
         }
+    }
+
+    // Post/redirect/get so a refresh never re-submits a trade or transfer.
+    if ($success !== '' && $error === '') {
+        $_SESSION['dfq_flash'] = $success;
+        header('Location: ' . strtok($_SERVER['REQUEST_URI'], '#'));
+        exit();
     }
 }
 
@@ -172,7 +219,7 @@ if (!in_array($currentSection, $userSections, true)) {
     <title>User Dashboard - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 
     <!-- carousel CSS -->
     <link rel="stylesheet" href="static/assets/css/owl.carousel.min.css">
@@ -398,6 +445,8 @@ if (!in_array($currentSection, $userSections, true)) {
         }
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
+    <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <script src="static/assets/js/dfq-shell.js" defer></script>
     <!-- PWA / install prompt -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#062489">
@@ -419,7 +468,7 @@ if (!in_array($currentSection, $userSections, true)) {
                 </div>
                 <div class="col-4 col-lg-2">
                     <div class="logo-area">
-                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt=""></a>
+                        <a href="?section=dashboard" class="dfq-brand" aria-label="DFQ Exchange dashboard"><img src="static/assets/img/dfq-mark.svg" alt="" width="36" height="36"><span>DFQ <b>Exchange</b></span></a>
                     </div>
                 </div>
                 <div class="col-4 col-lg-8 d-none d-lg-block">
@@ -488,20 +537,19 @@ if (!in_array($currentSection, $userSections, true)) {
 
                 <!-- Main Content -->
                 <div class="col-lg-9">
+                    <?php if (!empty($error)): ?>
+                        <div class="alert alert-danger" role="alert" data-dfq-flash><?php echo htmlspecialchars($error); ?></div>
+                    <?php endif; ?>
+                    <?php if (!empty($success)): ?>
+                        <div class="alert alert-success" role="status" data-dfq-flash><?php echo htmlspecialchars($success); ?></div>
+                    <?php endif; ?>
+
                     <!-- Dashboard Section -->
                     <div id="dashboard-section" class="dashboard-section" style="display: <?php echo $currentSection === 'dashboard' ? 'block' : 'none'; ?>;">
                         <div class="dashboard-header">
                             <h1 style="color: #fff; margin: 0;">Welcome Back, <?php echo htmlspecialchars($user['first_name']); ?>!</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Here's what's happening with your account today.</p>
                         </div>
-
-                        <?php if (!empty($error)): ?>
-                            <div class="alert alert-danger" role="alert"><?php echo htmlspecialchars($error); ?></div>
-                        <?php endif; ?>
-                        
-                        <?php if (!empty($success)): ?>
-                            <div class="alert alert-success" role="status"><?php echo htmlspecialchars($success); ?></div>
-                        <?php endif; ?>
 
                         <!-- Balance Card -->
                         <div class="dashboard-card balance-card">
@@ -994,6 +1042,24 @@ if (!in_array($currentSection, $userSections, true)) {
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">View all your trading activities.</p>
                         </div>
                         <div class="dashboard-card">
+                            <?php
+                            $txTypes = ['' => 'All', 'buy_crypto' => 'Buy', 'sell_crypto' => 'Sell', 'gift_card_exchange' => 'Gift cards', 'deposit' => 'Deposits', 'withdrawal' => 'Withdrawals'];
+                            $txType = $_GET['type'] ?? '';
+                            if (!array_key_exists($txType, $txTypes)) { $txType = ''; }
+                            $txPage = max(1, (int)($_GET['page'] ?? 1));
+                            $allTransactions = $currentSection === 'transactions'
+                                ? $dashboard->getTransactionHistory($txPage, 15, $txType !== '' ? $txType : null, $_SESSION['user_id'])
+                                : ['transactions' => [], 'pagination' => ['pages' => 0, 'page' => 1, 'total' => 0]];
+                            $txPages = (int)$allTransactions['pagination']['pages'];
+                            ?>
+                            <form method="GET" class="dfq-filter" style="margin-bottom: 16px;">
+                                <input type="hidden" name="section" value="transactions">
+                                <select name="type" class="form-control" onchange="this.form.submit()" aria-label="Filter by type">
+                                    <?php foreach ($txTypes as $val => $label): ?>
+                                        <option value="<?php echo h($val); ?>" <?php echo $txType === $val ? 'selected' : ''; ?>><?php echo h($label); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </form>
                             <div class="transaction-table">
                                 <table class="table">
                                     <thead>
@@ -1006,10 +1072,7 @@ if (!in_array($currentSection, $userSections, true)) {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <?php 
-                                        $allTransactions = $dashboard->getTransactionHistory(1, 20);
-                                        if (!empty($allTransactions['transactions'])): 
-                                        ?>
+                                        <?php if (!empty($allTransactions['transactions'])): ?>
                                             <?php foreach ($allTransactions['transactions'] as $transaction): ?>
                                                 <tr>
                                                     <td><?php echo date('M d, Y H:i', strtotime($transaction['created_at'])); ?></td>
@@ -1031,6 +1094,14 @@ if (!in_array($currentSection, $userSections, true)) {
                                     </tbody>
                                 </table>
                             </div>
+                            <?php if ($txPages > 1): ?>
+                                <nav class="dfq-pager" aria-label="Transactions pages" style="display:flex;gap:10px;justify-content:center;align-items:center;margin-top:16px;">
+                                    <?php $pq = 'section=transactions' . ($txType !== '' ? '&type=' . urlencode($txType) : ''); ?>
+                                    <?php if ($txPage > 1): ?><a class="btn dfq-ghost btn-sm" href="?<?php echo $pq; ?>&page=<?php echo $txPage - 1; ?>">&larr; Newer</a><?php endif; ?>
+                                    <span style="color:#cbe5ff;">Page <?php echo $txPage; ?> of <?php echo $txPages; ?></span>
+                                    <?php if ($txPage < $txPages): ?><a class="btn dfq-ghost btn-sm" href="?<?php echo $pq; ?>&page=<?php echo $txPage + 1; ?>">Older &rarr;</a><?php endif; ?>
+                                </nav>
+                            <?php endif; ?>
                         </div>
                     </div>
 
@@ -1218,10 +1289,105 @@ if (!in_array($currentSection, $userSections, true)) {
                             <h1 style="color: #fff; margin: 0;">Support</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Get help with your account and trading activities.</p>
                         </div>
+                        <?php
+                        $openTicket = null;
+                        if ($currentSection === 'support' && !empty($_GET['ticket'])) {
+                            $openTicket = $support->getTicket((string)$_GET['ticket'], $_SESSION['user_id']);
+                        }
+                        $userTickets = $currentSection === 'support' ? $support->listUserTickets($_SESSION['user_id']) : [];
+                        ?>
+                        <?php if ($openTicket): ?>
+                            <div class="dashboard-card">
+                                <a href="?section=support" class="btn dfq-ghost btn-sm" style="margin-bottom: 14px;">&larr; All tickets</a>
+                                <h3 style="color: #fff; margin-bottom: 4px;"><?php echo h($openTicket['subject']); ?></h3>
+                                <p style="color: #cbe5ff; margin-bottom: 16px;">
+                                    #<?php echo h($openTicket['ticket_id']); ?> &middot;
+                                    <?php echo h(SupportService::CATEGORIES[$openTicket['category']] ?? 'General'); ?> &middot;
+                                    <span class="status-<?php echo h($openTicket['status'] === 'resolved' || $openTicket['status'] === 'closed' ? 'completed' : 'pending'); ?>"><?php echo h(ucwords(str_replace('_', ' ', $openTicket['status']))); ?></span>
+                                </p>
+                                <div class="dfq-thread">
+                                    <div class="dfq-msg dfq-msg--me"><div class="dfq-msg__meta">You &middot; <?php echo h(date('M d, H:i', strtotime($openTicket['created_at']))); ?></div><?php echo nl2br(h($openTicket['message'])); ?></div>
+                                    <?php foreach ($openTicket['replies'] as $reply): ?>
+                                        <div class="dfq-msg <?php echo $reply['author_type'] === 'admin' ? 'dfq-msg--staff' : 'dfq-msg--me'; ?>">
+                                            <div class="dfq-msg__meta"><?php echo $reply['author_type'] === 'admin' ? 'DFQ Support' : 'You'; ?> &middot; <?php echo h(date('M d, H:i', strtotime($reply['created_at']))); ?></div>
+                                            <?php echo nl2br(h($reply['message'])); ?>
+                                        </div>
+                                    <?php endforeach; ?>
+                                </div>
+                                <?php if ($openTicket['status'] !== 'closed'): ?>
+                                    <form method="POST" style="margin-top: 16px;">
+                                        <?php echo csrfField(); ?>
+                                        <input type="hidden" name="action" value="reply_ticket">
+                                        <input type="hidden" name="ticket_id" value="<?php echo h($openTicket['ticket_id']); ?>">
+                                        <textarea name="message" class="form-control" rows="3" maxlength="5000" placeholder="Write a reply" required></textarea>
+                                        <button type="submit" class="gradient-btn" style="margin-top: 10px;">Send reply</button>
+                                    </form>
+                                <?php else: ?>
+                                    <p style="color: #cbe5ff; margin-top: 16px;">This ticket is closed.</p>
+                                <?php endif; ?>
+                            </div>
+                        <?php else: ?>
+                            <div class="dashboard-card">
+                                <h3 style="color: #fff; margin-bottom: 20px;">New support ticket</h3>
+                                <form method="POST">
+                                    <?php echo csrfField(); ?>
+                                    <input type="hidden" name="action" value="create_ticket">
+                                    <div class="row">
+                                        <div class="col-md-6 form-group">
+                                            <label for="ticket-category">Category</label>
+                                            <select id="ticket-category" name="category" class="form-control">
+                                                <?php foreach (SupportService::CATEGORIES as $val => $label): ?>
+                                                    <option value="<?php echo h($val); ?>"><?php echo h($label); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-6 form-group">
+                                            <label for="ticket-priority">Priority</label>
+                                            <select id="ticket-priority" name="priority" class="form-control">
+                                                <option value="low">Low</option>
+                                                <option value="medium" selected>Medium</option>
+                                                <option value="high">High</option>
+                                                <option value="urgent">Urgent</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ticket-subject">Subject</label>
+                                        <input id="ticket-subject" type="text" name="subject" class="form-control" maxlength="200" required value="<?php echo h($_POST['subject'] ?? ''); ?>">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="ticket-message">How can we help?</label>
+                                        <textarea id="ticket-message" name="message" class="form-control" rows="5" maxlength="5000" minlength="10" required><?php echo h($_POST['message'] ?? ''); ?></textarea>
+                                    </div>
+                                    <button type="submit" class="gradient-btn">Submit ticket</button>
+                                </form>
+                            </div>
+                            <div class="dashboard-card">
+                                <h3 style="color: #fff; margin-bottom: 20px;">Your tickets</h3>
+                                <?php if (empty($userTickets)): ?>
+                                    <p style="color: #cbe5ff; text-align: center; margin: 0;">No tickets yet. Submit one above and we'll reply here.</p>
+                                <?php else: ?>
+                                    <div class="transaction-table">
+                                        <table class="table">
+                                            <thead><tr><th>Ticket</th><th>Subject</th><th>Status</th><th>Updated</th></tr></thead>
+                                            <tbody>
+                                                <?php foreach ($userTickets as $t): ?>
+                                                    <tr>
+                                                        <td><a href="?section=support&amp;ticket=<?php echo h(urlencode($t['ticket_id'])); ?>">#<?php echo h($t['ticket_id']); ?></a></td>
+                                                        <td><?php echo h($t['subject']); ?></td>
+                                                        <td><span class="status-<?php echo in_array($t['status'], ['resolved', 'closed'], true) ? 'completed' : 'pending'; ?>"><?php echo h(ucwords(str_replace('_', ' ', $t['status']))); ?></span></td>
+                                                        <td><?php echo h(timeAgo($t['updated_at'])); ?></td>
+                                                    </tr>
+                                                <?php endforeach; ?>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        <?php endif; ?>
                         <div class="dashboard-card">
-                            <h3 style="color: #fff; margin-bottom: 20px;">Contact Support</h3>
-                            <p style="color: #cbe5ff;">For assistance, please contact our support team:</p>
-                            <p><strong>Email:</strong> <a href="mailto:support@dfqexchange.com.ng">support@dfqexchange.com.ng</a></p>
+                            <h3 style="color: #fff; margin-bottom: 12px;">Other ways to reach us</h3>
+                            <p style="color: #cbe5ff; margin: 0;">Email <a href="mailto:support@dfqexchange.com.ng">support@dfqexchange.com.ng</a> &middot; <a href="terms.php">Terms</a> &middot; <a href="privacy.php">Privacy</a></p>
                         </div>
                     </div>
                 </div>

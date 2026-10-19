@@ -293,12 +293,13 @@ class UserDashboard {
             }
             
             // Check minimum/maximum trade amounts
-            if ($amountUSD < MIN_TRADE_AMOUNT) {
-                throw new Exception('Minimum trade amount is ' . formatCurrency(MIN_TRADE_AMOUNT));
+            $limits = getTradeLimits();
+            if ($amountUSD < $limits['min']) {
+                throw new Exception('Minimum trade amount is ' . formatCurrency($limits['min']));
             }
             
-            if ($amountUSD > MAX_TRADE_AMOUNT) {
-                throw new Exception('Maximum trade amount is ' . formatCurrency(MAX_TRADE_AMOUNT));
+            if ($amountUSD > $limits['max']) {
+                throw new Exception('Maximum trade amount is ' . formatCurrency($limits['max']));
             }
             
             // Get current crypto rate
@@ -419,8 +420,12 @@ class UserDashboard {
             $netAmount = $usdAmount - $fee;
             
             // Check minimum trade amount
-            if ($usdAmount < MIN_TRADE_AMOUNT) {
-                throw new Exception('Minimum trade amount is ' . formatCurrency(MIN_TRADE_AMOUNT));
+            $sellLimits = getTradeLimits();
+            if ($usdAmount < $sellLimits['min']) {
+                throw new Exception('Minimum trade amount is ' . formatCurrency($sellLimits['min']));
+            }
+            if ($usdAmount > $sellLimits['max']) {
+                throw new Exception('Maximum trade amount is ' . formatCurrency($sellLimits['max']));
             }
             
             // Create transaction record

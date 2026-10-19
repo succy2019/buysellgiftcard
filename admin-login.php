@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <title>Admin Login - DFQ Exchange</title>
     <!-- Required meta tags -->
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <meta name="theme-color" content="#101828">
 
     <!-- carousel CSS -->
@@ -175,6 +175,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
+    <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <link rel="stylesheet" href="static/assets/css/pwa-install.css">
+    <script src="static/assets/js/pwa-install.js" defer></script>
 </head>
 <body class="dfq-auth">
     <!--header area start-->
@@ -186,7 +189,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
                 <div class="col-4 col-lg-2">
                     <div class="logo-area">
-                        <a href="index.html"><img src="static/assets/img/logo-top.png" alt="DFQ Exchange home"></a>
+                        <a href="index.html" class="dfq-brand" aria-label="DFQ Exchange home"><img src="static/assets/img/dfq-mark.svg" alt="" width="36" height="36"><span>DFQ <b>Exchange</b></span></a>
                     </div>
                 </div>
                 <div class="col-4 col-lg-8 d-none d-lg-block">

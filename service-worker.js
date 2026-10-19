@@ -1,13 +1,15 @@
 /* DFQ Exchange service worker — safe, minimal offline support. */
-const CACHE_NAME = 'dfq-shell-v5';
+const CACHE_NAME = 'dfq-shell-v7';
 const OFFLINE_URL = './offline.html';
 
 const SHELL_ASSETS = [
     OFFLINE_URL,
     './splash.html',
     './manifest.json',
+    './static/assets/img/dfq-mark.svg',
     './static/assets/img/app-icon-192.png',
     './static/assets/img/app-icon-512.png',
+    './static/assets/img/app-icon-maskable-512.png',
     './static/assets/img/apple-touch-icon.png'
 ];
 

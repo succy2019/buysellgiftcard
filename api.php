@@ -13,11 +13,6 @@ header('Content-Type: application/json');
 header('X-Content-Type-Options: nosniff');
 header('Cache-Control: no-store');
 
-require_once 'includes/user_auth.php';
-require_once 'includes/user_dashboard.php';
-require_once 'includes/admin_auth.php';
-require_once 'includes/admin_dashboard.php';
-
 // Get request method and endpoint
 $method = $_SERVER['REQUEST_METHOD'];
 $endpoint = $_GET['endpoint'] ?? '';
@@ -32,6 +27,19 @@ function apiResponse($success, $data = null, $message = '', $code = 200) {
         'timestamp' => time()
     ]);
     exit();
+}
+
+// Everything a service method returned besides the status/message envelope.
+function resultPayload($result) {
+    unset($result['success'], $result['message']);
+    return $result['data'] ?? ($result ?: null);
+}
+
+// Block money-moving endpoints while the platform is in maintenance mode.
+function requireNotMaintenance() {
+    if (isMaintenanceMode()) {
+        apiResponse(false, null, 'The platform is under maintenance. Please try again shortly.', 503);
+    }
 }
 
 // Authentication helper
@@ -154,6 +162,7 @@ try {
             
             $userId = requireAuth('user');
             requireApiCsrf();
+            requireNotMaintenance();
             $input = json_decode(file_get_contents('php://input'), true);
             $symbol = $input['symbol'] ?? '';
             $amount = (float)($input['amount'] ?? 0);
@@ -164,7 +173,7 @@ try {
 
             $dashboard = new UserDashboard();
             $result = $dashboard->buyCryptocurrency($userId, $symbol, $amount);
-            apiResponse($result['success'], $result['data'] ?? null, $result['message']);
+            apiResponse($result['success'], resultPayload($result), $result['message']);
             break;
             
         case 'user/sell-crypto':
@@ -174,6 +183,7 @@ try {
             
             $userId = requireAuth('user');
             requireApiCsrf();
+            requireNotMaintenance();
             $input = json_decode(file_get_contents('php://input'), true);
             $symbol = $input['symbol'] ?? '';
             $amount = (float)($input['amount'] ?? 0);
@@ -184,7 +194,7 @@ try {
 
             $dashboard = new UserDashboard();
             $result = $dashboard->sellCryptocurrency($userId, $symbol, $amount);
-            apiResponse($result['success'], $result['data'] ?? null, $result['message']);
+            apiResponse($result['success'], resultPayload($result), $result['message']);
             break;
             
         case 'user/submit-giftcard':
@@ -194,6 +204,7 @@ try {
             
             $userId = requireAuth('user');
             requireApiCsrf();
+            requireNotMaintenance();
             $brand = $_POST['brand'] ?? '';
             $value = (float)($_POST['value'] ?? 0);
             $code = $_POST['code'] ?? '';
@@ -207,7 +218,7 @@ try {
 
             $dashboard = new UserDashboard();
             $result = $dashboard->submitGiftCard($userId, $brand, $value, $code, $image);
-            apiResponse($result['success'], $result['data'] ?? null, $result['message']);
+            apiResponse($result['success'], resultPayload($result), $result['message']);
             break;
             
         // Public Endpoints
