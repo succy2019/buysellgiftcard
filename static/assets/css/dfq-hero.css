@@ -1,0 +1,169 @@
+/* Dark-emerald hero treatment for the user dashboard home (matches the reference mock-up). */
+.dfq-app .dfq-hero {
+    position: relative;
+    margin: 0 0 18px;
+    padding: 22px 16px 20px;
+    overflow: hidden;
+    color: #fff;
+    border-radius: 28px;
+    background:
+        radial-gradient(120% 70% at 100% 0%, rgba(18, 183, 106, .55) 0%, rgba(18, 183, 106, 0) 55%),
+        radial-gradient(90% 60% at 0% 100%, rgba(18, 183, 106, .22) 0%, rgba(18, 183, 106, 0) 60%),
+        linear-gradient(160deg, #06251d 0%, #041412 55%, #030b0d 100%);
+}
+
+.dfq-app .dfq-hero::before {
+    content: "";
+    position: absolute;
+    inset: -30% -20% auto auto;
+    width: 90%;
+    height: 70%;
+    border-radius: 50%;
+    border: 2px solid rgba(50, 213, 131, .18);
+    transform: rotate(-18deg);
+    pointer-events: none;
+}
+
+.dfq-app .dfq-welcome { position: relative; padding: 0 2px 16px; }
+.dfq-app .dfq-welcome h1 { color: #fff !important; font-size: clamp(24px, 4vw, 32px); }
+.dfq-app .dfq-welcome p { color: #b7c7d9 !important; font-size: 14.5px; }
+.dfq-app .dfq-welcome__name { color: #32d583; }
+
+/* Glass wallet card with glowing emerald edge */
+.dfq-app .dfq-hero .balance-card {
+    padding: 22px 18px 18px;
+    background:
+        radial-gradient(80% 90% at 100% 20%, rgba(18, 183, 106, .35) 0%, rgba(18, 183, 106, 0) 60%),
+        linear-gradient(160deg, #0a2a24 0%, #06161a 70%);
+    border: 1.5px solid rgba(50, 213, 131, .55);
+    border-radius: 26px;
+    box-shadow: 0 0 0 1px rgba(50, 213, 131, .08), 0 0 28px -4px rgba(50, 213, 131, .35), 0 26px 50px -24px rgba(0, 0, 0, .8);
+}
+
+.dfq-app .balance-card .balance-label { color: #8aa4c4; letter-spacing: .14em; }
+.dfq-app .balance-card .balance-amount { margin-top: 8px; }
+
+.dfq-watermark {
+    position: absolute;
+    top: 16px;
+    right: 18px;
+    display: block;
+    color: #fff;
+    font-size: clamp(38px, 11vw, 54px);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -.04em;
+    line-height: 1;
+    text-align: right;
+    pointer-events: none;
+    opacity: .96;
+}
+
+.dfq-watermark small {
+    display: block;
+    margin-top: 6px;
+    color: #32d583;
+    font-size: 10px;
+    font-style: normal;
+    font-weight: 700;
+    letter-spacing: .5em;
+    padding-left: .5em;
+}
+
+/* Wallet chips scroll sideways like the reference */
+.dfq-app .balance-card .dfq-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 10px;
+    margin: 20px -18px 0 !important;
+    padding: 0 18px 4px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+    scrollbar-width: none;
+}
+
+.dfq-app .balance-card .dfq-chips::-webkit-scrollbar { display: none; }
+
+.dfq-app .balance-card .dfq-chips > [class*="col-"] {
+    flex: 0 0 auto;
+    width: auto;
+    max-width: none;
+    min-width: 150px;
+    padding: 0;
+    margin: 0;
+    scroll-snap-align: start;
+}
+
+.dfq-app .balance-card .dfq-chips .stat-card {
+    height: 100%;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .16);
+    border-radius: 18px;
+}
+
+.dfq-app .balance-card .dfq-chips .stat-value { font-size: 18px; white-space: nowrap; }
+.dfq-app .balance-card .dfq-chips .stat-label { color: #8aa4c4; letter-spacing: .08em; }
+
+/* Quick actions: rounded-square glass tiles */
+.dfq-app .balance-card .quick-actions { align-items: start; }
+.dfq-app .balance-card .quick-action-btn { color: #f2f4f7 !important; font-size: 13px; justify-content: flex-start; }
+
+.dfq-app .balance-card .quick-action-btn .fa {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, .22);
+    border-radius: 20px;
+    font-size: 22px;
+}
+
+/* Stat cards: white with faded emerald swoosh and DFQ watermark */
+.dfq-app .dfq-stats .stat-card {
+    position: relative;
+    overflow: hidden;
+    background:
+        radial-gradient(70% 90% at 100% 100%, rgba(18, 183, 106, .22) 0%, rgba(18, 183, 106, 0) 65%),
+        #fff;
+    border-radius: 22px;
+}
+
+.dfq-app .dfq-stats .stat-card::after {
+    content: "DFQ";
+    position: absolute;
+    top: 14px;
+    right: 16px;
+    color: rgba(18, 183, 106, .16);
+    font-size: 30px;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -.04em;
+    pointer-events: none;
+}
+
+.dfq-app .dfq-stats .stat-card .stat-value { font-size: 30px; color: #0b1220 !important; }
+.dfq-app .dfq-stats .stat-card .stat-label { color: #475467 !important; letter-spacing: .1em; }
+
+/* Floating tab bar: deep green with emerald glow */
+@media (max-width: 767.98px) {
+    .dfq-app .dfq-hero { margin: -6px -6px 16px; padding: 20px 14px 18px; border-radius: 26px; }
+    .dfq-app .dfq-stats { grid-template-columns: 1fr; }
+
+    .dfq-tabbar {
+        background:
+            radial-gradient(60% 120% at 100% 100%, rgba(18, 183, 106, .35) 0%, rgba(18, 183, 106, 0) 70%),
+            linear-gradient(160deg, rgba(8, 36, 30, .97), rgba(4, 16, 18, .97));
+        border: 1px solid rgba(50, 213, 131, .3);
+        box-shadow: 0 0 22px -6px rgba(50, 213, 131, .4), 0 18px 40px -10px rgba(0, 0, 0, .6);
+    }
+
+    .dfq-tab.is-center .dfq-tab__icon {
+        border-color: #f4f6fa;
+        box-shadow: 0 0 0 2px rgba(50, 213, 131, .5), 0 10px 24px -4px rgba(18, 183, 106, .8);
+    }
+}
+
+@media (min-width: 768px) {
+    .dfq-app .dfq-hero { padding: 28px 28px 26px; }
+    .dfq-app .dfq-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}

@@ -449,6 +449,7 @@ if (!in_array($currentSection, $userSections, true)) {
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
     <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <link rel="stylesheet" href="static/assets/css/dfq-hero.css">
     <script>window.DFQ_RATES = {ngn: <?php echo json_encode($ngnRate); ?>, fee: <?php echo json_encode($tradeFeePct); ?>};</script>
     <script src="static/assets/js/dfq-calc.js" defer></script>
     <script src="static/assets/js/dfq-shell.js" defer></script>
@@ -551,16 +552,18 @@ if (!in_array($currentSection, $userSections, true)) {
 
                     <!-- Dashboard Section -->
                     <div id="dashboard-section" class="dashboard-section" style="display: <?php echo $currentSection === 'dashboard' ? 'block' : 'none'; ?>;">
-                        <div class="dashboard-header">
-                            <h1 style="color: #fff; margin: 0;">Welcome Back, <?php echo htmlspecialchars($user['first_name']); ?>!</h1>
+                        <div class="dfq-hero">
+                        <div class="dashboard-header dfq-welcome">
+                            <h1 style="color: #fff; margin: 0;">Welcome Back, <span class="dfq-welcome__name"><?php echo htmlspecialchars($user['first_name']); ?></span>!</h1>
                             <p style="color: #cbe5ff; margin: 10px 0 0 0;">Here's what's happening with your account today.</p>
                         </div>
 
                         <!-- Balance Card -->
                         <div class="dashboard-card balance-card">
+                            <span class="dfq-watermark" aria-hidden="true">DFQ<small>EXCHANGE</small></span>
                             <div class="balance-label">Total Balance</div>
                             <div class="balance-amount">$<?php echo number_format($user['balance'], 2); ?></div>
-                            <div class="row" style="margin-top:20px;">
+                            <div class="row dfq-chips" style="margin-top:20px;">
                                 <div class="col-md-4">
                                     <div class="stat-card">
                                         <div class="stat-value"><?php echo formatNaira($walletBalances['NGN']); ?></div>
@@ -599,9 +602,10 @@ if (!in_array($currentSection, $userSections, true)) {
                                 </a>
                             </div>
                         </div>
+                        </div>
 
                         <!-- Stats Grid -->
-                        <div class="stats-grid">
+                        <div class="stats-grid dfq-stats">
                             <div class="stat-card">
                                 <div class="stat-value"><?php echo $dashboardData['transaction_count'] ?? 0; ?></div>
                                 <div class="stat-label">Completed Trades</div>
