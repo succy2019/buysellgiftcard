@@ -161,6 +161,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $result = $dashboard->updateCryptoRates($rates);
                 if ($result['success']) {
                     $success = $result['message'];
+                    $ngnInput = $_POST['usd_to_ngn_rate'] ?? '';
+                    if ($ngnInput !== '' && is_numeric($ngnInput) && (float)$ngnInput > 0) {
+                        $ngnResult = $dashboard->updateSystemSettings(['usd_to_ngn_rate' => (string)(float)$ngnInput]);
+                        if (!$ngnResult['success']) { $error = $ngnResult['message']; }
+                    } elseif ($ngnInput !== '') {
+                        $error = 'The USD to NGN rate must be a positive number.';
+                    }
                 } else {
                     $error = $result['message'];
                 }
@@ -580,6 +587,8 @@ switch ($currentSection) {
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
     <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <script>window.DFQ_RATES = {ngn: <?php echo json_encode(getUsdToNgnRate()); ?>, fee: <?php echo json_encode((float)getSystemSetting('trading_fee_percentage', 1)); ?>};</script>
+    <script src="static/assets/js/dfq-calc.js" defer></script>
     <script src="static/assets/js/dfq-shell.js" defer></script>
     <link rel="stylesheet" href="static/assets/css/pwa-install.css">
     <script src="static/assets/js/pwa-install.js" defer></script>
@@ -801,10 +810,12 @@ switch ($currentSection) {
                             <form method="GET" class="row">
                                 <input type="hidden" name="section" value="users">
                                 <div class="col-md-4">
-                                    <input type="text" name="search" class="form-control" placeholder="Search users..." value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
+                                    <label for="f-user-search">Search</label>
+                                    <input type="text" id="f-user-search" name="search" class="form-control" placeholder="Name, email or phone" value="<?php echo htmlspecialchars($_GET['search'] ?? ''); ?>">
                                 </div>
                                 <div class="col-md-3">
-                                    <select name="status" class="form-control">
+                                    <label for="f-user-status">Account status</label>
+                                    <select id="f-user-status" name="status" class="form-control">
                                         <option value="">All Status</option>
                                         <option value="active" <?php echo ($_GET['status'] ?? '') === 'active' ? 'selected' : ''; ?>>Active</option>
                                         <option value="suspended" <?php echo ($_GET['status'] ?? '') === 'suspended' ? 'selected' : ''; ?>>Suspended</option>
@@ -896,7 +907,8 @@ switch ($currentSection) {
                             <form method="GET" class="row">
                                 <input type="hidden" name="section" value="transactions">
                                 <div class="col-md-3">
-                                    <select name="type" class="form-control">
+                                    <label for="f-tx-type">Type</label>
+                                    <select id="f-tx-type" name="type" class="form-control">
                                         <option value="">All Types</option>
                                         <option value="buy_crypto" <?php echo ($_GET['type'] ?? '') === 'buy_crypto' ? 'selected' : ''; ?>>Buy Crypto</option>
                                         <option value="sell_crypto" <?php echo ($_GET['type'] ?? '') === 'sell_crypto' ? 'selected' : ''; ?>>Sell Crypto</option>
@@ -904,7 +916,8 @@ switch ($currentSection) {
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <select name="status" class="form-control">
+                                    <label for="f-tx-status">Status</label>
+                                    <select id="f-tx-status" name="status" class="form-control">
                                         <option value="">All Status</option>
                                         <option value="pending" <?php echo ($_GET['status'] ?? '') === 'pending' ? 'selected' : ''; ?>>Pending</option>
                                         <option value="processing" <?php echo ($_GET['status'] ?? '') === 'processing' ? 'selected' : ''; ?>>Processing</option>
@@ -1035,7 +1048,7 @@ switch ($currentSection) {
                                             <input type="hidden" name="action" value="review_gift_card">
                                             <input type="hidden" name="submission_id" value="<?php echo (int)$detail['id']; ?>">
                                             <input type="hidden" name="review_action" value="reject">
-                                            <input type="text" name="rejection_reason" class="form-control" placeholder="Reason" style="display:inline-block;width:240px;">
+                                            <input type="text" name="rejection_reason" class="form-control" placeholder="Reason" aria-label="Rejection reason" style="display:inline-block;width:240px;">
                                             <button type="submit" class="action-btn btn-reject">Reject</button>
                                         </form>
                                     </div>
@@ -1156,7 +1169,8 @@ switch ($currentSection) {
                                         <input type="hidden" name="action" value="verify_transfer">
                                         <input type="hidden" name="transfer_id" value="<?php echo (int)$t['id']; ?>">
                                         <div class="col-md-8">
-                                            <input type="text" name="admin_notes" class="form-control" placeholder="Notes / rejection reason">
+                                            <label for="vt-notes-<?php echo (int)$t['id']; ?>">Notes or rejection reason</label>
+                                            <input type="text" id="vt-notes-<?php echo (int)$t['id']; ?>" name="admin_notes" class="form-control" placeholder="Optional for verify, required to reject">
                                         </div>
                                         <div class="col-md-2">
                                             <button type="submit" name="review_action" value="verify" class="gradient-btn" style="width:100%;">Verify</button>
@@ -1175,13 +1189,16 @@ switch ($currentSection) {
                                         <input type="hidden" name="action" value="process_transfer">
                                         <input type="hidden" name="transfer_id" value="<?php echo (int)$t['id']; ?>">
                                         <div class="col-md-4">
-                                            <input type="text" name="admin_tx_hash" class="form-control" placeholder="Payout tx hash / bank reference" required>
+                                            <label for="pt-hash">Payout tx hash / bank reference</label>
+                                            <input type="text" id="pt-hash" name="admin_tx_hash" class="form-control" placeholder="Reference number" required>
                                         </div>
                                         <div class="col-md-4">
-                                            <input type="file" name="admin_proof" class="form-control" accept="image/*" required>
+                                            <label for="pt-proof">Payout proof (image)</label>
+                                            <input type="file" id="pt-proof" name="admin_proof" class="form-control" accept="image/*" required>
                                         </div>
                                         <div class="col-md-2">
-                                            <input type="text" name="admin_notes" class="form-control" placeholder="Notes">
+                                            <label for="pt-notes">Notes</label>
+                                            <input type="text" id="pt-notes" name="admin_notes" class="form-control" placeholder="Optional">
                                         </div>
                                         <div class="col-md-2">
                                             <button type="submit" class="gradient-btn" style="width:100%;">Mark paid</button>
@@ -1197,14 +1214,16 @@ switch ($currentSection) {
                             <form method="GET" class="row">
                                 <input type="hidden" name="section" value="transfers">
                                 <div class="col-md-3">
-                                    <select name="direction" class="form-control">
+                                    <label for="f-tr-dir">Direction</label>
+                                    <select id="f-tr-dir" name="direction" class="form-control">
                                         <option value="">All Directions</option>
                                         <option value="deposit" <?php echo ($_GET['direction'] ?? '') === 'deposit' ? 'selected' : ''; ?>>Deposits</option>
                                         <option value="withdrawal" <?php echo ($_GET['direction'] ?? '') === 'withdrawal' ? 'selected' : ''; ?>>Withdrawals</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
-                                    <select name="status" class="form-control">
+                                    <label for="f-tr-status">Status</label>
+                                    <select id="f-tr-status" name="status" class="form-control">
                                         <option value="">All Status</option>
                                         <?php foreach (['proof_submitted', 'under_review', 'verified', 'processing', 'paid', 'rejected', 'cancelled'] as $st): ?>
                                             <option value="<?php echo $st; ?>" <?php echo ($_GET['status'] ?? '') === $st ? 'selected' : ''; ?>>
@@ -1277,7 +1296,8 @@ switch ($currentSection) {
                             <form method="GET" class="row" style="margin-bottom:15px;">
                                 <input type="hidden" name="section" value="payouts">
                                 <div class="col-md-4">
-                                    <select name="status" class="form-control">
+                                    <label for="f-po-status">Status</label>
+                                    <select id="f-po-status" name="status" class="form-control">
                                         <option value="">All Status</option>
                                         <?php foreach (['pending', 'verified', 'rejected'] as $st): ?>
                                             <option value="<?php echo $st; ?>" <?php echo ($_GET['status'] ?? '') === $st ? 'selected' : ''; ?>><?php echo ucfirst($st); ?></option>
@@ -1313,7 +1333,7 @@ switch ($currentSection) {
                                                                 <input type="hidden" name="action" value="review_payout_account">
                                                                 <input type="hidden" name="account_id" value="<?php echo (int)$account['id']; ?>">
                                                                 <input type="hidden" name="review_action" value="reject">
-                                                                <input type="text" name="rejection_reason" class="form-control" placeholder="Reason" style="display:inline-block;width:140px;">
+                                                                <input type="text" name="rejection_reason" class="form-control" placeholder="Reason" aria-label="Rejection reason" style="display:inline-block;width:140px;">
                                                                 <button type="submit" class="action-btn btn-reject">Reject</button>
                                                             </form>
                                                         <?php else: ?>
@@ -1485,13 +1505,19 @@ switch ($currentSection) {
                             <form method="POST">
                                 <?php echo csrfField(); ?>
                                 <input type="hidden" name="action" value="update_crypto_rates">
+                                <div class="dfq-ngn-banner">
+                                    <label for="ngn-rate-input">Naira rate: ₦ per $1</label>
+                                    <input type="number" id="ngn-rate-input" name="usd_to_ngn_rate" class="form-control" data-ngn-rate
+                                           value="<?php echo h(getSystemSetting('usd_to_ngn_rate', '1500')); ?>" step="0.01" min="1" required>
+                                    <small>Users see every coin rate converted to Naira using this value. Rates below are USD per coin.</small>
+                                </div>
                                 <div class="admin-table">
                                     <table class="table">
                                         <thead>
                                             <tr>
                                                 <th>Currency</th>
-                                                <th>Buy Rate ($)</th>
-                                                <th>Sell Rate ($)</th>
+                                                <th>Buy Rate ($) <small>users pay</small></th>
+                                                <th>Sell Rate ($) <small>users get</small></th>
                                                 <th>Status</th>
                                             </tr>
                                         </thead>
@@ -1502,16 +1528,18 @@ switch ($currentSection) {
                                             foreach ($cryptoRates as $rate):
                                             ?>
                                                 <tr>
-                                                    <td><?php echo $rate['name']; ?> (<?php echo strtoupper($rate['symbol']); ?>)</td>
+                                                    <td><?php echo h($rate['name']); ?> (<?php echo strtoupper(h($rate['symbol'])); ?>)</td>
                                                     <td>
-                                                        <input type="number" name="buy_rate_<?php echo $rate['symbol']; ?>" 
+                                                        <input type="number" name="buy_rate_<?php echo h($rate['symbol']); ?>" data-ngn-input
                                                                class="form-control" value="<?php echo $rate['buy_rate']; ?>" 
-                                                               step="0.00000001" style="width: 150px;">
+                                                               step="0.00000001" min="0.00000001" required style="width: 150px;">
+                                                        <span class="dfq-ngn-preview" data-ngn-preview></span>
                                                     </td>
                                                     <td>
-                                                        <input type="number" name="sell_rate_<?php echo $rate['symbol']; ?>" 
+                                                        <input type="number" name="sell_rate_<?php echo h($rate['symbol']); ?>" data-ngn-input
                                                                class="form-control" value="<?php echo $rate['sell_rate']; ?>" 
-                                                               step="0.00000001" style="width: 150px;">
+                                                               step="0.00000001" min="0.00000001" required style="width: 150px;">
+                                                        <span class="dfq-ngn-preview" data-ngn-preview></span>
                                                     </td>
                                                     <td>
                                                         <span class="status-<?php echo $rate['is_active'] ? 'completed' : 'pending'; ?>">
@@ -1636,9 +1664,10 @@ switch ($currentSection) {
                             <div class="dashboard-card">
                                 <form method="GET" class="row">
                                     <input type="hidden" name="section" value="support">
-                                    <div class="col-md-5 form-group"><input type="text" name="search" class="form-control" placeholder="Search ticket, subject or email" value="<?php echo h($tkSearch); ?>"></div>
+                                    <div class="col-md-5 form-group"><label for="f-tk-search">Search</label><input type="text" id="f-tk-search" name="search" class="form-control" placeholder="Ticket ID, subject or email" value="<?php echo h($tkSearch); ?>"></div>
                                     <div class="col-md-4 form-group">
-                                        <select name="status" class="form-control" onchange="this.form.submit()">
+                                                                            <label for="f-tk-status">Status</label>
+                                                                            <select id="f-tk-status" name="status" class="form-control" onchange="this.form.submit()">
                                             <option value="">All statuses</option>
                                             <?php foreach (SupportService::STATUSES as $s): ?>
                                                 <option value="<?php echo h($s); ?>" <?php echo $tkStatus === $s ? 'selected' : ''; ?>><?php echo h(ucwords(str_replace('_', ' ', $s))); ?></option>
@@ -1687,7 +1716,8 @@ switch ($currentSection) {
                                 <input type="hidden" name="action" value="generate_report">
                                 <div class="row">
                                     <div class="col-md-3">
-                                        <select name="report_type" class="form-control" required>
+                                        <label for="rp-type">Report type</label>
+                                        <select id="rp-type" name="report_type" class="form-control" required>
                                             <option value="">Select Report Type</option>
                                             <option value="revenue">Revenue Report</option>
                                             <option value="users">User Activity Report</option>
@@ -1696,10 +1726,12 @@ switch ($currentSection) {
                                         </select>
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="date" name="start_date" class="form-control" required>
+                                        <label for="rp-start">Start date</label>
+                                        <input type="date" id="rp-start" name="start_date" class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
-                                        <input type="date" name="end_date" class="form-control" required>
+                                        <label for="rp-end">End date</label>
+                                        <input type="date" id="rp-end" name="end_date" class="form-control" required>
                                     </div>
                                     <div class="col-md-3">
                                         <button type="submit" class="gradient-btn" style="width: 100%;">Generate Report</button>

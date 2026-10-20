@@ -533,6 +533,14 @@ function calculateTradingFee($amount, $feePercentage = null) {
 }
 
 /**
+ * Naira value of 1 USD, set by the admin under Exchange Rates.
+ */
+function getUsdToNgnRate() {
+    $rate = (float)getSystemSetting('usd_to_ngn_rate', 1500);
+    return $rate > 0 ? $rate : 1500.0;
+}
+
+/**
  * Admin-configurable trade limits in USD, falling back to the defaults.
  */
 function getTradeLimits() {

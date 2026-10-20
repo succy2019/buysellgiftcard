@@ -773,6 +773,19 @@ body.dfq-auth {
 }
 
 /* Support ticket conversation */
+.dfq-app .dashboard-card .form-group > label,
+.dfq-app .dashboard-card form.row label,
+.dfq-app .dashboard-card form.row label[style] { display: block; margin-bottom: 6px; font-size: .85rem; font-weight: 600; color: #344054 !important; }
+.dfq-app .dashboard-card form.row > [class*="col-"] { margin-bottom: 10px; }
+.dfq-app .dashboard-card .form-group > label[style] { display: block; margin-bottom: 6px; font-size: .85rem; font-weight: 600; color: #344054 !important; }
+.dfq-hint { display: block; margin-top: 6px; font-size: .78rem; color: #667085; }
+.dfq-app .dashboard-card .dfq-hint, .dfq-app .dashboard-card small[style*="cbe5ff"] { color: #667085 !important; }
+.dfq-quote{background:#f4f7fb;border:1px solid #e3e9f2;border-radius:14px;padding:10px 14px;margin:4px 0 14px;display:grid;gap:6px}
+.dfq-quote div{display:flex;justify-content:space-between;gap:12px;font-size:.88rem;color:#475467}
+.dfq-quote b{color:#101828;text-align:right}
+.dfq-ngn-preview{display:block;margin-top:4px;font-size:.78rem;color:#067647;font-weight:600}
+.dfq-ngn-banner{background:linear-gradient(135deg,#101828,#12b76a);color:#fff;border-radius:16px;padding:16px 18px;margin-bottom:16px}
+.dfq-ngn-banner label{color:#d1fadf;font-weight:600;display:block;margin-bottom:6px}
 .dfq-thread { display: flex; flex-direction: column; gap: 10px; }
 .dfq-msg { max-width: 88%; padding: 10px 14px; border-radius: 16px; font-size: 14px; line-height: 1.5; word-break: break-word; }
 .dfq-msg__meta { font-size: 11px; opacity: .7; margin-bottom: 4px; }

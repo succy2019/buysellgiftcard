@@ -202,6 +202,9 @@ $recentTransactions = $dashboard->getTransactionHistory(1, 5);
 $cryptoHoldings = $dashboard->getCryptoHoldings($_SESSION['user_id']);
 $currentRates = $dashboard->getCryptocurrencyRates();
 $giftCardRates = $dashboard->getGiftCardRates();
+$ngnRate = getUsdToNgnRate();
+$tradeFeePct = (float)getSystemSetting('trading_fee_percentage', 1);
+$giftProcessing = getSystemSetting('gift_card_processing_time', '24');
 $walletBalances = $dashboard->getWalletBalances($_SESSION['user_id']);
 $payoutAccounts = $dashboard->getPayoutAccounts($_SESSION['user_id']);
 $verifiedPayoutAccounts = $dashboard->getPayoutAccounts($_SESSION['user_id'], true);
@@ -446,6 +449,8 @@ if (!in_array($currentSection, $userSections, true)) {
     </style>
     <link rel="stylesheet" href="static/assets/css/dfq-app.css">
     <link rel="stylesheet" href="static/assets/css/dfq-premium.css">
+    <script>window.DFQ_RATES = {ngn: <?php echo json_encode($ngnRate); ?>, fee: <?php echo json_encode($tradeFeePct); ?>};</script>
+    <script src="static/assets/js/dfq-calc.js" defer></script>
     <script src="static/assets/js/dfq-shell.js" defer></script>
     <!-- PWA / install prompt -->
     <link rel="manifest" href="manifest.json">
@@ -664,21 +669,30 @@ if (!in_array($currentSection, $userSections, true)) {
                             <div class="col-md-6">
                                 <div class="dashboard-card">
                                     <h3 style="color: #fff; margin-bottom: 20px;">Buy Cryptocurrency</h3>
-                                    <form method="POST">
+                                    <form method="POST" data-calc="buy">
                                         <input type="hidden" name="action" value="buy_crypto">
                                         <?php echo csrfField(); ?>
                                         <div class="form-group">
-                                            <select name="crypto_symbol" class="form-control" required>
+                                            <label for="buy-coin">Cryptocurrency to buy</label>
+                                            <select id="buy-coin" name="crypto_symbol" class="form-control" required>
                                                 <option value="">Select Cryptocurrency</option>
                                                 <?php foreach ($currentRates as $rate): ?>
-                                                    <option value="<?php echo $rate['symbol']; ?>">
-                                                        <?php echo $rate['name']; ?> (<?php echo strtoupper($rate['symbol']); ?>) - $<?php echo number_format($rate['buy_rate'], 2); ?>
+                                                    <option value="<?php echo h($rate['symbol']); ?>" data-rate="<?php echo (float)$rate['buy_rate']; ?>">
+                                                        <?php echo h($rate['name']); ?> (<?php echo strtoupper(h($rate['symbol'])); ?>) - <?php echo formatNaira($rate['buy_rate'] * $ngnRate, 0); ?>
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <input type="number" name="amount" class="form-control" placeholder="Amount (USD)" step="0.01" min="1" required>
+                                            <label for="buy-amount">Amount to spend (USD)</label>
+                                            <input type="number" id="buy-amount" name="amount" class="form-control" placeholder="e.g. 100" inputmode="decimal" step="0.01" min="1" required>
+                                            <small class="dfq-hint">Enter how many US dollars you want to spend. The Naira value shows below.</small>
+                                        </div>
+                                        <div class="dfq-quote" aria-live="polite">
+                                            <div><span>Rate</span><b data-q="rate">Select a coin</b></div>
+                                            <div><span>Fee (<?php echo h(rtrim(rtrim(number_format($tradeFeePct, 2), '0'), '.')); ?>%)</span><b data-q="fee">-</b></div>
+                                            <div><span>You pay</span><b data-q="total">-</b></div>
+                                            <div><span>You receive</span><b data-q="receive">-</b></div>
                                         </div>
                                         <button type="submit" class="gradient-btn" style="width: 100%;">Buy Now</button>
                                     </form>
@@ -687,23 +701,37 @@ if (!in_array($currentSection, $userSections, true)) {
                             <div class="col-md-6">
                                 <div class="dashboard-card">
                                     <h3 style="color: #fff; margin-bottom: 20px;">Sell Cryptocurrency</h3>
-                                    <form method="POST">
+                                    <?php
+                                    $sellRateMap = [];
+                                    foreach ($currentRates as $r) { $sellRateMap[strtolower($r['symbol'])] = (float)$r['sell_rate']; }
+                                    ?>
+                                    <form method="POST" data-calc="sell">
                                         <input type="hidden" name="action" value="sell_crypto">
                                         <?php echo csrfField(); ?>
                                         <div class="form-group">
-                                            <select name="crypto_symbol" class="form-control" required>
+                                            <label for="sell-coin">Cryptocurrency to sell</label>
+                                            <select id="sell-coin" name="crypto_symbol" class="form-control" required>
                                                 <option value="">Select Cryptocurrency</option>
                                                 <?php foreach ($cryptoHoldings as $symbol => $amount): ?>
-                                                    <?php if ($amount > 0): ?>
-                                                        <option value="<?php echo $symbol; ?>">
-                                                            <?php echo strtoupper($symbol); ?> - <?php echo number_format($amount, 4); ?>
+                                                    <?php if ($amount > 0): $sr = $sellRateMap[strtolower($symbol)] ?? 0; ?>
+                                                        <option value="<?php echo h($symbol); ?>" data-rate="<?php echo $sr; ?>" data-max="<?php echo (float)$amount; ?>">
+                                                            <?php echo strtoupper(h($symbol)); ?> - <?php echo number_format($amount, 4); ?> (<?php echo formatNaira($sr * $ngnRate, 0); ?>)
                                                         </option>
                                                     <?php endif; ?>
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
                                         <div class="form-group">
-                                            <input type="number" name="amount" class="form-control" placeholder="Amount to Sell" step="0.00001" min="0.00001" required>
+                                            <label for="sell-amount">Amount of coin to sell</label>
+                                            <input type="number" id="sell-amount" name="amount" class="form-control" placeholder="e.g. 0.005" inputmode="decimal" step="0.00001" min="0.00001" required>
+                                            <small class="dfq-hint">Enter the quantity of the coin, not dollars.</small>
+                                            <button type="button" class="btn dfq-ghost" data-max-btn style="margin-top:8px;">Sell max</button>
+                                        </div>
+                                        <div class="dfq-quote" aria-live="polite">
+                                            <div><span>Rate</span><b data-q="rate">Select a coin</b></div>
+                                            <div><span>Gross value</span><b data-q="gross">-</b></div>
+                                            <div><span>Fee (<?php echo h(rtrim(rtrim(number_format($tradeFeePct, 2), '0'), '.')); ?>%)</span><b data-q="fee">-</b></div>
+                                            <div><span>You receive</span><b data-q="receive">-</b></div>
                                         </div>
                                         <button type="submit" class="gradient-btn" style="width: 100%;">Sell Now</button>
                                     </form>
@@ -713,16 +741,23 @@ if (!in_array($currentSection, $userSections, true)) {
 
                         <!-- Current Rates -->
                         <div class="dashboard-card">
-                            <h3 style="color: #fff; margin-bottom: 20px;">Current Exchange Rates</h3>
-                            <div class="row">
-                                <?php foreach (array_slice($currentRates, 0, 3) as $rate): ?>
-                                    <div class="col-md-4">
-                                        <div class="stat-card">
-                                            <div class="stat-value">$<?php echo number_format($rate['buy_rate'], 2); ?></div>
-                                            <div class="stat-label"><?php echo $rate['name']; ?> (<?php echo strtoupper($rate['symbol']); ?>)</div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
+                            <h3 style="color: #fff; margin-bottom: 6px;">Current Exchange Rates</h3>
+                            <p style="color: #cbe5ff; margin-bottom: 16px;">Rates set by DFQ Exchange. $1 = <?php echo formatNaira($ngnRate, 2); ?></p>
+                            <div class="transaction-table">
+                                <table class="table">
+                                    <thead>
+                                        <tr><th>Coin</th><th>We sell at (you buy)</th><th>We buy at (you sell)</th></tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php foreach ($currentRates as $rate): ?>
+                                            <tr>
+                                                <td><?php echo h($rate['name']); ?> (<?php echo strtoupper(h($rate['symbol'])); ?>)</td>
+                                                <td><strong><?php echo formatNaira($rate['buy_rate'] * $ngnRate, 0); ?></strong><br><small>$<?php echo number_format($rate['buy_rate'], 2); ?></small></td>
+                                                <td><strong><?php echo formatNaira($rate['sell_rate'] * $ngnRate, 0); ?></strong><br><small>$<?php echo number_format($rate['sell_rate'], 2); ?></small></td>
+                                            </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
@@ -736,17 +771,18 @@ if (!in_array($currentSection, $userSections, true)) {
 
                         <div class="dashboard-card">
                             <h3 style="color: #fff; margin-bottom: 20px;">Sell Gift Card</h3>
-                            <form method="POST" enctype="multipart/form-data">
+                            <form method="POST" enctype="multipart/form-data" data-calc="gift">
                                 <input type="hidden" name="action" value="submit_gift_card">
                                 <?php echo csrfField(); ?>
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <select name="gift_card_brand" class="form-control" required>
+                                            <label for="gc-brand">Gift card brand</label>
+                                            <select id="gc-brand" name="gift_card_brand" class="form-control" required>
                                                 <option value="">Select Gift Card Brand</option>
                                                 <?php foreach ($giftCardRates as $brand): ?>
-                                                    <option value="<?php echo $brand['brand_code']; ?>">
-                                                        <?php echo $brand['brand_name']; ?> (<?php echo $brand['exchange_rate']; ?>%)
+                                                    <option value="<?php echo h($brand['brand_code']); ?>" data-rate="<?php echo (float)$brand['exchange_rate']; ?>">
+                                                        <?php echo h($brand['brand_name']); ?> (<?php echo h($brand['exchange_rate']); ?>%)
                                                     </option>
                                                 <?php endforeach; ?>
                                             </select>
@@ -754,15 +790,24 @@ if (!in_array($currentSection, $userSections, true)) {
                                     </div>
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <input type="number" name="card_value" class="form-control" placeholder="Card Value (USD)" step="0.01" min="1" required>
+                                            <label for="gc-value">Card value (USD)</label>
+                                            <input type="number" id="gc-value" name="card_value" class="form-control" placeholder="e.g. 100" inputmode="decimal" step="0.01" min="1" required>
                                         </div>
                                     </div>
                                 </div>
-                                <div class="form-group">
-                                    <input type="text" name="gift_card_code" class="form-control" placeholder="Gift Card Code" required>
+                                <div class="dfq-quote" aria-live="polite">
+                                    <div><span>Rate</span><b data-q="rate">Select a brand</b></div>
+                                    <div><span>You receive (USD)</span><b data-q="usd">-</b></div>
+                                    <div><span>You receive (NGN)</span><b data-q="receive">-</b></div>
+                                    <div><span>Review time</span><b>~<?php echo h($giftProcessing); ?> hrs</b></div>
                                 </div>
                                 <div class="form-group">
-                                    <input type="file" name="gift_card_image" class="form-control" accept="image/*" required>
+                                    <label for="gc-code">Gift card code</label>
+                                    <input type="text" id="gc-code" name="gift_card_code" class="form-control" placeholder="Enter the code on the card" autocomplete="off" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="gc-image">Photo of the card</label>
+                                    <input type="file" id="gc-image" name="gift_card_image" class="form-control" accept="image/*" required>
                                     <small style="color: #cbe5ff;">Upload gift card image (JPG, PNG - Max 5MB)</small>
                                 </div>
                                 <button type="submit" class="gradient-btn" style="width: 100%;">Submit for Review</button>
@@ -1319,7 +1364,7 @@ if (!in_array($currentSection, $userSections, true)) {
                                         <?php echo csrfField(); ?>
                                         <input type="hidden" name="action" value="reply_ticket">
                                         <input type="hidden" name="ticket_id" value="<?php echo h($openTicket['ticket_id']); ?>">
-                                        <textarea name="message" class="form-control" rows="3" maxlength="5000" placeholder="Write a reply" required></textarea>
+                                        <textarea name="message" class="form-control" rows="3" maxlength="5000" placeholder="Write a reply" aria-label="Your reply" required></textarea>
                                         <button type="submit" class="gradient-btn" style="margin-top: 10px;">Send reply</button>
                                     </form>
                                 <?php else: ?>

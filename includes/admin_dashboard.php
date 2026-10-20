@@ -681,9 +681,11 @@ class AdminDashboard {
                 if (!isset($rateData['buy_rate']) || !isset($rateData['sell_rate'])) {
                     continue;
                 }
-                
+                if ($rateData['buy_rate'] <= 0 || $rateData['sell_rate'] <= 0) {
+                    throw new Exception('Rates must be greater than zero (' . $symbol . ')');
+                }
                 $sql = "UPDATE cryptocurrency_rates 
-                        SET buy_rate = :buy_rate, sell_rate = :sell_rate, updated_by = :admin_id, updated_at = NOW() 
+                        SET buy_rate = :buy_rate, sell_rate = :sell_rate, updated_by = :admin_id, updated_at = NOW()
                         WHERE symbol = :symbol";
                 
                 $stmt = $this->db->prepare($sql);
@@ -710,7 +712,7 @@ class AdminDashboard {
             logError('Update crypto rates error: ' . $e->getMessage());
             return [
                 'success' => false,
-                'message' => 'Failed to update cryptocurrency rates'
+                'message' => $e->getMessage() !== '' && strpos($e->getMessage(), 'Rates must') === 0 ? $e->getMessage() : 'Failed to update cryptocurrency rates'
             ];
         }
     }

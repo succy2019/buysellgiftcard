@@ -1345,17 +1345,20 @@ class UserDashboard {
         ];
     }
 
-    private function getUserBalance($forUpdate = false) {
-        $sql = "SELECT balance FROM users WHERE id = :user_id LIMIT 1" . ($forUpdate ? " FOR UPDATE" : "");
+    private function getUserBalance($forUpdate = false, $currency = 'USD') {
+        $column = strtoupper($currency) === 'NGN' ? 'balance_ngn' : 'balance';
+        $sql = "SELECT $column AS bal FROM users WHERE id = :user_id LIMIT 1" . ($forUpdate ? " FOR UPDATE" : "");
         $stmt = $this->db->prepare($sql);
         $stmt->execute([':user_id' => $this->userId]);
         $result = $stmt->fetch();
 
-        return $result ? (float)$result['balance'] : 0;
+        return $result ? (float)$result['bal'] : 0;
     }
 
-    private function updateUserBalance($amount, $referenceType = null, $referenceId = null) {
-        $sql = "UPDATE users SET balance = balance + :amount, updated_at = NOW() WHERE id = :user_id";
+    private function updateUserBalance($amount, $referenceType = null, $referenceId = null, $currency = 'USD') {
+        $currency = strtoupper($currency) === 'NGN' ? 'NGN' : 'USD';
+        $column = $currency === 'NGN' ? 'balance_ngn' : 'balance';
+        $sql = "UPDATE users SET $column = $column + :amount, updated_at = NOW() WHERE id = :user_id";
         $stmt = $this->db->prepare($sql);
         $stmt->execute([
             ':amount' => $amount,
@@ -1363,11 +1366,11 @@ class UserDashboard {
         ]);
 
         if ($referenceType !== null) {
-            $newBalance = $this->getUserBalance();
+            $newBalance = $this->getUserBalance(false, $currency);
             recordLedgerEntry(
                 $this->db,
                 $this->userId,
-                'USD',
+                $currency,
                 $amount >= 0 ? 'credit' : 'debit',
                 abs($amount),
                 $newBalance,

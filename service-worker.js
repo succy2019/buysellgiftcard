@@ -1,5 +1,5 @@
 /* DFQ Exchange service worker — safe, minimal offline support. */
-const CACHE_NAME = 'dfq-shell-v7';
+const CACHE_NAME = 'dfq-shell-v9';
 const OFFLINE_URL = './offline.html';
 
 const SHELL_ASSETS = [
